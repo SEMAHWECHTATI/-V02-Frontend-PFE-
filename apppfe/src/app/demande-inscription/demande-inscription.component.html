@@ -1,0 +1,95 @@
+<div class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-5">
+
+  <div class="card shadow-lg border-0 rounded-4 p-4 w-100" style="max-width: 700px;">
+    
+    <div class="text-center mb-4">
+      <h2 class="text-primary fw-bold">G2I Sagem</h2>
+      <p class="text-muted">Formulaire de demande d'accès</p>
+    </div>
+
+    <div *ngIf="erreur" class="alert alert-danger p-2 mb-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ erreur }}</div>
+    <div *ngIf="succes" class="alert alert-success p-2 mb-3"><i class="bi bi-check-circle-fill me-2"></i>{{ succes }}</div>
+
+    <form (ngSubmit)="onSubmit()" *ngIf="!succes">
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Nom *</label>
+          <input type="text" class="form-control" name="nom" [(ngModel)]="demande.nom" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Prénom *</label>
+          <input type="text" class="form-control" name="prenom" [(ngModel)]="demande.prenom" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Email *</label>
+          <input type="email" class="form-control" name="email" [(ngModel)]="demande.email" placeholder="nom@sagem.com" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Téléphone</label>
+          <input type="tel" class="form-control" name="telephone" [(ngModel)]="demande.telephone">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Matricule</label>
+          <input type="text" class="form-control" name="matricule" [(ngModel)]="demande.matricule">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Département *</label>
+          <select class="form-select" name="departement" [(ngModel)]="demande.departement" required>
+             <option [ngValue]="null">Aucun (departement)</option>
+                <option *ngFor="let departement of listedepartement" [ngValue]="departement">
+                    {{ departement}}
+                </option>
+        </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Rôle demandé *</label>
+          <select class="form-select" name="roleDemande" [(ngModel)]="demande.roleDemande" required>
+           <option [ngValue]="null">Aucun (Role)</option>
+    
+    <option *ngFor="let role of listeRoles" [ngValue]="role">
+      {{ role}}
+    </option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+  <label class="form-label fw-semibold">Groupe souhaité</label>
+  <select class="form-select" name="groupeId" [(ngModel)]="demande.groupeId">
+    
+    <option [ngValue]="null">Aucun (Demandeur)</option>
+    
+    <option *ngFor="let groupe of listeGroupes" [ngValue]="groupe.id">
+      {{ groupe.nomGroupes }}
+    </option>
+    
+  </select>
+</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Motif de la demande *</label>
+        <textarea class="form-control" name="motifDemande" [(ngModel)]="demande.motifDemande" rows="3" placeholder="Expliquez brièvement pourquoi vous avez besoin d'accéder à l'application..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="chargement">
+        <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ chargement ? 'Envoi en cours...' : 'Soumettre la demande' }}
+      </button>
+
+    </form>
+    
+    <div class="text-center mt-4" *ngIf="!succes">
+      <a href="/login" class="text-decoration-none small text-muted"><i class="bi bi-arrow-left me-1"></i>Retour à la connexion</a>
+    </div>
+
+  </div>
+</div>

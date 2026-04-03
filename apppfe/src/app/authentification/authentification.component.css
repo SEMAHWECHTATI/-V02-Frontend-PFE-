@@ -1,0 +1,92 @@
+/* Reset et conteneur global */
+.sagem-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f4f7f9; /* Un gris bleuté très clair et pro */
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Carte principale divisée */
+.sagem-container {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Panneau de Gauche (Image de marque - caché sur mobile) */
+.sagem-brand-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #003a8c, #0056b3);
+  color: white;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sagem-brand-panel h2 {
+  font-weight: 700;
+  margin-top: 1.5rem;
+}
+
+/* Panneau de Droite (Le Formulaire) */
+.sagem-form-panel {
+  flex: 1;
+  padding: 3.5rem;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+/* Inputs Modernes et stricts */
+.sagem-input-group {
+  border: 1px solid #e0e4e8;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background: #fafbfc;
+}
+
+/* L'effet au clic : bordure bleue nette et léger halo */
+.sagem-input-group:focus-within {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  background: #ffffff;
+}
+
+.sagem-input-group .input-group-text {
+  background: transparent;
+  border: none;
+  color: #8c98a4;
+}
+
+.sagem-input-group:focus-within .input-group-text {
+  color: #0056b3;
+}
+
+.sagem-input-group .form-control {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding-left: 0; /* Rapproche le texte de l'icône */
+}
+
+/* Bouton d'action pro */
+.btn-corporate {
+  background-color: #0056b3;
+  color: white;
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-corporate:hover {
+  background-color: #003a8c;
+}

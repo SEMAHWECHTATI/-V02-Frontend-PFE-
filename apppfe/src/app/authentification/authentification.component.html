@@ -1,0 +1,110 @@
+<!-- <div class="bg-light d-flex align-items-center justify-content-center vh-100">
+
+  <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 400px;">
+    
+    <div class="text-center mb-4">
+    <img src="assets/loginsagem.png" alt="logo" style="height:100px; vertical-align:middle;">
+    <p class="text-muted">Veuillez vous identifier</p>
+</div>
+
+    <div *ngIf="erreur" class="alert alert-danger text-center p-2 mb-3">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ erreur }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="email" class="form-label fw-semibold">Adresse Email</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+          <input type="email" id="email" class="form-control" placeholder="nom@sagem.com"
+                 name="email" [(ngModel)]="email" required>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="motDePasse" class="form-label fw-semibold">Mot de passe</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+          <input type="password" id="motDePasse" class="form-control" placeholder="••••••••"
+                 name="motDePasse" [(ngModel)]="motDePasse" required>
+        </div>
+      </div>
+	  
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="chargement">
+        <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ chargement ? 'Connexion en cours...' : 'Se connecter' }}
+      </button>
+
+    </form>
+    
+    <div class="text-center mt-3">
+      <a href="#" class="text-decoration-none small text-muted">Mot de passe oublié ?</a>
+    </div>
+	<div class="text-center mt-3">
+      <a href="/demandeInscription" class="text-decoration-none small text-muted">demande d'inscription ?</a>
+    </div>
+  </div>
+
+</div> -->
+
+<div class="sagem-wrapper p-3">
+	
+  <div class="sagem-container">
+
+    <div class="sagem-brand-panel d-none d-md-flex">
+      <img img src="assets/gestion.png" alt="logo" style="height:150px; vertical-align:middle;">
+      <h2>Portail Connecté</h2>
+      <p class="mt-3 opacity-75">Accédez à votre espace collaborateur et vos outils internes de manière sécurisée.</p>
+    </div>
+
+    <div class="sagem-form-panel">
+      
+      <div class="text-center d-md-none mb-4">
+        <img src="assets/loginsagem.png" alt="Sagemcom" style="height: 60px;">
+      </div>
+
+      <h4 class="fw-bold mb-1">Connexion</h4>
+      <p class="text-muted small mb-4">Veuillez renseigner vos identifiants.</p>
+
+      <div *ngIf="erreur" class="alert alert-danger p-2 small mb-4 rounded-3 d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ erreur }}
+      </div>
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="email" class="form-label small fw-semibold text-secondary">Adresse Email</label>
+          <div class="input-group sagem-input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" id="email" class="form-control" placeholder="prenom.nom@sagemcom.com"
+                   name="email" [(ngModel)]="email" required>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="motDePasse" class="form-label small fw-semibold text-secondary">Mot de passe</label>
+          <div class="input-group sagem-input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" id="motDePasse" class="form-control" placeholder="••••••••"
+                   name="motDePasse" [(ngModel)]="motDePasse" required>
+          </div>
+          <div class="text-end mt-1">
+            <a href="#" class="text-decoration-none small" style="color: #0056b3;">Mot de passe oublié ?</a>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-corporate w-100 fw-bold mb-3" [disabled]="chargement">
+          <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          {{ chargement ? 'Authentification...' : 'Se connecter' }}
+        </button>
+      </form>
+
+      <div class="text-center mt-4 pt-3 border-top">
+        <span class="small text-muted">Vous n'avez pas de compte ? </span>
+        <a href="/demandeInscription" class="text-decoration-none small fw-bold" style="color: #0056b3;">Demander un accès</a>
+      </div>
+      
+    </div>
+
+  </div>
+</div>

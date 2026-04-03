@@ -1,0 +1,39 @@
+/* Donne un effet de "carte" flottante à votre tableau */
+table {
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden; /* Nécessaire pour que les coins arrondis s'appliquent aux titres */
+  border-collapse: collapse;
+}
+
+/* Stylise l'en-tête du tableau */
+th {
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+
+/* Centre le contenu des cellules verticalement */
+td {
+  vertical-align: middle;
+}
+
+/* Amélioration des badges de statut et rôle */
+.badge {
+  padding: 0.5em 0.8em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 12px; /* Rend les badges plus ronds */
+}
+
+/* Petit effet d'animation au survol des boutons d'action */
+.btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px); /* Fait "sauter" le bouton légèrement vers le haut */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}

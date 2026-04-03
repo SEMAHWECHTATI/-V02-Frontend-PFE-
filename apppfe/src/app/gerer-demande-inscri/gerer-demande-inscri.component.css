@@ -1,0 +1,113 @@
+/* =========================================
+   ANIMATION D'APPARITION (Optionnel mais joli)
+   ========================================= */
+.container-fluid {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   STYLE DES CARTES
+   ========================================= */
+.card {
+    border-radius: 12px;
+    overflow: hidden; /* Assure que les coins arrondis cachent bien le contenu */
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+/* =========================================
+   AMÉLIORATION DU TABLEAU
+   ========================================= */
+.table-responsive {
+    /* Fixe une hauteur max pour permettre le scroll si beaucoup de demandes */
+    max-height: 600px; 
+    overflow-y: auto;
+}
+
+/* Fixer l'en-tête du tableau lors du scroll (Sticky Header) */
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa; /* Couleur de la classe .table-light */
+    z-index: 1;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Cellules du tableau plus aérées */
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+/* Effet de survol doux sur les lignes du tableau */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* =========================================
+   BADGES (Statuts et Rôles)
+   ========================================= */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 8px; /* Coins un peu plus arrondis */
+}
+
+/* =========================================
+   BOUTONS D'ACTION
+   ========================================= */
+.btn {
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Effet de soulèvement au survol pour les boutons (sauf s'ils sont désactivés) */
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* =========================================
+   PERSONNALISATION DE LA BARRE DE SCROLL
+   (Pour les navigateurs Webkit : Chrome, Safari, Edge)
+   ========================================= */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}

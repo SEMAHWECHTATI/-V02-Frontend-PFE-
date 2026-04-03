@@ -1,0 +1,39 @@
+/* Bordures par défaut des champs */
+.input-group-text, .form-control {
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Retire l'ombre bleue classique de Bootstrap au focus */
+.form-control:focus {
+  box-shadow: none;
+  border-color: #0d6efd; /* Couleur primary */
+}
+
+/* Illumine l'icône et la bordure gauche quand on clique dans le champ */
+.form-control:focus + .input-group-text,
+.input-group:focus-within .input-group-text,
+.input-group:focus-within .form-control {
+  border-color: #0d6efd;
+}
+
+/* Change la couleur de l'icône Bootstrap au focus */
+.input-group:focus-within .bi {
+  color: #0d6efd !important;
+}
+
+/* Animation et effet 3D sur le bouton de soumission */
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
+
+/* Désactive l'animation si le bouton est en état de chargement/désactivé */
+.btn-primary:disabled {
+  transform: none;
+  box-shadow: none;
+}
