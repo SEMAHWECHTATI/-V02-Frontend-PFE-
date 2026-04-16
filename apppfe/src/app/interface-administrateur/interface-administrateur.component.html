@@ -4,81 +4,127 @@
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark sidebar shadow">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
                 <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                    <span class="fs-4 fw-bold text-primary"><i class="bi bi-gear-fill me-2"></i> G2II </span>
-                     </a>
-                     <hr class="w-100 text-secondary">
+                    <span class="d-block text-center fs-4 fw-bold text-success">
+                         <img src="assets/newlog.png" alt="logo" style="height:200px; vertical-align:center;">
+                    </span>
+                </a>
+                <hr class="w-100 text-secondary">
                 
-                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
                     
-                     <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                     <a class="nav-link align-middle px-0 text-white" 
-                        [class.active]="vueActuelle === 'accueil'" 
-                        (click)="changerVue('accueil')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
+                    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link align-middle px-0 text-white" 
+                           [class.active]="vueActuelle === 'accueil'" 
+                           (click)="changerVue('accueil')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline "><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
                         </a>
                     </li>
 
-                <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien'">
-                    <a class="nav-link px-0 align-middle text-light" 
-                    [class.active]="vueActuelle === 'interventions'" 
-                    (click)="changerVue('interventions')" style="cursor: pointer;">
-                        <span class="ms-1 d-none d-sm-inline">
-                            <i class="bi bi-tools me-2"></i> Interventions & Tickets
-                        </span>        </a>
-                            </li>
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
+    
+    <a (click)="menuTicketsOuvert = !menuTicketsOuvert" class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center" style="cursor: pointer;">
+        <div>
+            <i class="bi bi-tools me-2 text-success"></i> 
+            <span class="ms-1 d-none d-sm-inline">Interventions & Tickets</span>
+        </div>
+        <i class="bi d-none d-sm-inline ms-2" [ngClass]="menuTicketsOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+    </a>
 
-                <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Gestionnaire_Stock'">
-                    <a class="nav-link px-0 align-middle text-light" 
-                    [class.active]="vueActuelle === 'inventaire'" 
-                    (click)="changerVue('inventaire')" style="cursor: pointer;">
-                        <span class="ms-1 d-none d-sm-inline"><i class="bi bi-archive me-2"></i> Inventaire & Stocks</span>
-                    </a>
-                </li>
+    <ul class="nav flex-column ms-3 collapse" [ngClass]="{'show': menuTicketsOuvert}">
+        
+        <li class="w-100">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'creerTicket'" (click)="changerVue('creerTicket')" style="cursor: pointer;">
+                <i class="bi bi-plus-circle me-2 text-info"></i> 
+                <span class="d-none d-sm-inline">Créer un ticket</span>
+            </a>
+        </li>
+        <li class="w-100">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'create-categorie'" (click)="changerVue('create-categorie')" style="cursor: pointer;">
+                <i class="bi bi-plus-circle me-2 text-success"></i> 
+                <span class="d-none d-sm-inline">Créer un categorie</span>
+            </a>
+        </li>
+         <li class="w-100">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'create-groupe'" (click)="changerVue('create-groupe')" style="cursor: pointer;">
+                <i class="bi bi-plus-circle me-2 text-success"></i> 
+                <span class="d-none d-sm-inline">Créer un groupe</span>
+            </a>
+        </li>
 
-                <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                    <a class="nav-link px-0 align-middle text-light" 
-                    [class.active]="vueActuelle === 'alertes'" 
-                    (click)="changerVue('alertes')" style="cursor: pointer;">
-                        <span class="ms-1 d-none d-sm-inline">
-                            <i class="bi bi-bell-fill me-2"></i> Alertes & Notifications
-                            <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span>
-                        </span>
-                    </a>
-                </li>
+        <li class="w-100">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'liste-tickets'" (click)="changerVue('liste-tickets')" style="cursor: pointer;">
+                <i class="bi bi-list-task me-2 text-warning"></i> 
+                <span class="d-none d-sm-inline">Liste des tickets</span>
+            </a>
+        </li>
 
-                <hr class="w-100 text-secondary my-2" *ngIf="currentUser?.role === 'Administrateur'">
+        <li class="w-100">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesInterventions'" (click)="changerVue('mesInterventions')" style="cursor: pointer;">
+                <i class="bi bi-clock-history me-2 text-secondary"></i> 
+                <span class="d-none d-sm-inline">Mes interventions</span>
+            </a>
+        </li>
 
-                <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                    <a class="nav-link px-0 align-middle text-light" 
-                    [class.active]="vueActuelle === 'utilisateurs'" 
-                    (click)="changerVue('utilisateurs')" style="cursor: pointer;">
-                        <span class="ms-1 d-none d-sm-inline"><i class="bi bi-people-fill me-2"></i> Gestion Utilisateurs</span>
-                    </a>
-            </li>
+        <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+            <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'enumerations'" (click)="changerVue('enumerations')" style="cursor: pointer;">
+                <i class="bi bi-gear-fill me-2 text-danger"></i> 
+                <span class="d-none d-sm-inline">Référentiel (Énumérations)</span>
+            </a>
+        </li>
 
-            <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-            <a class="nav-link px-0 align-middle text-light" 
-            [class.active]="vueActuelle === 'demandes'" 
-            (click)="changerVue('demandes')" style="cursor: pointer;">
-                <span class="ms-1 d-none d-sm-inline">
-                    <i class="bi bi-file-earmark-person me-2"></i> Demandes d'accès
-                    
-                    <span class="badge bg-danger ms-2 rounded-pill" *ngIf="nombreDemandesEnAttente > 0">
-                        {{ nombreDemandesEnAttente }}
-                    </span>
-                    
-                </span>
-                 </a>
-                </li>
+    </ul>
+</li>
 
-                        <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                            <a class="nav-link px-0 align-middle text-light" 
-                            [class.active]="vueActuelle === 'parametres'" 
-                            (click)="changerVue('parametres')" style="cursor: pointer;">
-                                <span class="ms-1 d-none d-sm-inline"><i class="bi bi-gear-fill me-2"></i> Configuration Système</span>
-                            </a>
-                        </li>
-                    </ul>
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Gestionnaire_Stock'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'inventaire'" 
+                           (click)="changerVue('inventaire')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-archive me-2 text-success"></i> Inventaire & Stocks</span>
+                        </a>
+                    </li>
+
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'alertes'" 
+                           (click)="changerVue('alertes')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline">
+                                <i class="bi bi-bell-fill me-2 text-danger"></i> Alertes & Notifications
+                                <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span>
+                            </span>
+                        </a>
+                    </li>
+
+                    <hr class="w-100 text-secondary my-2" *ngIf="currentUser?.role === 'Administrateur'">
+
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'utilisateurs'" 
+                           (click)="changerVue('utilisateurs')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-people-fill me-2 text-primary"></i> Gestion Utilisateurs</span>
+                        </a>
+                    </li>
+
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'demandes'" 
+                           (click)="changerVue('demandes')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline">
+                                <i class="bi bi-file-earmark-person me-2 text-warning"></i> Demandes d'accès
+                                <span class="badge bg-danger ms-2 rounded-pill" *ngIf="nombreDemandesEnAttente > 0">
+                                    {{ nombreDemandesEnAttente }}
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'parametres'" 
+                           (click)="changerVue('parametres')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-gear-fill me-2 text-secondary"></i> Configuration Système</span>
+                        </a>
+                    </li>
+                </ul>
                                     
                 <hr class="w-100 text-secondary">
                 <div class="pb-4 w-100">
@@ -91,29 +137,22 @@
 
         <div class="col py-4 px-4 bg-light" style="min-height: 100vh; overflow-y: auto;">
             
-    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border-start border-primary border-4" *ngIf="currentUser">
-        
-        <h2 class="fw-bold text-danger mb-0">Espace {{ currentUser?.role }}</h2>
-        
-        <div class="d-flex align-items-center">
-             <span class="badge bg-primary me-2 p-2 text-uppercase">
-                Bonjour, {{ currentUser?.prenom }} {{ currentUser?.nom }} ! <i class="bi bi-buildings"></i>
-            </span>
-            <span class="badge bg-info me-2 p-2 text-uppercase">
-                Rôle : {{ currentUser?.role }}
-            </span>
-            
-            <span class="badge bg-warning   me-2 p-2 text-uppercase">
-                <i class="bi bi-building me-1"></i> Departement:{{ currentUser?.departement }}
-            </span>
-            
-           
-            <!-- <pre class="bg-dark text-warning p-3 mt-3">{{ currentUser | json }}</pre> -->
-          
-        </div>
-        
-    </div>
-    
+            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border-start border-primary border-4" *ngIf="currentUser">
+                <h2 class="fw-bold text-danger mb-0">Espace {{ currentUser?.role }}</h2>
+                <h1 class="fw-bold text-warning mb-0 fs-3">Gestion des Interventions & Inventaire IT</h1>
+                
+                <div class="d-flex align-items-center">
+                     <span class="badge bg-primary me-2 p-2 text-uppercase">
+                        Bonjour, {{ currentUser?.prenom }} {{ currentUser?.nom }} ! <i class="bi bi-buildings"></i>
+                    </span>
+                    <span class="badge bg-info me-2 p-2 text-uppercase">
+                        Rôle : {{ currentUser?.role }}
+                    </span>
+                    <span class="badge bg-warning me-2 p-2 text-uppercase">
+                        <i class="bi bi-building me-1"></i> Departement : {{ currentUser?.departement }}
+                    </span>
+                </div>
+            </div>
 
             <div *ngIf="vueActuelle === 'accueil'">
                 <h4 class="mb-3 text-secondary">Aperçu Global (Temps Réel)</h4>
@@ -151,10 +190,31 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div *ngIf="vueActuelle === 'creerTicket'">
+                <app-create-ticket-page></app-create-ticket-page>
+            </div>
+            <div *ngIf="vueActuelle === 'create-categorie'">
+                <app-create-categorie></app-create-categorie>
+            </div>
+             <div *ngIf="vueActuelle === 'create-groupe'">
+                <app-create-groupe></app-create-groupe>
+            </div>
+            <div *ngIf="vueActuelle === 'liste-tickets'">
+                <app-liste-tickets></app-liste-tickets>
+            </div>
+
+            <div *ngIf="vueActuelle === 'listeTickets'">
+                <div class="alert alert-info">Affichage de la liste des tickets...</div>
                 </div>
 
-            <div *ngIf="vueActuelle === 'interventions'">
-                <div class="alert alert-info">Module de gestion des tickets et assignations des techniciens.</div>
+            <div *ngIf="vueActuelle === 'mesInterventions'">
+                <div class="alert alert-info">Affichage des interventions...</div>
+                </div>
+
+            <div *ngIf="vueActuelle === 'enumerations'">
+                <app-enumeration></app-enumeration>
             </div>
 
             <div *ngIf="vueActuelle === 'inventaire'">

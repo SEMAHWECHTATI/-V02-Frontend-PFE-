@@ -1,0 +1,256 @@
+<!-- HEADER GITI-KPI -->
+<header class="giti-header">
+  <div class="header-top">
+    <div class="header-content">
+      <div class="logo-section">
+        <img src="assets/newlog.png" alt="GITI-KPI Logo" class="giti-logo">
+        <div class="logo-text">
+          <h1 class="giti-title">GITI<span class="giti-subtitle">-KPI</span></h1>
+          <p class="giti-tagline">Gestion Intégrée des Tickets & Incidents</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="date-badge">
+          <i class="bi bi-calendar-event"></i>
+          {{ today | date:'EEEE d MMMM yyyy' }}
+        </div>
+        <div class="user-menu">
+          <div class="user-avatar">
+            {{ currentUser.prenom?.[0] }}{{ currentUser.nom?.[0] }}
+          </div>
+          <div class="user-info">
+            <p class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</p>
+            <p class="user-role">Demandeur</p>
+          </div>
+          <button class="btn-logout" (click)="deconnexion()" title="Se déconnecter">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CONTENU PRINCIPAL -->
+<div class="main-container">
+  <!-- WELCOME SECTION -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <h2 class="welcome-title">Bienvenue, {{ currentUser.prenom }} 👋</h2>
+      <p class="welcome-subtitle">Gérez vos incidents et demandes de services en toute simplicité</p>
+    </div>
+  </div>
+
+  <!-- ACTION CARDS -->
+  <section class="action-section">
+    <div class="cards-grid">
+      <!-- Card 1: Signaler un problème -->
+      <div class="action-card card-primary" 
+           [class.active]="vueActuelle === 'creerTicket'"
+           (click)="ouvrirFormulaireTicket()">
+        <div class="card-icon">
+          <i class="bi bi-exclamation-circle-fill"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Signaler un problème</h3>
+          <p class="card-description">Panne réseau, erreur logicielle, accès refusé...</p>
+        </div>
+        <div class="card-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </div>
+
+      <!-- Card 2: Demander du Matériel -->
+      <div class="action-card card-disabled">
+        <div class="card-icon">
+          <i class="bi bi-pc-display-horizontal"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Demander du Matériel</h3>
+          <p class="card-description">Ordinateur, écran, clavier...</p>
+        </div>
+        <div class="coming-soon">Bientôt</div>
+      </div>
+
+      <!-- Card 3: Mes Tickets -->
+      <div class="action-card card-info"
+           [class.active]="vueActuelle === 'mesTickets' || vueActuelle === 'detailTicket'"
+           (click)="changerVue('mesTickets')">
+        <div class="card-icon">
+          <i class="bi bi-list-check"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Mes Tickets</h3>
+          <p class="card-description">Suivre l'état de mes demandes</p>
+        </div>
+        <div class="card-badge">{{ mesTickets.length }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MES TICKETS VIEW -->
+  <div *ngIf="vueActuelle === 'mesTickets'" class="view-container fade-in">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="bi bi-clock-history"></i>
+        Historique de mes demandes
+      </h3>
+      <p class="section-subtitle">{{ mesTickets.length }} ticket(s) au total</p>
+    </div>
+
+    <div class="tickets-container">
+      <div *ngIf="mesTickets.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h4>Aucun ticket pour le moment</h4>
+        <p>Créez votre premier ticket en cliquant sur "Signaler un problème"</p>
+        <button class="btn btn-primary mt-3" (click)="ouvrirFormulaireTicket()">
+          <i class="bi bi-plus-lg"></i> Créer un ticket
+        </button>
+      </div>
+
+      <div *ngIf="mesTickets.length > 0" class="tickets-list">
+        <div *ngFor="let ticket of mesTickets" 
+             class="ticket-card"
+             [class]="'status-' + ticket.statut?.toLowerCase()"
+             (click)="voirDetailTicket(ticket)">
+          
+          <div class="ticket-header">
+            <div class="ticket-ref-badge">{{ ticket.reference }}</div>
+            <span class="status-badge" [ngClass]="getStatusClass(ticket.statut)">
+              {{ ticket.statut }}
+            </span>
+          </div>
+
+          <div class="ticket-body">
+            <h4 class="ticket-title">{{ ticket.titre }}</h4>
+            <p class="ticket-description">{{ ticket.description | slice:0:100 }}{{ ticket.description?.length > 100 ? '...' : '' }}</p>
+          </div>
+
+          <div class="ticket-footer">
+            <div class="ticket-meta">
+              <span class="meta-item">
+                <i class="bi bi-calendar3"></i>
+                {{ ticket.date | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="meta-item">
+                <i class="bi bi-tag"></i>
+                {{ ticket.type }}
+              </span>
+            </div>
+            <div class="ticket-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL TICKET VIEW -->
+  <div *ngIf="vueActuelle === 'detailTicket' && ticketSelectionne" class="view-container fade-in">
+    <button class="btn-back" (click)="changerVue('mesTickets')">
+      <i class="bi bi-arrow-left"></i>
+      Retour à la liste
+    </button>
+
+    <div class="detail-card">
+      <div class="detail-header" [class]="'status-' + ticketSelectionne.statut?.toLowerCase()">
+        <div class="detail-title-section">
+          <div class="detail-ref">{{ ticketSelectionne.reference }}</div>
+          <h2 class="detail-title">{{ ticketSelectionne.titre }}</h2>
+        </div>
+        <span class="status-badge-large" [ngClass]="getStatusClass(ticketSelectionne.statut)">
+          {{ ticketSelectionne.statut }}
+        </span>
+      </div>
+
+      <div class="detail-content">
+        <div class="detail-main">
+          <div class="detail-section">
+            <h4 class="detail-section-title">Description du problème</h4>
+            <div class="detail-description">
+              {{ ticketSelectionne.description }}
+            </div>
+          </div>
+
+          <div *ngIf="ticketSelectionne.noteResolution" class="detail-section resolution-section">
+            <h4 class="detail-section-title">
+              <i class="bi bi-check-circle-fill"></i>
+              Note de résolution
+            </h4>
+            <div class="resolution-note">
+              "{{ ticketSelectionne.noteResolution }}"
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-sidebar">
+          <div class="info-card">
+            <h5 class="info-title">Informations du ticket</h5>
+            <div class="info-group">
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="bi bi-tag"></i> Type
+                </span>
+                <span class="info-value">{{ ticketSelectionne.type }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="bi bi-exclamation-triangle"></i> Priorité
+                </span>
+                <span class="info-value priority" [class]="'priority-' + ticketSelectionne.priorite?.toLowerCase()">
+                  {{ ticketSelectionne.priorite }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="bi bi-folder"></i> Catégorie
+                </span>
+                <span class="info-value">{{ ticketSelectionne.categorie?.nomCategorie || 'Non définie' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="bi bi-calendar-event"></i> Créé le
+                </span>
+                <span class="info-value">{{ ticketSelectionne.date | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card technician-card">
+            <h5 class="info-title">Support attribué</h5>
+            <div class="technician-info">
+              <div class="technician-avatar">
+                {{ ticketSelectionne.technicienAssigne?.prenom?.[0] || '?' }}
+                {{ ticketSelectionne.technicienAssigne?.nom?.[0] || '?' }}
+              </div>
+              <div class="technician-details">
+                <p class="technician-name">
+                  {{ ticketSelectionne.technicienAssigne?.prenom || 'Non assigné' }}
+                  {{ ticketSelectionne.technicienAssigne?.nom }}
+                </p>
+                <p class="technician-role">Technicien support</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREER TICKET VIEW -->
+  <div *ngIf="vueActuelle === 'creerTicket'" class="view-container fade-in">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="bi bi-plus-circle"></i>
+        Créer un nouveau ticket
+      </h3>
+      <p class="section-subtitle">Décrivez votre problème ou votre demande</p>
+    </div>
+    <div class="create-ticket-wrapper">
+      <app-create-ticket-page></app-create-ticket-page>
+    </div>
+  </div>
+</div>

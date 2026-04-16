@@ -79,14 +79,15 @@
 
 /* Bouton d'action pro */
 .btn-corporate {
-  background-color: #0056b3;
-  color: white;
-  border-radius: 8px;
+  background-color: orange;
+    color: white;
+    border: none;
   padding: 0.75rem;
   border: none;
   transition: background-color 0.2s ease;
 }
 
 .btn-corporate:hover {
-  background-color: #003a8c;
+   background-color: darkorange;
+    color: white;
 }

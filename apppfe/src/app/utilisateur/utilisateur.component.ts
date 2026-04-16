@@ -17,6 +17,14 @@ export class UtilisateurComponent implements OnInit{
   chargement: boolean = true;
   erreur: string = '';
 
+  // NOUVELLES VARIABLES POUR L'ÉDITION
+  modeEdition: boolean = false;
+  utilisateurAEditer: Partial<Utilisateur> | any = {}; 
+
+  utilisateurSelectionne: any | null = null;
+  texteRecherche: string = '';
+  dateRecherche: string = '';
+
   constructor(private utilisateurService: ApiService) {}
 
   ngOnInit(): void {
@@ -42,33 +50,78 @@ export class UtilisateurComponent implements OnInit{
     if (id && confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       this.utilisateurService.deleteUtilisateur(id).subscribe({
         next: () => {
-          // Recharger la liste ou filtrer le tableau local
           this.utilisateurs = this.utilisateurs.filter(u => u.id !== id);
+          if (this.utilisateurSelectionne?.id === id) {
+            this.utilisateurSelectionne = null; // Fermer les détails si on supprime l'utilisateur sélectionné
+          }
         },
         error: (err) => console.error('Erreur de suppression', err)
       });
     }
   }
 
-  utilisateurSelectionne: any | null = null; // Remplacez 'any' par votre interface Utilisateur si vous l'avez
+  voirDetails(user: any): void {
+    this.utilisateurSelectionne = user;
+  }
 
-voirDetails(user: any): void {
-  this.utilisateurSelectionne = user;
-}
+  fermerDetails(): void {
+    this.utilisateurSelectionne = null;
+  }
 
-fermerDetails(): void {
-  this.utilisateurSelectionne = null;
-}
-// Variables pour les filtres
-  texteRecherche: string = '';
-  dateRecherche: string = '';
+  // --- 🛠️ NOUVELLES MÉTHODES POUR MODIFIER LES ACCÈS 🛠️ ---
 
-  // Getter pour filtrer la liste en temps réel
+  ouvrirFormulaireEdition(): void {
+    this.modeEdition = true;
+    // On fait une copie exacte pour ne pas modifier l'affichage avant de sauvegarder
+    this.utilisateurAEditer = { ...this.utilisateurSelectionne };
+  }
+
+  fermerFormulaireEdition(): void {
+    this.modeEdition = false;
+    this.utilisateurAEditer = {};
+  }
+
+  sauvegarderModifications(): void {
+    // 1. Vérification de sécurité (Debug)
+    console.log("Données envoyées au backend :", this.utilisateurAEditer);
+
+    // 2. Si l'ID est perdu, on l'empêche de faire planter le backend
+    if (!this.utilisateurAEditer.id) {
+      alert("Erreur interne : L'ID de l'utilisateur est introuvable.");
+      return; 
+    }
+
+    // 3. Appel au service avec l'ID sécurisé
+    this.utilisateurService.updateUtilisateur(this.utilisateurAEditer.id, this.utilisateurAEditer).subscribe({
+      next: (utilisateurMisAJour) => {
+        // Mettre à jour la liste générale (le tableau)
+        const index = this.utilisateurs.findIndex(u => u.id === this.utilisateurAEditer.id);
+        if (index !== -1) {
+          // On remplace par l'objet mis à jour renvoyé par la base de données
+          this.utilisateurs[index] = utilisateurMisAJour || this.utilisateurAEditer; 
+        }
+        
+        // Mettre à jour la fiche détaillée ouverte
+        this.utilisateurSelectionne = { ...this.utilisateurAEditer };
+        
+        // Fermer la modale
+        this.fermerFormulaireEdition();
+        
+        alert('Les accès ont été mis à jour avec succès !');
+      },
+      error: (err) => {
+        console.error('Erreur lors de la modification', err);
+        alert('Une erreur est survenue lors de la sauvegarde.');
+      }
+    });
+  }
+
+  // --- FIN DES NOUVELLES MÉTHODES ---
+
   get utilisateursFiltres() {
     if (!this.utilisateurs) return [];
 
     return this.utilisateurs.filter(user => {
-      // 1. Filtre textuel (sur le matricule, nom, prénom, département, rôle ou statut)
       const rechercheMinuscule = this.texteRecherche.toLowerCase().trim();
       const champsComplets = (
         (user.matricule || '') + ' ' + 
@@ -81,20 +134,17 @@ fermerDetails(): void {
       
       const matchTexte = rechercheMinuscule === '' || champsComplets.includes(rechercheMinuscule);
 
-      // 2. Filtre par date (Ici, configuré sur la date de création du compte)
-      // Vous pouvez remplacer "user.date_Creation_Compte" par "user.date_dernier_Connex" si vous préférez !
       let matchDate = true;
       if (this.dateRecherche) {
         if (user.date_Creation_Compte) {
           const dateCompte = new Date(user.date_Creation_Compte).toISOString().split('T')[0];
           matchDate = dateCompte === this.dateRecherche;
         } else {
-          matchDate = false; // Si on filtre par date mais que l'utilisateur n'en a pas
+          matchDate = false; 
         }
       }
 
       return matchTexte && matchDate;
     });
   }
-
 }

@@ -1,0 +1,294 @@
+<div class="container-groupe mt-5 mb-5">
+  
+  <!-- HEADER -->
+  <div class="groupe-header mb-5">
+    <div class="header-content">
+      <h2 class="groupe-title">
+        <i class="bi bi-plus-circle me-2"></i>
+        Gérer les Groupes
+      </h2>
+      <p class="groupe-subtitle">Créez et gérez les groupes techniques de votre équipe</p>
+    </div>
+    
+    <div class="header-badge" *ngIf="currentUser">
+      <span class="user-badge">
+        <i class="bi bi-person-check me-1"></i>
+        {{ currentUser.prenom }} {{ currentUser.nom }}
+      </span>
+    </div>
+  </div>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="row g-4">
+    
+    <!-- COLONNE SÉLECTION DES TYPES -->
+    <div class="col-lg-8">
+      <!-- MESSAGE D'ERREUR GLOBAL -->
+      <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-4">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        {{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+
+      <!-- MESSAGE DE SUCCÈS -->
+      <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show mb-4">
+        <i class="bi bi-check-circle me-2"></i>
+        <div style="white-space: pre-line;">{{ successMessage }}</div>
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+
+      <!-- LOADER -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="text-muted">Chargement des données...</p>
+      </div>
+
+      <!-- SÉLECTION DES TYPES (GRILLE) -->
+      <div class="types-grid mb-5" *ngIf="!isLoading">
+        <div class="type-card" 
+             *ngFor="let type of typeGroupes; let i = index"
+             (click)="selecterType(i)"
+             [style.border-color]="getTypeColor(i)"
+             [class.selected]="selectedTypeIndex === i"
+             [class.already-created]="isTypeAlreadyCreated(type.code)">
+          
+          <!-- ICÔNE -->
+          <div class="type-icon" [style.background-color]="getTypeColor(i) + '15'">
+            <i [class]="'bi ' + type.icon" [style.color]="getTypeColor(i)"></i>
+          </div>
+
+          <!-- CONTENU -->
+          <div class="type-content">
+            <h5 class="type-label">{{ type.label }}</h5>
+            <p class="type-desc">{{ type.description }}</p>
+          </div>
+
+          <!-- BADGE CRÉÉ -->
+          <div class="created-badge" *ngIf="isTypeAlreadyCreated(type.code)">
+            <i class="bi bi-check-circle me-1"></i>Créé
+          </div>
+
+          <!-- CHECKMARK SÉLECTION -->
+          <div class="selection-check" *ngIf="selectedTypeIndex === i">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE -->
+      <div class="card shadow border-0 modern-card" *ngIf="!isLoading && selectedTypeIndex >= 0">
+        
+        <!-- HEADER CARD -->
+        <div class="card-header modern-header-groupe" 
+             [style.background]="'linear-gradient(135deg, ' + getTypeColor(selectedTypeIndex) + ' 0%, rgba(' + getTypeColor(selectedTypeIndex) + ', 0.6) 100%)'">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title mb-0">
+                <i [class]="'bi ' + typeGroupes[selectedTypeIndex].icon" style="color: white;"></i>
+                Détails du Groupe
+              </h5>
+              <p class="card-subtitle mb-0">{{ typeGroupes[selectedTypeIndex].label }}</p>
+            </div>
+            <button type="button" class="btn-close btn-close-white" (click)="selectedTypeIndex = -1"></button>
+          </div>
+        </div>
+
+        <!-- BODY CARD -->
+        <div class="card-body p-4">
+          
+          <!-- FORMULAIRE -->
+          <form [formGroup]="groupeForm" (ngSubmit)="onSubmit()" novalidate>
+            
+            <!-- DESCRIPTION DU TYPE -->
+            <div class="info-box mb-4">
+              <i class="bi bi-info-circle me-2"></i>
+              <span>{{ typeGroupes[selectedTypeIndex].description }}</span>
+            </div>
+
+            <!-- NOM DU GROUPE (HIDDEN) -->
+            <input type="hidden" 
+                   formControlName="nomGroupes"
+                   [value]="typeGroupes[selectedTypeIndex].code">
+
+            <!-- DESCRIPTION -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                <i class="bi bi-chat-left-text me-1"></i>
+                Description du Groupe <span class="text-danger">*</span>
+              </label>
+              <textarea formControlName="description" 
+                        class="form-control"
+                        [class.is-invalid]="isFieldInvalid('description')"
+                        rows="5" 
+                        placeholder="Décrivez les responsabilités et le rôle de ce groupe..."
+                        maxlength="500">
+              </textarea>
+              <small class="form-text text-muted d-block mt-2">
+                <i class="bi bi-info-circle me-1"></i>
+                Minimum 10 caractères - Maximum 500 caractères
+              </small>
+              <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('description')">
+                {{ getFieldErrorMessage('description') }}
+              </div>
+            </div>
+
+            <!-- COMPTEUR CARACTÈRES -->
+            <div class="char-counter mb-4">
+              <small class="text-muted">
+                {{ groupeForm.get('description')?.value?.length || 0 }} / 500 caractères
+              </small>
+            </div>
+
+            <!-- BOUTONS -->
+            <div class="button-group-groupe">
+              <button type="button" 
+                      class="btn btn-light" 
+                      (click)="resetForm()">
+                <i class="bi bi-x-lg me-1"></i>Annuler
+              </button>
+              <button type="submit" 
+                      class="btn btn-primary"
+                      [style.background-color]="getTypeColor(selectedTypeIndex)"
+                      [style.border-color]="getTypeColor(selectedTypeIndex)"
+                      [disabled]="groupeForm.invalid || isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i class="bi bi-check-circle me-1" *ngIf="!isSubmitting"></i>
+                {{ isSubmitting ? 'Création en cours...' : 'Créer le Groupe' }}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- INVITATION À SÉLECTIONNER -->
+      <div class="empty-state" *ngIf="!isLoading && selectedTypeIndex < 0">
+        <i class="bi bi-cursor-text"></i>
+        <h5>Sélectionnez un type de groupe</h5>
+        <p>Cliquez sur l'une des cartes ci-dessus pour commencer</p>
+      </div>
+    </div>
+
+    <!-- COLONNE INFO/SIDEBAR -->
+    <div class="col-lg-4">
+      
+      <!-- CARD INFO UTILISATEUR -->
+      <div class="info-card mb-4">
+        <div class="card-header-sidebar">
+          <i class="bi bi-person-check me-2"></i>
+          Votre Profil
+        </div>
+        <div class="card-body-sidebar">
+          <dl class="info-list">
+            <dt>Nom</dt>
+            <dd *ngIf="currentUser">{{ currentUser.prenom }} {{ currentUser.nom }}</dd>
+            
+            <dt>Email</dt>
+            <dd *ngIf="currentUser">{{ currentUser.email }}</dd>
+            
+            <dt>Rôle</dt>
+            <dd *ngIf="currentUser">
+              <span class="role-badge" 
+                    [class.admin]="currentUser.role.toLowerCase() === 'administrateur'">
+                <i class="bi bi-shield-check me-1"></i>
+                {{ currentUser.role }}
+              </span>
+            </dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- CARD GROUPES EXISTANTS -->
+      <div class="groups-card mb-4">
+        <div class="card-header-sidebar">
+          <i class="bi bi-diagram-2 me-2"></i>
+          Groupes Existants ({{ groupes.length }})
+        </div>
+        <div class="card-body-sidebar">
+          <div *ngIf="groupes.length > 0" class="groups-list">
+            <div class="group-item" *ngFor="let groupe of groupes">
+              <div class="group-info">
+                <i class="bi bi-diagram-2 me-2"></i>
+                <div>
+                  <h6>{{ groupe.nomGroupes }}</h6>
+                  <small>{{ groupe.description }}</small>
+                </div>
+              </div>
+              <button type="button" 
+                      class="btn-delete-groupe"
+                      (click)="openDeleteModal(groupe)"
+                      title="Supprimer ce groupe">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+          </div>
+          <div *ngIf="groupes.length === 0" class="empty-message">
+            <i class="bi bi-inbox"></i>
+            <p>Aucun groupe créé</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD TYPES DISPONIBLES -->
+      <div class="types-card">
+        <div class="card-header-sidebar">
+          <i class="bi bi-list-check me-2"></i>
+          Types Disponibles
+        </div>
+        <div class="card-body-sidebar">
+          <div class="types-mini-list">
+            <div class="type-mini" 
+                 *ngFor="let type of typeGroupes; let i = index"
+                 [style.border-left-color]="getTypeColor(i)">
+              <i [class]="'bi ' + type.icon" [style.color]="getTypeColor(i)"></i>
+              <div>
+                <h6>{{ type.label }}</h6>
+                <small>{{ type.code }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE SUPPRESSION -->
+  <div class="delete-modal" *ngIf="showDeleteModal">
+    <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
+          Confirmer la suppression
+        </h5>
+        <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+      </div>
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir supprimer le groupe :</p>
+        <div class="groupe-alert" *ngIf="selectedGroupeToDelete">
+          <strong>{{ selectedGroupeToDelete.nomGroupes }}</strong>
+          <small>{{ selectedGroupeToDelete.description }}</small>
+        </div>
+        <p class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Cette action est irréversible !</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" 
+                class="btn btn-secondary" 
+                (click)="closeDeleteModal()"
+                [disabled]="isDeleting">
+          Annuler
+        </button>
+        <button type="button" 
+                class="btn btn-danger" 
+                (click)="supprimerGroupe()"
+                [disabled]="isDeleting">
+          <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
+          <i class="bi bi-trash-fill me-1" *ngIf="!isDeleting"></i>
+          {{ isDeleting ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<form [formGroup]="categorieForm" (ngSubmit)="onSubmit()">
+    
+    <div class="mb-3">
+        <label class="form-label">Nom de la catégorie</label>
+        <input type="text" class="form-control" formControlName="nomCategorie" placeholder="Ex: Installation Logiciel">
+        <div *ngIf="categorieForm.get('nomCategorie')?.touched && categorieForm.get('nomCategorie')?.invalid" class="text-danger mt-1 small">
+            Le nom est requis (minimum 3 caractères).
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Type de ticket</label>
+        <select class="form-select" formControlName="type">
+            <option [ngValue]="null" disabled>Choisir un type de ticket...</option>
+            <option *ngFor="let type of TypeTicketListe" [value]="type">
+                {{ type }}
+            </option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Groupe Responsable</label>
+        <select class="form-select" formControlName="groupeResponsable">
+            <option [ngValue]="null" disabled>Sélectionner un groupe responsable...</option>
+            <option *ngFor="let groupe of groupesListe" [value]="groupe.id">
+                {{ groupe.nomGroupes }}
+            </option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" formControlName="descriptionCategorie" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="categorieForm.invalid">Créer la catégorie</button>
+
+    <div class="mt-3 alert" *ngIf="message" [ngClass]="{'alert-success': message.includes('succès'), 'alert-danger': message.includes('Erreur')}">
+        {{ message }}
+    </div>
+</form>

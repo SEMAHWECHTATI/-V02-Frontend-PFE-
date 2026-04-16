@@ -5,11 +5,16 @@ import { UtilisateurComponent } from '../utilisateur/utilisateur.component';
 import { GererDemandeInscriComponent } from '../gerer-demande-inscri/gerer-demande-inscri.component';
 import { Utilisateur } from '../Model/Entity';
 import { ApiService } from '../services/api.service';
+import { EnumerationComponent } from "../enumeration/enumeration.component";
+import { CreateCategorieComponent } from "../create-categorie/create-categorie.component";
+import { ListeTicketsComponent } from "../liste-tickets/liste-tickets.component";
+import { CreateGroupeComponent } from "../create-groupe/create-groupe.component";
+import { CreateTicketPageComponent } from "../create-ticket-page/create-ticket-page.component";
 
 @Component({
   selector: 'app-interface-administrateur',
   standalone: true,  
-  imports: [CommonModule,RouterModule,UtilisateurComponent,GererDemandeInscriComponent],
+  imports: [CommonModule, RouterModule, UtilisateurComponent, GererDemandeInscriComponent, EnumerationComponent, CreateCategorieComponent, ListeTicketsComponent, CreateGroupeComponent,CreateTicketPageComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })
@@ -17,6 +22,8 @@ import { ApiService } from '../services/api.service';
 
 export class InterfaceAdministrateurComponent implements OnInit {
 
+  // Ajoute cette ligne dans ta classe
+menuTicketsOuvert: boolean = false;
   vueActuelle: string = 'accueil';
   user: Utilisateur[] = [];
   // 1. Ajoutez une variable pour stocker le nombre
@@ -44,7 +51,8 @@ constructor(private router: Router, private apiservice: ApiService,@Inject(PLATF
       }
     }
     
-    console.log("Données nettoyées :", this.currentUser);
+    
+    // console.log("Données nettoyées :", this.currentUser);
 
     if (this.currentUser?.role === 'Administrateur') {
         this.calculerNouvellesDemandes();

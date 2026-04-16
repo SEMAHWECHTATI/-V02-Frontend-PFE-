@@ -1,0 +1,371 @@
+<div class="tickets-container">
+  <!-- HEADER INFO -->
+  <div class="info-header">
+    <div class="user-info-card">
+      <i class="bi bi-person-circle"></i>
+      <div class="user-details">
+        <span class="user-name">{{ currentUser?.prenom }} {{ currentUser?.nom }}</span>
+        <span class="user-role" [ngClass]="'role-' + (userRole | lowercase)">
+          {{ userRole }}
+        </span>
+      </div>
+      <div class="user-groups">
+        <i class="bi bi-diagram-2"></i>
+        <div class="groups-list">
+          <span class="group-item" *ngFor="let groupe of userGroupNames">
+            {{ groupe }}
+          </span>
+          <span *ngIf="userGroupNames.length === 0" class="group-empty">
+            Aucun groupe assigné
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-number">{{ getTotalTickets() }}</div>
+        <div class="stat-label">Total Tickets</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ countByStatus('Nouveau') }}</div>
+        <div class="stat-label">Nouveaux</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ countByStatus('En_Cours') }}</div>
+        <div class="stat-label">En cours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ countByStatus('Resolu') }}</div>
+        <div class="stat-label">Résolus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ countByStatus('Cloture') }}</div>
+        <div class="stat-label">Clôturés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Rechercher par titre ou référence..."
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (change)="onFilterChange()"
+        />
+      </div>
+
+      <div class="filter-select">
+        <label>Statut:</label>
+        <select [(ngModel)]="filterStatut" (change)="onFilterChange()" class="select-input">
+          <option value="ALL">Tous les statuts</option>
+          <option value="Nouveau">Nouveau</option>
+          <option value="En_Cours">En cours</option>
+          <option value="En_Attente">En attente</option>
+          <option value="Resolu">Résolu</option>
+          <option value="Cloture">Clôturé</option>
+        </select>
+      </div>
+
+      <div class="filter-select">
+        <label>Priorité:</label>
+        <select [(ngModel)]="filterPriorite" (change)="onFilterChange()" class="select-input">
+          <option value="ALL">Toutes les priorités</option>
+          <option value="Basse">Basse</option>
+          <option value="Moyenne">Moyenne</option>
+          <option value="Haute">Haute</option>
+          <option value="Critique">Critique</option>
+        </select>
+      </div>
+
+      <button class="btn-refresh" (click)="refresh()" [disabled]="isLoading">
+        <i class="bi bi-arrow-repeat" [class.spin]="isLoading"></i>
+        Rafraîchir
+      </button>
+
+      <a routerLink="/create-ticket" class="btn-new-ticket">
+        <i class="bi bi-plus-circle"></i>
+        Nouveau Ticket
+      </a>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des tickets...</p>
+  </div>
+
+  <!-- TABLEAU MODERNE -->
+  <div *ngIf="!isLoading" class="card modern-card">
+    <div class="card-header modern-header">
+      <div class="header-content">
+        <h5 class="header-title">
+          <i class="bi bi-list-check"></i>
+          Liste des Tickets
+        </h5>
+        <p class="header-subtitle">
+          {{ ticketsFiltres.length }} ticket(s) correspondant à votre accès
+        </p>
+      </div>
+      <div class="header-badge">
+        <span class="role-badge" [ngClass]="'role-' + (userRole | lowercase)">
+          {{ userRole }}
+        </span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- TABLE TICKETS -->
+      <div *ngIf="ticketsFiltres.length > 0" class="table-responsive">
+        <table class="table modern-table">
+          <thead>
+            <tr>
+              <th class="col-ref">N° Ticket</th>
+              <th class="col-title">Titre</th>
+              <th class="col-category">Catégorie</th>
+              <th class="col-status">Statut</th>
+              <th class="col-priority">Priorité</th>
+              <th class="col-requester">Demandeur</th>
+              <th class="col-group">Groupe</th>
+              <th class="col-date">Date</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ticket of ticketsFiltres" 
+                [ngClass]="'ticket-row ' + getRowStatusClass(ticket.statut)"
+                (click)="viewDetails(ticket)"
+                class="clickable-row">
+              
+              <!-- Référence -->
+              <td class="ticket-ref">
+                <strong class="ref-badge">{{ ticket.reference }}</strong>
+              </td>
+              
+              <!-- Titre -->
+              <td class="ticket-title">
+                <div class="title-content">
+                  <strong>{{ ticket.titre }}</strong>
+                  <small *ngIf="ticket.description" class="description-preview">
+                    {{ ticket.description | slice:0:50 }}...
+                  </small>
+                </div>
+              </td>
+              
+              <!-- Catégorie -->
+              <td class="ticket-category">
+                <span class="category-badge">
+                  <i class="bi bi-tag"></i>
+                  {{ ticket.categorie?.nomCategorie || 'N/A' }}
+                </span>
+              </td>
+              
+              <!-- Statut -->
+              <td class="ticket-status">
+                <span class="badge" [ngClass]="getStatusClass(ticket.statut)">
+                  <i class="bi bi-dot"></i>
+                  {{ ticket.statut }}
+                </span>
+              </td>
+              
+              <!-- Priorité -->
+              <td class="ticket-priority">
+                <span class="badge badge-priority" [ngClass]="getPriorityClass(ticket.priorite)">
+                  <i class="bi bi-exclamation-circle"></i>
+                  {{ ticket.priorite || 'Non définie' }}
+                </span>
+              </td>
+              
+              <!-- Demandeur -->
+              <td class="ticket-requester">
+                <div class="requester-info">
+                  <div class="requester-avatar">
+                    {{ ticket.demandeur?.prenom?.[0] }}{{ ticket.demandeur?.nom?.[0] }}
+                  </div>
+                  <div class="requester-details">
+                    <span class="requester-name">
+                      {{ ticket.demandeur?.prenom }} {{ ticket.demandeur?.nom }}
+                    </span>
+                    <small class="requester-email">
+                      {{ ticket.demandeur?.email }}
+                    </small>
+                  </div>
+                </div>
+              </td>
+              
+              <!-- Groupe -->
+              <td class="ticket-group">
+                <span class="group-badge">
+                  <i class="bi bi-diagram-2"></i>
+                  {{ ticket.groupeAssigne?.nomGroupes || 'Non défini' }}
+                </span>
+              </td>
+              
+              <!-- Date -->
+              <td class="ticket-date">
+                <span class="date-badge">
+                  <i class="bi bi-calendar3"></i>
+                  {{ ticket.date | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="ticket-actions" (click)="$event.stopPropagation()">
+                <div class="action-buttons">
+                  <!-- Voir -->
+                  <button 
+                    class="btn-action btn-view"
+                    (click)="viewDetails(ticket)"
+                    title="Voir les détails"
+                  >
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- Actions contextuelles -->
+                  <div class="dropdown">
+                    <button 
+                      class="btn-action btn-menu dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      title="Actions"
+                    >
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <!-- Démarrer -->
+                      <li *ngIf="ticket.statut === 'Nouveau'">
+                        <a class="dropdown-item" href="#" 
+                           (click)="demarrerTicket(ticket); $event.preventDefault()">
+                          <i class="bi bi-play-fill"></i> Démarrer
+                        </a>
+                      </li>
+
+                      <!-- Résoudre -->
+                      <li *ngIf="ticket.statut === 'En_Cours' || ticket.statut === 'En_Attente'">
+                        <a class="dropdown-item" href="#" 
+                           (click)="selectedTicket = ticket; showNoteInput = true; $event.preventDefault()">
+                          <i class="bi bi-check-circle"></i> Résoudre
+                        </a>
+                      </li>
+
+                      <!-- Clôturer -->
+                      <li *ngIf="ticket.statut === 'Resolu'">
+                        <a class="dropdown-item" href="#" 
+                           (click)="cloturerTicket(ticket); $event.preventDefault()">
+                          <i class="bi bi-lock-fill"></i> Clôturer
+                        </a>
+                      </li>
+
+                      <li><hr class="dropdown-divider"></li>
+
+                      <!-- Ajouter note -->
+                      <li>
+                        <a class="dropdown-item" href="#" 
+                           (click)="$event.preventDefault()">
+                          <i class="bi bi-pencil-square"></i> Ajouter une note
+                        </a>
+                      </li>
+
+                      <!-- Voir historique -->
+                      <li>
+                        <a class="dropdown-item" href="#" 
+                           (click)="$event.preventDefault()">
+                          <i class="bi bi-clock-history"></i> Historique
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div *ngIf="ticketsFiltres.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h4>Aucun ticket disponible</h4>
+        <p>
+          <ng-container [ngSwitch]="userRole | lowercase">
+            <ng-container *ngSwitchCase="'administrateur'">
+              Aucun ticket n'a été créé dans la base de données.
+            </ng-container>
+            <ng-container *ngSwitchCase="'admin'">
+              Aucun ticket n'a été créé dans la base de données.
+            </ng-container>
+            <ng-container *ngSwitchCase="'technicien'">
+              Aucun ticket n'est assigné aux groupes <strong>{{ getGroupesFormatted() }}</strong>.
+            </ng-container>
+            <ng-container *ngSwitchCase="'gestionnaire_stock'">
+              Aucun ticket pour votre groupe de gestion.
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              Vous n'avez accès à aucun ticket avec votre rôle actuel.
+            </ng-container>
+          </ng-container>
+        </p>
+        <a routerLink="/create-ticket" class="btn-empty-action">
+          <i class="bi bi-plus-circle"></i>
+          Créer un ticket
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RÉSOUDRE -->
+  <div *ngIf="showNoteInput && selectedTicket" class="modal-overlay" (click)="showNoteInput = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-check-circle"></i>
+          Résoudre le ticket {{ selectedTicket.reference }}
+        </h5>
+        <button type="button" class="btn-close" (click)="showNoteInput = false"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Note de résolution *</label>
+          <textarea
+            class="form-control"
+            rows="5"
+            placeholder="Décrivez la résolution du problème..."
+            [(ngModel)]="noteResolution"
+          ></textarea>
+          <small class="form-text text-muted">
+            Cette note sera visible dans l'historique du ticket
+          </small>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          (click)="showNoteInput = false"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="resoudreTicket(selectedTicket)"
+          [disabled]="actionInProgress || !noteResolution.trim()"
+        >
+          <i *ngIf="!actionInProgress" class="bi bi-check-circle"></i>
+          <i *ngIf="actionInProgress" class="bi bi-hourglass-split"></i>
+          {{ actionInProgress ? 'Résolution en cours...' : 'Résoudre le ticket' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

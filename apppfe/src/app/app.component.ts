@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AutoLogoutServiceService } from './services/auto-logout-service.service';
 
 @Component({
   selector: 'app-root',
@@ -10,4 +11,6 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'apppfe';
+  constructor(private autoLogoutService: AutoLogoutServiceService) {}
+
 }

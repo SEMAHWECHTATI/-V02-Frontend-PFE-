@@ -17,6 +17,9 @@ export class GererDemandeInscriComponent implements OnInit {
   listedepartement: any[] = [];
   demandes: DemandeReponseDTO[] = [];
   groupes: Groupe[] = []; // Pour la liste déroulante
+
+  // NOUVEAU : Variable pour gérer la vue (Actives ou Archives)
+  modeArchive: boolean = false;
   
   // Variables pour le formulaire d'approbation
   demandeEnCoursDApprobation: DemandeReponseDTO | null = null;
@@ -55,10 +58,34 @@ export class GererDemandeInscriComponent implements OnInit {
     });
   }
   chargerDemandes(): void {
-    this.apiService.getAllDemandes().subscribe({
-      next: (data) => this.demandes = data,
-      error: (err) => console.error('Erreur chargement demandes', err)
-    });
+    if (this.modeArchive) {
+      this.apiService.getDemandesArchivees().subscribe({
+        next: (data) => this.demandes = data,
+        error: (err) => console.error('Erreur chargement archives', err)
+      });
+    } else {
+      this.apiService.getDemandesActives().subscribe({
+        next: (data) => this.demandes = data,
+        error: (err) => console.error('Erreur chargement demandes actives', err)
+      });
+    }
+  }
+  basculerVue(): void {
+    this.modeArchive = !this.modeArchive;
+    this.chargerDemandes(); // Recharge le tableau avec les bonnes données
+  }
+
+  // NOUVEAU : Méthode pour archiver une demande
+  archiver(id: number): void {
+    if (confirm('Voulez-vous vraiment archiver cette demande ?')) {
+      this.apiService.archiverDemande(id).subscribe({
+        next: () => {
+          alert("La demande a été archivée avec succès !");
+          this.chargerDemandes(); // Fait disparaître la demande de la liste active
+        },
+        error: (err) => alert('Erreur lors de l\'archivage : ' + (err.error || err.message))
+      });
+    }
   }
 
   chargerGroupes(): void {
@@ -123,7 +150,23 @@ export class GererDemandeInscriComponent implements OnInit {
         this.annulerApprobation(); // Ferme le panneau ET vide le formulaire
         this.chargerDemandes(); // Recharge le tableau
       },
-      error: (err) => alert('Erreur : ' + (err.error || err.message))
+      error: (err) => {
+        console.error("Détails de l'erreur :", err);
+
+        if (err.status === 0) {
+          // L'administrateur a perdu sa connexion Internet
+          alert(" Erreur réseau : Impossible de joindre le serveur. Vérifiez votre connexion Internet.");
+        } 
+        else if (err.status === 500) {
+          // Le serveur a planté, probablement lors de l'envoi de l'email
+          alert(" La demande a peut-être été traitée, mais un problème est survenu sur le serveur (Exemple : Échec de l'envoi de l'email au destinataire).");
+        } 
+        else {
+          // Autres types d'erreurs renvoyées par Spring Boot
+          const messageErreur = err.error || err.message;
+          alert(" Erreur lors de l'approbation :\n" + messageErreur);
+        }
+      }
     });
   }
 

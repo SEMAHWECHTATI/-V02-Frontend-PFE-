@@ -1,13 +1,7 @@
-import { ActionAudit, departementService, GroupeTechnicien, RoleUtilisateur, StatutUtilisateur, TypeAlerte } from "./Enumeration";
+import { ActionAudit, departementService, GroupeTechnicien, Priorite, RoleUtilisateur, StatutUtilisateur, TypeAlerte, TypeTicket } from "./Enumeration";
 
 // Models
-export interface Groupe {
-  id: number;
-  nomGroupes: GroupeTechnicien;
-  description: string;
-  actif?: Boolean ;
-  dateCreation?: Date;
-}
+
 
 export interface DemandeInscription {
   id: number;
@@ -83,7 +77,8 @@ export interface DemandeReponseDTO {
   roleDemande: string;     // Ajouté pour correspondre à 'roleUtilisateur'
   statut: string;          // Corrigé : 'statut' au lieu de 'statutDemande'
   dateDemande: string;     // Les LocalDateTime arrivent sous forme de chaîne de caractères (ex: "2024-10-12T10:15:30")
-  nomGroupe?: string;      // Ajouté avec un "?" (optionnel) car il peut être null si le demandeur n'a pas de groupe
+  nomGroupe?: string; 
+  motifDemande?: string;     // Ajouté avec un "?" (optionnel) car il peut être null si le demandeur n'a pas de groupe
 }
 
 // DTO pour l'approbation par l'Admin
@@ -92,51 +87,102 @@ export interface ApprobationDTO {
   groupeId: number | null; // Peut être null si le rôle n'exige pas de groupe
 }
 
-// Class implementation (optional, for methods if needed)
-// export class UtilisateurImpl implements Utilisateur {
-//   id?: number;
-//   nom: string;
-//   prenom: string;
-//   email: string;
-//   matricule?: string;
-//   motDePasse: string;
-//   telephone?: string;
-//   departement?: departementService;
-//   role?: RoleUtilisateur;
-//   motDepassetemporaire: boolean = false;
-//   tentative_login: number = 0;
-//   date_Creation_Compte: Date;
-//   dateExpmdpTemp: Date;
-//   date_dernier_Connex?: Date;
-//   statut?: StatutUtilisateur;
-//   groupes?: Groupe[];
-//   preferences?: PreferenceNotification;
 
-//   constructor(utilisateur: Utilisateur) {
-//     this.id = utilisateur.id;
-//     this.nom = utilisateur.nom;
-//     this.prenom = utilisateur.prenom;
-//     this.email = utilisateur.email;
-//     this.matricule = utilisateur.matricule;
-//     this.motDePasse = utilisateur.motDePasse;
-//     this.telephone = utilisateur.telephone;
-//     this.departement = utilisateur.departement;
-//     this.role = utilisateur.role;
-//     this.motDepassetemporaire = utilisateur.motDepassetemporaire ?? false;
-//     this.tentative_login = utilisateur.tentative_login ?? 0;
-//     this.date_Creation_Compte = utilisateur.date_Creation_Compte ?? new Date();
-//     this.dateExpmdpTemp = utilisateur.dateExpmdpTemp ?? new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-//     this.date_dernier_Connex = utilisateur.date_dernier_Connex;
-//     this.statut = utilisateur.statut;
-//     this.groupes = utilisateur.groupes;
-//     this.preferences = utilisateur.preferences;
-//   }
 
-//   getFullName(): string {
-//     return `${this.prenom} ${this.nom}`;
-//   }
 
-//   isActive(): boolean {
-//     return this.statut === StatutUtilisateur.Actif;
-//   }
-//}
+
+/**
+ * 🎫 MODÈLES DE TICKETS - Module 2 G2II
+ */
+
+export interface Categorie {
+  idCategorie: number;
+  nomCategorie: string;
+  descriptionCategorie: string;
+  type: string;
+  actif: boolean;
+  groupeResponsable?: Groupe;
+  slas?: SLA[];
+}
+
+export interface SLA {
+  idSLA: number;
+  nomSLA: string;
+  delaiResolutionHeure: number;
+  delaiPriseEnchargeHeur: number;
+  priorite: string;
+}
+
+export enum StatutTicket {
+  Nouveau = 'Nouveau',
+  En_Cours = 'En_Cours',
+  En_Attente = 'En_Attente',
+  Resolu = 'Resolu',
+  Cloture = 'Cloture'
+}
+
+
+
+
+
+export interface Groupe {
+  id: number;
+  nomGroupes: string;
+  description?: string;
+}
+
+export interface Ticket {
+  idTicket?: number;
+  reference?: string;
+  titre: string;
+  description: string;
+  priorite: Priorite;
+  statut?: StatutTicket;
+  date?: string;
+  datePriseEncharge?: string;
+  dateResolution?: string;
+  dateCloture?: string;
+  delaiResolution?: number;
+  slaRespecte?: boolean;
+  noteResolution?: string;
+  categorie?: Categorie;
+  demandeur?: Utilisateur;
+  technicienAssigne?: Utilisateur;
+  groupeAssigne?: Groupe;
+  notes?: NoteTicket[];
+  historiqueTickets?: HistoriqueTicket[];
+}
+
+export interface TicketCreateDTO {
+  titre: string;
+  description: string;
+  priorite: Priorite;
+  demandeurId: number;
+  groupeId: number;
+}
+
+export interface NoteTicket {
+  idNoteTicket?: number;
+  contenu: string;
+  type: 'COMMENTAIRE' | 'TECHNIQUE' | 'RESOLUTION';
+  date?: string;
+  utilisateur?: Utilisateur;
+}
+
+export interface NoteTicketDTO {
+  contenu: string;
+  type: string;
+  idTicket: number;
+  idUtilisateur: number;
+}
+
+export interface HistoriqueTicket {
+  idHistoriqueTicket: number;
+  champModifie: string;
+  ancienneValeur: string;
+  nouvelleValeur: string;
+  date: string;
+  utilisateur: Utilisateur;
+}
+
+export { Priorite };

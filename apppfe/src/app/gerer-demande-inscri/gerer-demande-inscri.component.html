@@ -1,133 +1,147 @@
 <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-secondary">Historique des demandes d'inscription</h5>
-        </div>
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-secondary">
+            <i class="bi" [ngClass]="modeArchive ? 'bi-archive-fill text-warning' : 'bi-card-list text-primary'"></i>
+            {{ modeArchive ? 'Archives des demandes d\'inscription' : 'Demandes d\'inscription actives' }}
+        </h5>
+        <button class="btn btn-sm" [ngClass]="modeArchive ? 'btn-primary' : 'btn-danger'" (click)="basculerVue()">
+            <i class="bi" [ngClass]="modeArchive ? 'bi-arrow-left' : 'bi-archive text'"></i>
+            {{ modeArchive ? 'Retour aux demandes actives' : 'Voir les archives' }}
+        </button>
+    </div>
 
-        <div class="card-body bg-light border-bottom py-3">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">🔍</span>
-                        <input type="text" class="form-control" placeholder="Rechercher un nom, email, rôle..." [(ngModel)]="texteRecherche">
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">📅</span>
-                        <input type="date" class="form-control" [(ngModel)]="dateRecherche">
-                    </div>
-                </div>
-
-                <div class="col-md-3 text-end">
-                    <button class="btn btn-outline-secondary w-100" (click)="texteRecherche = ''; dateRecherche = ''">
-                        ❌ Réinitialiser les filtres
-                    </button>
+    <div class="card-body bg-light border-bottom py-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Rechercher un nom, email, rôle..." [(ngModel)]="texteRecherche">
                 </div>
             </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Demandeur</th>
-                            <th>Département</th>
-                            <th>Rôle Souhaité</th>
-                            <th>Statut</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let d of demandesFiltrees">
-                            <td class="text-muted fw-bold">#{{ d.id }}</td>
-                            <td>{{ d.dateDemande | date:'dd/MM/yyyy HH:mm' }}</td>
-                            <td>
-                                <div><strong>{{ d.nom }} {{ d.prenom }}</strong></div>
-                                <div class="small text-muted">{{ d.email }}</div>
-                            </td>
-                            <td>{{ d.departement }}</td>
-                            <td><span class="badge bg-secondary">{{ d.roleDemande }}</span></td>
-                            
-                            <td>
-                                <span class="badge" 
-                                      [ngClass]="{
-                                        'bg-warning text-dark': d.statut === 'En_Attente',
-                                        'bg-success': d.statut === 'ACCEPTEE',
-                                        'bg-danger': d.statut === 'REFUSEE'
-                                      }">
-                                    {{ d.statut }}
-                                </span>
-                            </td>
-                            
-                            <td class="text-center">
-                                <ng-container *ngIf="d.statut === 'En_Attente'">
-                                    <button class="btn btn-sm btn-outline-success me-2" 
-                                            title="Accepter" 
-                                            (click)="preparerApprobation(d)">
-                                        ✅ Valider
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" 
-                                            title="Refuser" 
-                                            (click)="refuser(d)">
-                                        ❌ Refuser
-                                    </button>
-                                </ng-container>
-                                <span *ngIf="d.statut !== 'En_Attente'" class="text-muted small">Traitée</span>
-                            </td>
-                        </tr>
-
-                        <tr *ngIf="demandesFiltrees.length === 0">
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                🚫 Aucune demande ne correspond à vos filtres.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    </table>
-            </div>
-        </div>
-    </div> <div class="card mt-4 shadow-sm border-primary" *ngIf="demandeEnCoursDApprobation">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Approbation de la demande #{{ demandeEnCoursDApprobation.id }}</h5>
-        </div>
-        <div class="card-body">
-            <p>Vous allez valider l'inscription de <strong>{{ demandeEnCoursDApprobation.prenom }} {{ demandeEnCoursDApprobation.nom }}</strong>.</p>
             
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Rôle accordé :</label>
-                    <select class="form-select" [(ngModel)]="formApprobation.roleAccorde">
-                        <option value="">-- Sélectionner un rôle --</option>
-                        <option *ngFor="let r of listeRoles" [value]="r">{{ r }}</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Affecter à un groupe :</label>
-                    <select class="form-select" [(ngModel)]="formApprobation.groupeId">
-                        <option [ngValue]="null">-- Aucun groupe (Optionnel) --</option>
-                        <option *ngFor="let g of groupes" [value]="g.id">{{ g.nomGroupes }}</option>
-                    </select>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-calendar-date"></i></span>
+                    <input type="date" class="form-control" [(ngModel)]="dateRecherche">
                 </div>
             </div>
 
-            <div class="mt-4 text-end">
-                <button class="btn btn-light me-2" (click)="annulerApprobation()">Annuler</button>
-                <button class="btn btn-success" 
-                        [disabled]="!formApprobation.roleAccorde" 
-                        (click)="confirmerApprobation()">
-                    Confirmer l'inscription
+            <div class="col-md-3 text-end">
+                <button class="btn btn-outline-secondary w-100" (click)="texteRecherche = ''; dateRecherche = ''">
+                     <i class="bi bi-x-lg"></i>  Réinitialiser les filtres
                 </button>
             </div>
         </div>
     </div>
-    
-    
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Demandeur</th>
+                        <th>Département</th>
+                        <th>Rôle Souhaité</th>
+                        <th>Statut</th>
+                        <th>Motif demande</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let d of demandesFiltrees">
+                        <td class="text-muted fw-bold">{{ d.id }}</td>
+                        <td>{{ d.dateDemande | date:'dd/MM/yyyy HH:mm' }}</td>
+                        <td>
+                            <div><strong>{{ d.nom }} {{ d.prenom }}</strong></div>
+                            <div class="small text-muted">{{ d.email }}</div>
+                        </td>
+                        <td>{{ d.departement }}</td>
+                        <td><span class="badge bg-secondary">{{ d.roleDemande }}</span></td>
+                        
+                        <td>
+                            <span class="badge" 
+                                  [ngClass]="{
+                                    'bg-warning text-dark': d.statut === 'En_Attente',
+                                    'bg-success': d.statut === 'ACCEPTEE',
+                                    'bg-danger': d.statut === 'REFUSEE'
+                                  }">
+                                {{ d.statut }}
+                            </span>
+                        </td>
+                        <td>{{ d.motifDemande }}</td>
+                        
+                        <td class="text-center">
+                            <ng-container *ngIf="d.statut === 'En_Attente' && !modeArchive">
+                                <button class="btn btn-sm btn-outline-success me-2" 
+                                        title="Accepter" 
+                                        (click)="preparerApprobation(d)">
+                                    <i class="bi bi-check-square"></i> Valider
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        title="Refuser" 
+                                        (click)="refuser(d)">
+                                    <i class="bi bi-x-lg"></i> Refuser
+                                </button>
+                            </ng-container>
+
+                            <span *ngIf="d.statut !== 'En_Attente' || modeArchive" class="text-muted small">
+                                <strong>{{ modeArchive ? 'Archivée' : 'Traitée' }}</strong>
+                                <br>
+                                <button *ngIf="!modeArchive" class="btn btn-sm btn-outline-secondary mt-1" 
+                                        title="Archiver cette demande" 
+                                        (click)="archiver(d.id)">
+                                    <i class="bi bi-archive"></i> Archiver
+                                </button>
+                                
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="demandesFiltrees.length === 0">
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-ban"></i> Aucune demande ne correspond à vos filtres dans cette vue.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm border-primary" *ngIf="demandeEnCoursDApprobation">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Approbation de la demande #{{ demandeEnCoursDApprobation.id }}</h5>
+    </div>
+    <div class="card-body">
+        <p>Vous allez valider l'inscription de <strong>{{ demandeEnCoursDApprobation.prenom }} {{ demandeEnCoursDApprobation.nom }}</strong>.</p>
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Rôle accordé :</label>
+                <select class="form-select" [(ngModel)]="formApprobation.roleAccorde">
+                    <option value="">-- Sélectionner un rôle --</option>
+                    <option *ngFor="let r of listeRoles" [value]="r">{{ r }}</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Affecter à un groupe :</label>
+                <select class="form-select" [(ngModel)]="formApprobation.groupeId">
+                    <option [ngValue]="null">-- Aucun groupe (Optionnel) --</option>
+                    <option *ngFor="let g of groupes" [value]="g.id">{{ g.nomGroupes }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button class="btn btn-light me-2" (click)="annulerApprobation()">Annuler</button>
+            <button class="btn btn-success" 
+                    [disabled]="!formApprobation.roleAccorde" 
+                    (click)="confirmerApprobation()">
+                Confirmer l'inscription
+            </button>
+        </div>
+    </div>
+</div>

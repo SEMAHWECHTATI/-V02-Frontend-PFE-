@@ -112,7 +112,9 @@ onSubmit() {
     next: (reponseBackend) => {
       // console.log("Succès ! Réponse du backend :", reponseBackend);
       this.chargement = false;
-      this.succes = "Votre demande a été envoyée avec succès à l'administrateur.";
+      // 1. Affiche l'alerte (le code s'arrête ici tant qu'on ne clique pas sur OK)
+      alert("Votre demande a été envoyée avec succès à l'administrateur.");
+      this.router.navigate(['/login']);
     },
     error: (err) => {
       console.error("Erreur capturée par Angular :", err);
