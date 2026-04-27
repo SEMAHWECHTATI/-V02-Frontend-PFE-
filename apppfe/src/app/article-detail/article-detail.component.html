@@ -1,0 +1,179 @@
+<div class="detail-container" *ngIf="article; else loading">
+
+  <button class="btn-back" (click)="retour()">
+    <i class="bi bi-arrow-left"></i> Retour
+  </button>
+
+  <div class="detail-card">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="header-left">
+        <h2>{{ article.designation }}</h2>
+        <p class="reference">{{ article.reference }}</p>
+      </div>
+      <div class="header-right">
+        <span class="status-badge" [style.background-color]="getStatusColor(article.statut)">
+          {{ article.statut }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="detail-content">
+
+      <!-- Colonne gauche -->
+      <div class="detail-main">
+
+        <!-- Description -->
+        <section class="info-section">
+          <h3>📝 Description</h3>
+          <p class="description">{{ article.description || 'Aucune description' }}</p>
+        </section>
+
+        <!-- Spécifications -->
+        <section class="info-section">
+          <h3>⚙️ Spécifications</h3>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <label>Type</label>
+              <span>{{ article.typeArticle }}</span>
+            </div>
+            <div class="spec-item">
+              <label>Code-barres</label>
+              <span>{{ article.codeBarres || '-' }}</span>
+            </div>
+            <div class="spec-item">
+              <label>Fournisseur</label>
+              <span>{{ article.fournisseur || '-' }}</span>
+            </div>
+            <div class="spec-item">
+              <label>Localisation</label>
+              <span>{{ article.localisationLabel || '-' }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stock -->
+        <section class="info-section">
+          <h3>📦 Gestion du Stock</h3>
+          
+          <div class="stock-info">
+            <div class="stock-item">
+              <label>Quantité en stock</label>
+              <div class="stock-value">
+                {{ article.quantiteEnStock }}
+              </div>
+              <div class="stock-bar">
+                <div class="stock-fill" [style.width.%]="getStockPercentage()"></div>
+              </div>
+            </div>
+
+            <div class="stock-thresholds">
+              <div class="threshold">
+                <label>Seuil minimum</label>
+                <span class="value warning">{{ article.seuilMinimum }}</span>
+              </div>
+              <div class="threshold">
+                <label>Seuil critique</label>
+                <span class="value critical">{{ article.seuilCritique }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Financier -->
+        <section class="info-section">
+          <h3>💰 Informations Financières</h3>
+          <div class="financial-grid">
+            <div class="financial-item">
+              <label>Prix unitaire</label>
+              <span class="value">{{ article.prixUnitaire | number:'1.2-2' }} €</span>
+            </div>
+            <div class="financial-item">
+              <label>Valeur totale</label>
+              <span class="value highlight">{{ article.valeurTotal | number:'1.2-2' }} €</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dates -->
+        <section class="info-section">
+          <h3>📅 Historique</h3>
+          <div class="dates-grid">
+            
+            <!-- Date d'achat -->
+            <div class="date-item">
+              <label>Date d'achat</label>
+              <span>{{ getFormattedDateAchat() }}</span>
+            </div>
+
+            <!-- Garantie -->
+            <div class="date-item">
+              <label>Garantie jusqu'au</label>
+              <span>{{ getFormattedDateGarantie() }}</span>
+            </div>
+
+            <!-- Créé le -->
+            <div class="date-item">
+              <label>Créé le</label>
+              <span>{{ getFormattedDateCreation() }}</span>
+            </div>
+
+            <!-- Modifié le -->
+            <div class="date-item">
+              <label>Modifié le</label>
+              <span>{{ getFormattedDateModification() }}</span>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Colonne droite - Actions -->
+      <div class="detail-actions">
+        <div class="actions-card">
+          <h4>⚡ Actions rapides</h4>
+          <button class="action-btn primary">
+            <i class="bi bi-pencil"></i>
+            Modifier
+          </button>
+          <button class="action-btn secondary">
+            <i class="bi bi-arrow-down-circle"></i>
+            Réduire stock
+          </button>
+          <button class="action-btn secondary">
+            <i class="bi bi-arrow-up-circle"></i>
+            Augmenter stock
+          </button>
+          <button class="action-btn danger">
+            <i class="bi bi-trash"></i>
+            Archiver
+          </button>
+        </div>
+
+        <!-- Statut Summary -->
+        <div class="summary-card">
+          <h4>📊 Résumé</h4>
+          <div class="summary-item">
+            <span>État du stock</span>
+            <span [class]="getStockStatusClass()">
+              {{ getStockStatus() }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<ng-template #loading>
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+</ng-template>

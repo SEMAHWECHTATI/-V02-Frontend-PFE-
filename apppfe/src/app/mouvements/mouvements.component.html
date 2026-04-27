@@ -1,0 +1,151 @@
+<div class="mouvements-container">
+
+  <div class="mouvements-header">
+    <h2>🔄 Enregistrer un Mouvement</h2>
+    <p>Gérer les entrées, sorties et transferts de stock</p>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="messageSucces" class="alert alert-success">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ messageSucces }}
+  </div>
+
+  <div *ngIf="messageErreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ messageErreur }}
+  </div>
+
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mouvements-form">
+
+    <div class="form-section">
+      <h3>📋 Type de Mouvement</h3>
+
+      <div class="movement-types">
+        <button *ngFor="let type of typesMovement"
+                type="button"
+                (click)="form.get('typeMovement')?.setValue(type)"
+                [class.active]="form.get('typeMovement')?.value === type"
+                class="type-btn"
+                [style.border-left-color]="getTypeColor(type)">
+          <i class="bi" [ngClass]="
+            type === 'ENTREE' ? 'bi-arrow-down-circle' :
+            type === 'SORTIE' ? 'bi-arrow-up-circle' :
+            type === 'TRANSFERT' ? 'bi-arrow-left-right' :
+            type === 'PRET' ? 'bi-box-seam' :
+            type === 'RETOUR' ? 'bi-box-arrow-left' :
+            type === 'CONSOMMATION' ? 'bi-wrench' :
+            'bi-sliders'
+          "></i>
+          <span>{{ typeLabels[type] }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>📦 Article et Quantité</h3>
+
+      <div class="form-row">
+        <!-- Article -->
+        <div class="form-group">
+          <label for="articleId">
+            <i class="bi bi-box2-heart"></i> Article *
+          </label>
+          <select 
+            id="articleId"
+            formControlName="articleId"
+            [class.is-invalid]="isFieldInvalid('articleId')">
+            <option value="">-- Sélectionner un article --</option>
+            <option *ngFor="let article of articles" [value]="article.id">
+              {{ article.reference }} - {{ article.designation }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Quantité -->
+        <div class="form-group">
+          <label for="quantite">
+            <i class="bi bi-boxes"></i> Quantité *
+          </label>
+          <input 
+            type="number" 
+            id="quantite"
+            formControlName="quantite"
+            placeholder="0"
+            [class.is-invalid]="isFieldInvalid('quantite')">
+        </div>
+      </div>
+    </div>
+
+    <!-- Affichage conditionnel pour TRANSFERT -->
+    <div *ngIf="form.get('typeMovement')?.value === 'TRANSFERT'" class="form-section">
+      <h3>📍 Localisations</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="locSource">Localisation source *</label>
+          <input 
+            type="text" 
+            id="locSource"
+            formControlName="localisationSource"
+            placeholder="Bureau A - Étage 2">
+        </div>
+
+        <div class="form-group">
+          <label for="locDest">Localisation destination *</label>
+          <input 
+            type="text" 
+            id="locDest"
+            formControlName="localisationDestination"
+            placeholder="Bureau B - Étage 3">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>💬 Justification</h3>
+
+      <div class="form-group">
+        <label for="justification">
+          <i class="bi bi-chat-left-text"></i> Justification *
+        </label>
+        <textarea 
+          id="justification"
+          formControlName="justification"
+          placeholder="Motif du mouvement..."
+          rows="4"
+          [class.is-invalid]="isFieldInvalid('justification')"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>🎫 Informations supplémentaires</h3>
+
+      <div class="form-group">
+        <label for="referenceTicket">
+          <i class="bi bi-ticket"></i> Référence Ticket (optionnel)
+        </label>
+        <input 
+          type="text" 
+          id="referenceTicket"
+          formControlName="referenceTicket"
+          placeholder="TICKET-12345">
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="chargement || form.invalid">
+        <i class="bi bi-check-lg"></i>
+        {{ chargement ? 'Enregistrement...' : 'Enregistrer le mouvement' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="form.reset()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Réinitialiser
+      </button>
+    </div>
+
+  </form>
+
+</div>

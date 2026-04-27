@@ -99,3 +99,86 @@ textarea.form-control {
 small.form-text i {
   margin-right: 0.25rem;
 }
+.category-card:hover {
+  transform: translateY(-5px) !important;
+  border-color: #0d6efd; /* Couleur bleue Bootstrap (Primary) */
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+/* ============== DROP ZONE ============== */
+.drop-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.drop-zone:hover {
+  border-color: #0d6efd;
+  background: #f0f6ff;
+}
+
+.drop-zone.drag-over {
+  border-color: #0d6efd;
+  background: #cfe2ff;
+  transform: scale(1.02);
+}
+
+.drop-zone i {
+  color: #0d6efd;
+}
+
+.drop-zone p {
+  margin: 0;
+  color: #6c757d;
+}
+
+/* ============== LISTE FICHIERS ============== */
+.list-group-item {
+  padding: 12px 15px !important;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* ============== CATÉGORIES ============== */
+.category-card {
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.category-card:hover {
+  border-color: #0d6efd;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.15) !important;
+}
+
+/* ============== CARD HEADER ============== */
+.card-header.bg-gradient {
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%) !important;
+}
+
+/* ============== ALERT ============== */
+.alert {
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.alert-success {
+  border-color: #d1e7dd;
+  background-color: #d1e7dd;
+}
+
+.alert-danger {
+  border-color: #f8d7da;
+  background-color: #f8d7da;
+}
+
+.alert-info {
+  border-color: #cfe2ff;
+  background-color: #cfe2ff;
+}

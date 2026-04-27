@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../services/api.service';
 import { Categorie, Priorite, TicketCreateDTO } from '../Model/Entity';
 import { Router, RouterModule } from '@angular/router';
+import { TicketService } from '../services/ticket.service';
+import { CategorieService } from '../services/categorie.service';
 
 @Component({
   selector: 'app-create-ticket-page',
@@ -21,8 +22,15 @@ export class CreateTicketPageComponent implements OnInit {
   errorMessage = '';
   currentUser: any = null;
 
-  // ✅ Stocker la catégorie sélectionnée
+  // ✅ VARIABLES PIÈCES JOINTES
+  selectedFiles: File[] = [];
+  draggedOver = false;
+  maxFileSize = 5 * 1024 * 1024; // 5MB
+  allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip'];
+
   selectedCategorie: Categorie | null = null;
+  etapeActive: number = 1;
+  categorieChoisie: any = null;
 
   prioriteOptions = [
     { label: '🟢 Basse', value: Priorite.Basse },
@@ -33,7 +41,8 @@ export class CreateTicketPageComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService,
+    private ticketservice: TicketService,
+    private categorieservice: CategorieService,
     private router: Router
   ) {}
 
@@ -55,12 +64,9 @@ export class CreateTicketPageComponent implements OnInit {
     if (userStr) {
       try {
         let user = JSON.parse(userStr);
-        
-        // ✅ Vérifier si c'est un double parsing
         if (typeof user === 'string') {
           user = JSON.parse(user);
         }
-        
         this.currentUser = user;
         console.log('✅ Utilisateur chargé:', {
           id: this.currentUser.id,
@@ -68,11 +74,8 @@ export class CreateTicketPageComponent implements OnInit {
         });
       } catch (error) {
         console.error('❌ Erreur parsing utilisateur:', error);
-        this.errorMessage = 'Erreur lors du chargement de vos informations. Veuillez vous reconnecter.';
+        this.errorMessage = 'Erreur lors du chargement de vos informations.';
       }
-    } else {
-      console.warn('⚠️ Utilisateur non trouvé');
-      this.errorMessage = 'Veuillez vous connecter d\'abord';
     }
   }
 
@@ -82,41 +85,23 @@ export class CreateTicketPageComponent implements OnInit {
   private loadCategories(): void {
     console.log('📋 Chargement des catégories');
 
-    this.apiService.getCategories().subscribe({
+    this.categorieservice.getCategories().subscribe({
       next: (res: any) => {
-        console.log('📊 Réponse API categories:', res);
-
-        // ✅ CORRECTION: Gérer différentes structures de réponse
         if (Array.isArray(res)) {
-          // Si c'est un tableau directement
           this.categories = res;
         } else if (res && res.categories && Array.isArray(res.categories)) {
-          // Si c'est { total, categories }
           this.categories = res.categories;
         } else if (res && res.data && Array.isArray(res.data)) {
-          // Si c'est { data }
           this.categories = res.data;
         } else {
           this.categories = [];
-          console.warn('⚠️ Structure inattendue:', res);
         }
 
-        console.log('✅ Catégories chargées:', {
-          count: this.categories.length,
-          categories: this.categories.map((c: any) => ({
-            id: c.idCategorie,
-            nom: c.nomCategorie
-          }))
-        });
+        console.log('✅ Catégories chargées:', this.categories.length);
       },
       error: (err) => {
-        console.error('❌ Erreur catégories:', {
-          status: err.status,
-          message: err.message,
-          error: err.error
-        });
-        
-        this.errorMessage = 'Erreur lors du chargement des catégories. Veuillez rafraîchir la page.';
+        console.error('❌ Erreur catégories:', err);
+        this.errorMessage = 'Erreur lors du chargement des catégories.';
       }
     });
   }
@@ -125,8 +110,6 @@ export class CreateTicketPageComponent implements OnInit {
    * 📝 Créer le formulaire réactif
    */
   private createForm(): void {
-    console.log('📝 Création du formulaire');
-
     this.form = this.fb.group({
       titre: ['', [Validators.required, Validators.minLength(5)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
@@ -134,20 +117,15 @@ export class CreateTicketPageComponent implements OnInit {
       categorieId: ['', Validators.required]
     });
 
-    // ✅ Écouter les changements de catégorie
     this.form.get('categorieId')?.valueChanges.subscribe((categorieId: any) => {
       this.onCategorieChange(categorieId);
     });
-
-    console.log('✅ Formulaire créé');
   }
 
   /**
    * 🎯 Quand la catégorie change
    */
   onCategorieChange(categorieId: any): void {
-    console.log('🎯 Changement de catégorie:', categorieId);
-    
     if (!categorieId) {
       this.selectedCategorie = null;
       return;
@@ -155,13 +133,110 @@ export class CreateTicketPageComponent implements OnInit {
 
     const id = Number(categorieId);
     this.selectedCategorie = this.categories.find(c => c.idCategorie === id) || null;
+  }
 
-    if (this.selectedCategorie) {
-      console.log('📍 Catégorie sélectionnée:', {
-        nom: this.selectedCategorie.nomCategorie,
-        groupe: this.selectedCategorie.groupeResponsable?.nomGroupes
-      });
+  // ==================== GESTION DES FICHIERS ====================
+
+  /**
+   * 📎 Sélectionner des fichiers via input
+   */
+  onFileSelected(event: any): void {
+    const files = event.target.files;
+    this.addFiles(files);
+  }
+
+  /**
+   * 📎 Ajouter des fichiers
+   */
+  private addFiles(files: FileList): void {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const error = this.validateFile(file);
+
+      if (error) {
+        this.errorMessage = error;
+        return;
+      }
+
+      // ✅ Vérifier si le fichier n'est pas déjà ajouté
+      if (!this.selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        this.selectedFiles.push(file);
+        console.log('✅ Fichier ajouté:', file.name);
+      }
     }
+
+    this.errorMessage = '';
+  }
+
+  /**
+   * ✅ Valider un fichier
+   */
+  private validateFile(file: File): string {
+    // Vérifier la taille
+    if (file.size > this.maxFileSize) {
+      return `❌ Le fichier "${file.name}" dépasse 5MB`;
+    }
+
+    // Vérifier l'extension
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (!extension || !this.allowedExtensions.includes(extension)) {
+      return `❌ Type de fichier non autorisé: ${extension}`;
+    }
+
+    return '';
+  }
+
+  /**
+   * 🗑️ Supprimer un fichier
+   */
+  removeFile(index: number): void {
+    const fileName = this.selectedFiles[index].name;
+    this.selectedFiles.splice(index, 1);
+    console.log('🗑️ Fichier supprimé:', fileName);
+  }
+
+  /**
+   * 📥 Drag and Drop - Fichier entrant
+   */
+  onDragOver(event: any): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.draggedOver = true;
+  }
+
+  /**
+   * 📤 Drag and Drop - Fichier quittant
+   */
+  onDragLeave(event: any): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.draggedOver = false;
+  }
+
+  /**
+   * 📥 Drag and Drop - Fichier déposé
+   */
+  onDrop(event: any): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.draggedOver = false;
+
+    const files = event.dataTransfer.files;
+    this.addFiles(files);
+  }
+
+  /**
+   * 📊 Obtenir la taille totale des fichiers
+   */
+  getTotalFileSize(): number {
+    return this.selectedFiles.reduce((total, file) => total + file.size, 0);
+  }
+
+  /**
+   * 📊 Formater la taille en MB
+   */
+  formatFileSize(bytes: number): string {
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   }
 
   /**
@@ -170,16 +245,13 @@ export class CreateTicketPageComponent implements OnInit {
   onSubmit(): void {
     console.log('📤 Soumission du formulaire');
 
-    // ✅ Validations
     if (!this.form.valid) {
-      console.warn('⚠️ Formulaire invalide');
-      this.errorMessage = 'Veuillez remplir tous les champs requis correctement';
+      this.errorMessage = 'Veuillez remplir tous les champs requis';
       this.form.markAllAsTouched();
       return;
     }
 
     if (!this.currentUser || !this.currentUser.id) {
-      console.warn('⚠️ Utilisateur non connecté');
       this.errorMessage = 'Veuillez vous connecter d\'abord';
       return;
     }
@@ -193,13 +265,11 @@ export class CreateTicketPageComponent implements OnInit {
     const categorie = this.categories.find(c => c.idCategorie === categorieId);
 
     if (!categorie) {
-      console.error('❌ Catégorie invalide:', categorieId);
-      this.errorMessage = 'Catégorie invalide. Veuillez sélectionner une catégorie valide.';
+      this.errorMessage = 'Catégorie invalide';
       this.isLoading = false;
       return;
     }
 
-    // ✅ Construire le DTO du ticket
     const ticketData: TicketCreateDTO = {
       titre: formValue.titre.trim(),
       description: formValue.description.trim(),
@@ -208,54 +278,110 @@ export class CreateTicketPageComponent implements OnInit {
       groupeId: categorie.groupeResponsable?.id || 0
     };
 
-    console.log('📝 Données du ticket:', {
-      titre: ticketData.titre,
-      priorite: ticketData.priorite,
-      categorie: categorie.nomCategorie,
-      groupe: categorie.groupeResponsable?.nomGroupes,
-      demandeur: `${this.currentUser.prenom} ${this.currentUser.nom}`
-    });
-
-    // ✅ Appel API
-    this.apiService.creerTicket(ticketData, categorieId).subscribe({
+    // ✅ CRÉER LE TICKET D'ABORD
+    this.ticketservice.creerTicket(ticketData, categorieId).subscribe({
       next: (res: any) => {
-        console.log('✅ Ticket créé avec succès:', {
-          idTicket: res.idTicket,
-          reference: res.reference,
-          statut: res.statut
-        });
+        console.log('✅ Ticket créé:', res.idTicket);
 
-                  this.successMessage = `✅ Ticket créé avec succès !
-          Référence: ${res.reference}
-          Catégorie: ${categorie.nomCategorie}
-          Statut: ${res.statut}`;
-
-        // ✅ Réinitialiser le formulaire
-        this.form.reset();
-        this.form.patchValue({ priorite: Priorite.Moyenne });
-        this.selectedCategorie = null;
-        this.isLoading = false;
-
-        // ✅ Rediriger après 2 secondes
-        console.log('🔄 Redirection vers le ticket créé...');
-        setTimeout(() => {
-          this.router.navigate(['/index']);
-        }, 2000);
+        // ✅ PUIS UPLOADER LES FICHIERS
+        if (this.selectedFiles.length > 0) {
+          this.uploadFiles(res.idTicket);
+        } else {
+          this.afficherSucces(res, categorie);
+        }
       },
       error: (err) => {
-        console.error('❌ Erreur lors de la création du ticket:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.error?.message || err.message,
-          error: err.error?.error
-        });
-
-        this.errorMessage = err.error?.error || 
-                           err.error?.message || 
-                           'Erreur lors de la création du ticket. Veuillez réessayer.';
+        console.error('❌ Erreur création ticket:', err);
+        this.errorMessage = err.error?.error || 'Erreur lors de la création du ticket';
         this.isLoading = false;
       }
     });
+  }
+
+ /**
+ * 📎 Uploader les fichiers
+ */
+private uploadFiles(idTicket: number): void {
+  console.log(`📎 Upload de ${this.selectedFiles.length} fichier(s)`);
+
+  let uploadedCount = 0;
+  let errorCount = 0;
+
+  this.selectedFiles.forEach((file, index) => {
+    // ✅ PASSER L'ID UTILISATEUR
+    this.ticketservice.uploadPieceJointe(
+      idTicket, 
+      file, 
+      this.currentUser.id  // ✅ AJOUTER L'ID UTILISATEUR
+    ).subscribe({
+      next: (res) => {
+        uploadedCount++;
+        console.log(`✅ Fichier ${index + 1}/${this.selectedFiles.length} uploadé:`, file.name);
+        console.log('📎 Pièce jointe créée:', res.data);
+
+        if (uploadedCount + errorCount === this.selectedFiles.length) {
+          this.finalisationCreation(idTicket, uploadedCount, errorCount);
+        }
+      },
+      error: (err) => {
+        errorCount++;
+        console.error(`❌ Erreur upload fichier ${index + 1}:`, file.name, err);
+
+        if (uploadedCount + errorCount === this.selectedFiles.length) {
+          this.finalisationCreation(idTicket, uploadedCount, errorCount);
+        }
+      }
+    });
+  });
+}
+
+  /**
+   * ✅ Finalisation après création + upload
+   */
+  private finalisationCreation(idTicket: number, uploadedCount: number, errorCount: number): void {
+    const categorie = this.categories.find(c => c.idCategorie === this.form.get('categorieId')?.value);
+
+    let message = `✅ Ticket créé avec succès !
+    Référence: TK-${idTicket}
+    Catégorie: ${categorie?.nomCategorie}`;
+
+    if (uploadedCount > 0) {
+      message += `\n📎 ${uploadedCount} fichier(s) uploadé(s)`;
+    }
+
+    if (errorCount > 0) {
+      message += `\n⚠️ ${errorCount} fichier(s) non uploadé(s)`;
+    }
+
+    this.successMessage = message;
+    this.form.reset();
+    this.selectedFiles = [];
+    this.selectedCategorie = null;
+    this.isLoading = false;
+
+    setTimeout(() => {
+      this.etapeActive = 1;
+      this.categorieChoisie = null;
+    }, 3000);
+  }
+
+  /**
+   * ✅ Afficher le message de succès
+   */
+  private afficherSucces(res: any, categorie: any): void {
+    this.successMessage = `✅ Ticket créé avec succès !
+    Référence: ${res.reference}
+    Catégorie: ${categorie.nomCategorie}`;
+
+    this.form.reset();
+    this.selectedFiles = [];
+    this.selectedCategorie = null;
+    this.isLoading = false;
+
+    setTimeout(() => {
+      this.etapeActive = 1;
+      this.categorieChoisie = null;
+    }, 3000);
   }
 
   /**
@@ -271,51 +397,55 @@ export class CreateTicketPageComponent implements OnInit {
    */
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
-    
-    if (!control || !control.errors) {
-      return '';
-    }
+    if (!control || !control.errors) return '';
 
-    if (control.errors['required']) {
-      return 'Ce champ est requis';
-    }
-
-    if (control.errors['minlength']) {
-      const minLength = control.errors['minlength'].requiredLength;
-      return `Minimum ${minLength} caractères requis`;
-    }
-
-    if (control.errors['maxlength']) {
-      const maxLength = control.errors['maxlength'].requiredLength;
-      return `Maximum ${maxLength} caractères autorisés`;
-    }
+    if (control.errors['required']) return 'Ce champ est requis';
+    if (control.errors['minlength']) return `Minimum ${control.errors['minlength'].requiredLength} caractères`;
+    if (control.errors['maxlength']) return `Maximum ${control.errors['maxlength'].requiredLength} caractères`;
 
     return 'Valeur invalide';
   }
 
   /**
-   * ✅ Obtenir le groupe de la catégorie sélectionnée
+   * ✅ Obtenir le groupe de la catégorie
    */
   getSelectedCategorieGroupe(): string {
     return this.selectedCategorie?.groupeResponsable?.nomGroupes || 'Non défini';
   }
 
   /**
-   * 🔄 Réinitialiser le formulaire
+   * 🔄 Réinitialiser
    */
   resetForm(): void {
-    console.log('🔄 Réinitialisation du formulaire');
     this.form.reset();
-    this.form.patchValue({ priorite: Priorite.Moyenne });
-    this.selectedCategorie = null;
+    this.selectedFiles = [];
     this.errorMessage = '';
     this.successMessage = '';
   }
 
   /**
-   * ✅ Vérifier si on peut soumettre
+   * ✅ Peut soumettre
    */
   canSubmit(): boolean {
     return this.form.valid && this.currentUser && !this.isLoading;
+  }
+
+  /**
+   * 🎯 Sélectionner une catégorie
+   */
+  selectionnerCategorie(cat: any): void {
+    this.categorieChoisie = cat;
+    this.form.patchValue({ categorieId: cat.idCategorie });
+    this.etapeActive = 2;
+  }
+
+  /**
+   * ← Retour aux catégories
+   */
+  retourChoixCategorie(): void {
+    this.etapeActive = 1;
+    this.categorieChoisie = null;
+    this.form.reset();
+    this.selectedFiles = [];
   }
 }

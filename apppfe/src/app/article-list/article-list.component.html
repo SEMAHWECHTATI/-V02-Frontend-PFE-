@@ -1,0 +1,94 @@
+<div class="article-list-container">
+
+  <div class="list-header">
+    <h2>📦 Gestion des Articles</h2>
+    <p>Liste complète de tous les articles de l'inventaire</p>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="search-filter">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input 
+        type="text" 
+        placeholder="Rechercher un article..."
+        [(ngModel)]="searchKeyword"
+        (keyup)="rechercher()">
+    </div>
+
+    <select [(ngModel)]="filtre" (change)="appliquerFiltre()" class="filter-select">
+      <option value="tous">Tous les articles</option>
+      <option value="faible">Stock faible</option>
+      <option value="critique">Stock critique</option>
+    </select>
+  </div>
+
+  <!-- Articles Table -->
+  <div class="articles-table-wrapper" *ngIf="!chargement">
+    <table class="articles-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Désignation</th>
+          <th>Type</th>
+          <th>Quantité</th>
+          <th>Prix Unit.</th>
+          <th>Valeur</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let article of filteredArticles" [class]="'status-' + article.statut">
+          <td><strong>{{ article.reference }}</strong></td>
+          <td>{{ article.designation }}</td>
+          <td><small>{{ article.typeArticle }}</small></td>
+          <td>
+            <span [class]="article.quantiteEnStock <= article.seuilCritique ? 'critical' : article.quantiteEnStock <= article.seuilMinimum ? 'warning' : 'normal'">
+              {{ article.quantiteEnStock }}
+            </span>
+          </td>
+          <td>{{ article.prixUnitaire | number:'1.2-2' }} €</td>
+          <td><strong>{{ article.valeurTotal | number:'1.2-2' }} €</strong></td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + article.statut">
+              {{ article.statut }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-icon" title="Voir détails">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn-icon edit" title="Modifier">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn-icon delete" 
+        title="Archiver" 
+        (click)="article.id && archiver(article.id)"
+        [disabled]="!article.id">
+  <i class="bi bi-trash"></i>
+</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="table-footer">
+      <p>Total: {{ filteredArticles.length }} article(s)</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="chargement" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des articles...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!chargement && filteredArticles.length === 0" class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <h3>Aucun article</h3>
+    <p>Créez votre premier article pour commencer</p>
+  </div>
+
+</div>

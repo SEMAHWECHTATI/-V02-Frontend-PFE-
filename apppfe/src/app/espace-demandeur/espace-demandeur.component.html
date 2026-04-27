@@ -33,6 +33,7 @@
 
 <!-- CONTENU PRINCIPAL -->
 <div class="main-container">
+  
   <!-- WELCOME SECTION -->
   <div class="welcome-section">
     <div class="welcome-content">
@@ -44,6 +45,7 @@
   <!-- ACTION CARDS -->
   <section class="action-section">
     <div class="cards-grid">
+      
       <!-- Card 1: Signaler un problème -->
       <div class="action-card card-primary" 
            [class.active]="vueActuelle === 'creerTicket'"
@@ -60,18 +62,6 @@
         </div>
       </div>
 
-      <!-- Card 2: Demander du Matériel -->
-      <div class="action-card card-disabled">
-        <div class="card-icon">
-          <i class="bi bi-pc-display-horizontal"></i>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">Demander du Matériel</h3>
-          <p class="card-description">Ordinateur, écran, clavier...</p>
-        </div>
-        <div class="coming-soon">Bientôt</div>
-      </div>
-
       <!-- Card 3: Mes Tickets -->
       <div class="action-card card-info"
            [class.active]="vueActuelle === 'mesTickets' || vueActuelle === 'detailTicket'"
@@ -85,6 +75,7 @@
         </div>
         <div class="card-badge">{{ mesTickets.length }}</div>
       </div>
+      
     </div>
   </section>
 
@@ -99,6 +90,7 @@
     </div>
 
     <div class="tickets-container">
+      <!-- État vide -->
       <div *ngIf="mesTickets.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="bi bi-inbox"></i>
@@ -110,6 +102,7 @@
         </button>
       </div>
 
+      <!-- Liste des tickets -->
       <div *ngIf="mesTickets.length > 0" class="tickets-list">
         <div *ngFor="let ticket of mesTickets" 
              class="ticket-card"
@@ -125,7 +118,9 @@
 
           <div class="ticket-body">
             <h4 class="ticket-title">{{ ticket.titre }}</h4>
-            <p class="ticket-description">{{ ticket.description | slice:0:100 }}{{ ticket.description?.length > 100 ? '...' : '' }}</p>
+            <p class="ticket-description">
+              {{ ticket.description | slice:0:100 }}{{ ticket.description?.length > 100 ? '...' : '' }}
+            </p>
           </div>
 
           <div class="ticket-footer">
@@ -166,8 +161,29 @@
         </span>
       </div>
 
+      <!-- ✅ MESSAGES D'ALERTE -->
+      <div *ngIf="messageSucces" class="alert alert-success-modern">
+        <i class="bi bi-check-circle-fill"></i>
+        <div>
+          <p class="alert-title">Succès</p>
+          <p class="alert-message">{{ messageSucces }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="messageErreur" class="alert alert-danger-modern">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <div>
+          <p class="alert-title">Erreur</p>
+          <p class="alert-message">{{ messageErreur }}</p>
+        </div>
+      </div>
+
       <div class="detail-content">
+        
+        <!-- Colonne principale -->
         <div class="detail-main">
+          
+          <!-- Description -->
           <div class="detail-section">
             <h4 class="detail-section-title">Description du problème</h4>
             <div class="detail-description">
@@ -175,18 +191,39 @@
             </div>
           </div>
 
-          <div *ngIf="ticketSelectionne.noteResolution" class="detail-section resolution-section">
+          <!-- ✅ SECTION RÉSOLUTION - Visible si ticket résolu -->
+          <div *ngIf="ticketSelectionne.statut === 'Resolu' || ticketSelectionne.statut === 'Résolu'" 
+               class="detail-section resolution-section">
             <h4 class="detail-section-title">
               <i class="bi bi-check-circle-fill"></i>
               Note de résolution
             </h4>
             <div class="resolution-note">
-              "{{ ticketSelectionne.noteResolution }}"
+              {{ ticketSelectionne.noteResolution }}
+            </div>
+
+            <!-- 🔘 BOUTON CLÔTURER - Visible uniquement si ticket est RÉSOLU -->
+            <div class="resolution-actions">
+              <button 
+                class="btn btn-success btn-lg"
+                (click)="cloturerTicketDemandeur()"
+                [disabled]="enChargement">
+                <i class="bi bi-check-lg"></i>
+                {{ enChargement ? 'Traitement...' : 'Confirmer la résolution et clôturer' }}
+              </button>
+              <p class="action-info">
+                <i class="bi bi-info-circle"></i>
+                En cliquant sur ce bouton, vous confirmez que la solution apportée résout votre problème et le ticket sera définitivement clôturé.
+              </p>
             </div>
           </div>
+
         </div>
 
+        <!-- Colonne latérale -->
         <div class="detail-sidebar">
+          
+          <!-- Info card -->
           <div class="info-card">
             <h5 class="info-title">Informations du ticket</h5>
             <div class="info-group">
@@ -216,9 +253,18 @@
                 </span>
                 <span class="info-value">{{ ticketSelectionne.date | date:'dd/MM/yyyy à HH:mm' }}</span>
               </div>
+
+              <!-- ✅ Afficher la date de clôture si déjà clôturé -->
+              <div class="info-item" *ngIf="ticketSelectionne.statut === 'Cloture' || ticketSelectionne.statut === 'Clôturé'">
+                <span class="info-label">
+                  <i class="bi bi-lock-fill"></i> Clôturé le
+                </span>
+                <span class="info-value">{{ ticketSelectionne.dateResolution || 'Non disponible' | date:'dd/MM/yyyy' }}</span>
+              </div>
             </div>
           </div>
 
+          <!-- Technicien card -->
           <div class="info-card technician-card">
             <h5 class="info-title">Support attribué</h5>
             <div class="technician-info">
@@ -235,7 +281,9 @@
               </div>
             </div>
           </div>
+          
         </div>
+        
       </div>
     </div>
   </div>
@@ -253,4 +301,5 @@
       <app-create-ticket-page></app-create-ticket-page>
     </div>
   </div>
+
 </div>

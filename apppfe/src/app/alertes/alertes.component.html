@@ -1,0 +1,81 @@
+<div class="alertes-container">
+
+  <div class="alertes-header">
+    <h2>⚠️ Gestion des Alertes</h2>
+    <p>Suivi des alertes de stock et d'inventaire</p>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filter-tabs">
+    <button (click)="filtreActif = 'toutes'" 
+            [class.active]="filtreActif === 'toutes'"
+            class="tab-btn">
+      <i class="bi bi-bell"></i>
+      Toutes alertes
+      <span class="count">{{ alertesNonTraitees.length }}</span>
+    </button>
+    <button (click)="filtreActif = 'critiques'" 
+            [class.active]="filtreActif === 'critiques'"
+            class="tab-btn critical">
+      <i class="bi bi-fire"></i>
+      Critiques
+      <span class="count">{{ alertesCritiques.length }}</span>
+    </button>
+  </div>
+
+  <!-- Alertes -->
+  <div *ngIf="!chargement" class="alertes-list">
+    <div *ngIf="getAlertesFiltrees().length === 0" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <h3>Aucune alerte</h3>
+      <p>Tout va bien! Continuez à surveiller votre inventaire.</p>
+    </div>
+
+    <div *ngFor="let alerte of getAlertesFiltrees()" 
+         class="alerte-card"
+         [style.border-left-color]="getSeveriteColor(alerte.severite)">
+      
+      <div class="alerte-header">
+        <div class="alerte-icon" [style.color]="getSeveriteColor(alerte.severite)">
+          <i class="bi" [ngClass]="getSeveriteIcon(alerte.severite)"></i>
+        </div>
+        
+        <div class="alerte-content">
+          <h4>{{ alerte.message }}</h4>
+          <p class="alerte-type">{{ alerte.type }}</p>
+        </div>
+
+        <div class="alerte-actions">
+          <button class="action-btn view" title="Marquer comme lue"
+                  (click)="marquerCommeLue(alerte.id)">
+            <i class="bi bi-eye"></i>
+          </button>
+          <button class="action-btn check" title="Marquer comme traitée"
+                  (click)="marquerCommeTraitee(alerte.id)">
+            <i class="bi bi-check-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="alerte-footer">
+        <span class="badge-severite" [style.background-color]="getSeveriteColor(alerte.severite)">
+          {{ alerte.severite }}
+        </span>
+        <span class="badge-statut">
+          {{ alerte.statut }}
+        </span>
+        <span class="date">
+          {{ alerte.dateCreation | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="chargement" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des alertes...</p>
+  </div>
+
+</div>

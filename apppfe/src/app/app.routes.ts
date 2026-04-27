@@ -14,22 +14,41 @@ import { EspaceDemandeurComponent } from './espace-demandeur/espace-demandeur.co
 import { CreateGroupeComponent } from './create-groupe/create-groupe.component';
 import { CreateTicketPageComponent } from './create-ticket-page/create-ticket-page.component';
 import { adminGuardGuard } from './guards/admin-guard.guard';
+import { InterfaceTechniceienComponent } from './interface-techniceien/interface-techniceien.component';
+import { technicienGuard } from './guards/technicien.guard';
+import { demandeurGuard } from './guards/demandeur.guard';
+import { TicketDetailComponent } from './ticket-detail/ticket-detail.component';
+import { roleGuard } from './guards/role-guard.guard';
+import { authGuardGuard } from './guards/auth-guard.guard';
+import { GestionnaireStockComponent } from './gestionnaire-stock/gestionnaire-stock.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' }, // page par défaut
-  { path: 'login', component: AuthentificationComponent },
-  { path: 'utilisateurs', component: UtilisateurComponent },
-  { path: 'changer-mdp', component: ChangerMdpComponent },
+{ path: '', redirectTo: 'login', pathMatch: 'full' }, 
+  
+  // 🟢 ROUTES PUBLIQUES (Pas besoin d'être connecté/admin)
+  { path: 'login', component: AuthentificationComponent ,},
   { path: 'demandeInscription', component: DemandeInscriptionComponent },
-  { path: 'index', component: InterfaceAdministrateurComponent },
-  { path: 'tab_Inscrip', component: GererDemandeInscriComponent },
   { path: 'mot-de-passe-oublie', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'creerTicket', component: CreateTicketPageComponent },
-  { path: 'create-categorie', component: CreateCategorieComponent },
-  {path: 'enumeration', component: EnumerationComponent},
-  {path: 'liste-tickets', component:ListeTicketsComponent },
-  {path: 'espace-demandeur', component: EspaceDemandeurComponent, canActivate: [adminGuardGuard]},
-  { path: 'create-groupe', component: CreateGroupeComponent },
-  { path: '**', redirectTo: 'login' } // page 404 → redirection
+  { path: 'changer-mdp', component: ChangerMdpComponent },
+
+  // 🔵 ROUTES UTILISATEUR NORMAL (Demandeur)
+  // (Vous pourriez créer un 'userGuard' plus tard pour vérifier qu'ils sont juste connectés)
+  { path: 'espace-demandeur', component: EspaceDemandeurComponent },
+  { path: 'creerTicket', component: CreateTicketPageComponent},
+
+  // 🔴 ROUTES ADMINISTRATEUR (Sécurisées par adminGuardGuard)
+  { path: 'index', component: InterfaceAdministrateurComponent, canActivate: [authGuardGuard, roleGuard(['Administrateur'])]},
+  { path: 'utilisateurs', component: UtilisateurComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] },
+  { path: 'tab_Inscrip', component: GererDemandeInscriComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] },
+  { path: 'create-categorie', component: CreateCategorieComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] },
+  { path: 'create-groupe', component: CreateGroupeComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] },
+  { path: 'enumeration', component: EnumerationComponent  , canActivate: [authGuardGuard, roleGuard(['Administrateur'])]},
+  { path: 'liste-tickets', component: ListeTicketsComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] }, // À voir si les demandeurs voient aussi cette liste ou que les admins
+  { path: 'technicien', component: InterfaceTechniceienComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur','Technicien'])]},
+  { path: 'ticket-detail/:id', component: TicketDetailComponent , canActivate: [authGuardGuard, roleGuard(['Administrateur'])] },
+  { path: 'gestionnaire-stock', component: GestionnaireStockComponent, canActivate: [authGuardGuard, roleGuard(['Administrateur','Gestionnaire_Stock'])] },
+
+  // page 404 → redirection
+  { path: '**', redirectTo: 'login' }
 ];

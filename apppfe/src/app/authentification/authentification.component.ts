@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormGroup, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginRequest, Utilisateur } from '../Model/Entity';
-import { ApiService } from '../services/api.service';
+import { AuthServiceService } from '../services/auth-service.service';
 
 @Component({
   selector: 'app-authentification',
@@ -25,7 +25,7 @@ export class AuthentificationComponent {
   succes = '';
   showPassword = false;
 
-  constructor(private router: Router, private authent: ApiService) {}
+  constructor(private router: Router, private authent: AuthServiceService) {}
 
   onSubmit() {
     if (!this.email || !this.motDePasse) {
@@ -49,11 +49,11 @@ export class AuthentificationComponent {
           console.log('📡 Réponse login:', utilisateurConnecte);
           console.log('📍 Groupes:', utilisateurConnecte.groupes);
 
-          // 💾 Sauvegarder l'utilisateur AVEC les groupes
+          // 💾 Sauvegarder l'utilisateur AVEC les groupes ET LE TOKEN
           this.sauvegarderUtilisateur(utilisateurConnecte);
 
           this.message = 'Connexion réussie';
-          console.log('✅ Utilisateur sauvegardé');
+          console.log('✅ Utilisateur et Token sauvegardés');
 
           // 🔀 Redirection selon le rôle
           this.redirigerSelonRole(utilisateurConnecte);
@@ -67,7 +67,7 @@ export class AuthentificationComponent {
   }
 
   /**
-   * Sauvegarde l'utilisateur dans le localStorage
+   * Sauvegarde l'utilisateur ET le token dans le localStorage
    */
   private sauvegarderUtilisateur(utilisateur: any): void {
     const utilisateurAuCache = {
@@ -91,7 +91,15 @@ export class AuthentificationComponent {
       groupes: utilisateurAuCache.groupes.map((g: any) => g.nomGroupes)
     });
 
+    // 1️⃣ On sauvegarde l'objet complet pour l'affichage de l'interface
     localStorage.setItem('utilisateurConnecte', JSON.stringify(utilisateurAuCache));
+
+    // 2️⃣ LA CORRECTION EST ICI : On sauvegarde le token à part pour les Guards !
+    if (utilisateur.token) {
+      localStorage.setItem('token', utilisateur.token);
+    } else {
+      console.warn("⚠️ Attention : Aucun token n'a été reçu du backend !");
+    }
   }
 
   /**
@@ -100,14 +108,21 @@ export class AuthentificationComponent {
   private redirigerSelonRole(utilisateur: any): void {
     const role = utilisateur.role?.toLowerCase() || '';
 
-    console.log('🔀 Redirection:', role);
+    console.log('🔀 Redirection vers espace:', role);
 
     if (role === 'demandeur') {
       this.router.navigate(['/espace-demandeur']);
-    } else if (role === 'administrateur' || role === 'technicien'  || role === 'gestionnaire_stock') {
+    } else if (role === 'administrateur' ) {
       this.router.navigate(['/index']);
-   
-  
-}
+    } else if (role === 'technicien') {
+      this.router.navigate(['/technicien']);
+    } else if (role === 'gestionnaire_stock' || role === 'gestionnaire_stock') {
+      this.router.navigate(['/gestionnaire-stock']);
+    } 
+    
+    else {
+      console.error("❌ Rôle inconnu, impossible de rediriger :", role);
+      this.chargement = false;
+    }
   }
 }

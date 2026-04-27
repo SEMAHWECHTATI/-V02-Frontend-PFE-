@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApprobationDTO, DemandeReponseDTO, Groupe } from '../Model/Entity';
-import { ApiService } from '../services/api.service';
+import { EnumerationService } from '../services/enumeration.service';
+import { DemandeService } from '../services/demande.service';
+import { GroupeService } from '../services/groupe.service';
 @Component({
   selector: 'app-gerer-demande-inscri',
   standalone: true,
@@ -25,7 +27,11 @@ export class GererDemandeInscriComponent implements OnInit {
   demandeEnCoursDApprobation: DemandeReponseDTO | null = null;
   formApprobation: ApprobationDTO = { roleAccorde: '', groupeId: null };
 
-  constructor(private apiService: ApiService) {}
+  constructor(private enumservice: EnumerationService,
+    private demandeservice: DemandeService,
+    private groupeservice: GroupeService
+
+  ) {}
 
   ngOnInit(): void {
     this.chargerDemandes();
@@ -36,7 +42,7 @@ export class GererDemandeInscriComponent implements OnInit {
 
   }
    chargerDepartements() {
-    this.apiService.getDepartements().subscribe({
+    this.enumservice.getDepartements().subscribe({
       next: (donnees) => {
         this.listedepartement = donnees; // On remplit notre tableau
         // console.log("Départements récupérés depuis la BDD :", this.listedepartement);
@@ -47,7 +53,7 @@ export class GererDemandeInscriComponent implements OnInit {
     });
   }
  chargerRole() {
-    this.apiService.getRoles().subscribe({
+    this.enumservice.getRoles().subscribe({
       next: (donnees) => {
         this.listeRoles = donnees; // On remplit notre tableau
         // console.log("Rôles récupérés depuis la BDD :", this.listeRoles);
@@ -59,12 +65,12 @@ export class GererDemandeInscriComponent implements OnInit {
   }
   chargerDemandes(): void {
     if (this.modeArchive) {
-      this.apiService.getDemandesArchivees().subscribe({
+      this.demandeservice.getDemandesArchivees().subscribe({
         next: (data) => this.demandes = data,
         error: (err) => console.error('Erreur chargement archives', err)
       });
     } else {
-      this.apiService.getDemandesActives().subscribe({
+      this.demandeservice.getDemandesActives().subscribe({
         next: (data) => this.demandes = data,
         error: (err) => console.error('Erreur chargement demandes actives', err)
       });
@@ -78,7 +84,7 @@ export class GererDemandeInscriComponent implements OnInit {
   // NOUVEAU : Méthode pour archiver une demande
   archiver(id: number): void {
     if (confirm('Voulez-vous vraiment archiver cette demande ?')) {
-      this.apiService.archiverDemande(id).subscribe({
+      this.demandeservice.archiverDemande(id).subscribe({
         next: () => {
           alert("La demande a été archivée avec succès !");
           this.chargerDemandes(); // Fait disparaître la demande de la liste active
@@ -89,7 +95,7 @@ export class GererDemandeInscriComponent implements OnInit {
   }
 
   chargerGroupes(): void {
-    this.apiService.getGroupes().subscribe({
+    this.groupeservice.getGroupes().subscribe({
       next: (data) => this.groupes = data,
       error: (err) => console.error('Erreur chargement groupes', err)
     });
@@ -104,7 +110,7 @@ export class GererDemandeInscriComponent implements OnInit {
       return; 
     }
 
-    this.apiService.refuserDemande(demande.id, motif).subscribe({
+    this.demandeservice.refuserDemande(demande.id, motif).subscribe({
       next: (message) => {
         alert(message); // Affiche "La demande a été refusée."
         this.chargerDemandes(); // On recharge le tableau
@@ -143,7 +149,7 @@ export class GererDemandeInscriComponent implements OnInit {
       return;
     }
 
-    this.apiService.approuverDemande(this.demandeEnCoursDApprobation.id, this.formApprobation).subscribe({
+    this.demandeservice.approuverDemande(this.demandeEnCoursDApprobation.id, this.formApprobation).subscribe({
       next: (message) => {
         alert("Succès : " + message);
         // this.demandeEnCoursDApprobation = null; // Ferme le panneau

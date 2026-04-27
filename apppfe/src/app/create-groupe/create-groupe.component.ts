@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../services/api.service';
 import { Router } from '@angular/router';
+import { GroupeService } from '../services/groupe.service';
 
 interface GroupeType {
   code: string;
@@ -67,8 +68,9 @@ export class CreateGroupeComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService,
-    private router: Router
+    private groupeservice: GroupeService,
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object  // ✅ Injection requise
   ) {}
 
   ngOnInit(): void {
@@ -78,27 +80,36 @@ export class CreateGroupeComponent implements OnInit {
     this.chargerGroupesExistants();
   }
 
+  /**
+   * ✅ Charge l'utilisateur depuis localStorage (browser uniquement)
+   */
   private chargerUtilisateur(): void {
-    const userStr = localStorage.getItem('utilisateurConnecte');
-    
-    if (userStr) {
-      try {
+    // ✅ Vérifier si on est en mode browser AVANT d'accéder à localStorage
+    if (!isPlatformBrowser(this.platformId)) {
+      console.warn('⚠️ SSR détecté - localStorage indisponible');
+      this.isLoading = false;
+      return;
+    }
+
+    try {
+      const userStr = localStorage.getItem('utilisateurConnecte');
+      
+      if (userStr) {
         this.currentUser = JSON.parse(userStr);
         console.log('👤 Utilisateur:', this.currentUser.prenom, this.currentUser.nom);
         
+        // Vérifier les droits d'accès
         if (this.currentUser.role.toLowerCase() !== 'administrateur' && 
             this.currentUser.role.toLowerCase() !== 'admin') {
           this.errorMessage = '❌ Vous n\'avez pas la permission de gérer les groupes (Admin requis)';
-          this.isLoading = false;
-        } else {
-          this.isLoading = false;
         }
-      } catch (error) {
-        console.error('❌ Erreur:', error);
-        this.isLoading = false;
+      } else {
+        this.errorMessage = '⚠️ Veuillez vous connecter';
       }
-    } else {
-      this.errorMessage = 'Veuillez vous connecter';
+    } catch (error) {
+      console.error('❌ Erreur parsing utilisateur:', error);
+      this.errorMessage = '❌ Erreur chargement profil utilisateur';
+    } finally {
       this.isLoading = false;
     }
   }
@@ -111,13 +122,14 @@ export class CreateGroupeComponent implements OnInit {
   }
 
   private chargerGroupesExistants(): void {
-    this.apiService.getGroupes().subscribe({
+    this.groupeservice.getGroupes().subscribe({
       next: (res: any[]) => {
         this.groupes = res;
         console.log('📚 Groupes existants:', res.length);
       },
       error: (err) => {
         console.error('❌ Erreur chargement groupes:', err);
+        this.errorMessage = 'Erreur lors du chargement des groupes';
       }
     });
   }
@@ -180,7 +192,7 @@ export class CreateGroupeComponent implements OnInit {
 
     console.log('📤 Création:', groupeData);
 
-    this.apiService.creerGroupe(groupeData).subscribe({
+    this.groupeservice.creerGroupe(groupeData).subscribe({
       next: (res: any) => {
         this.successMessage = `✅ Groupe créé : ${selectedType.label}`;
         this.groupeForm.reset();
@@ -220,7 +232,7 @@ export class CreateGroupeComponent implements OnInit {
 
     console.log('🗑️ Suppression:', groupeId);
 
-    this.apiService.supprimerGroupe(groupeId).subscribe({
+    this.groupeservice.supprimerGroupe(groupeId).subscribe({
       next: (res: any) => {
         this.successMessage = `✅ Groupe "${groupeName}" supprimé !`;
         this.isDeleting = false;

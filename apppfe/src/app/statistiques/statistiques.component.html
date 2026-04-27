@@ -1,0 +1,128 @@
+<div class="statistiques-container">
+
+  <div class="statistiques-header">
+    <h2>📊 Statistiques Inventaire</h2>
+    <p>Vue d'ensemble complète de votre inventaire IT</p>
+  </div>
+
+  <div *ngIf="!chargement" class="stats-content">
+
+    <!-- Cartes principales -->
+    <div class="main-stats">
+      <div class="stat-card primary">
+        <div class="stat-icon">
+          <i class="bi bi-box2-heart"></i>
+        </div>
+        <div class="stat-content">
+          <h3>Total Articles</h3>
+          <p class="stat-value">{{ stats.totalArticles }}</p>
+          <small>Nombre d'articles en inventaire</small>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <div class="stat-icon">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div class="stat-content">
+          <h3>Valeur Totale</h3>
+          <p class="stat-value">{{ stats.valeurTotale | number:'1.2-2' }} €</p>
+          <small>Valeur financière inventaire</small>
+        </div>
+      </div>
+
+      <div class="stat-card info">
+        <div class="stat-icon">
+          <i class="bi bi-boxes"></i>
+        </div>
+        <div class="stat-content">
+          <h3>Quantité Totale</h3>
+          <p class="stat-value">{{ stats.quantiteTotale }}</p>
+          <small>Nombre d'unités en stock</small>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>Stock Faible</h3>
+          <p class="stat-value">{{ stats.stockFaible }}</p>
+          <small>{{ calculatePercentage(stats.stockFaible, stats.totalArticles) }}% du total</small>
+        </div>
+      </div>
+
+      <div class="stat-card danger">
+        <div class="stat-icon">
+          <i class="bi bi-fire"></i>
+        </div>
+        <div class="stat-content">
+          <h3>Stock Critique</h3>
+          <p class="stat-value">{{ stats.stockCritique }}</p>
+          <small>{{ calculatePercentage(stats.stockCritique, stats.totalArticles) }}% du total</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphiques et rapports -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <h3>📈 Répartition du Stock</h3>
+        <div class="chart-placeholder">
+          <p>Graphique en secteurs (À intégrer avec ng2-charts)</p>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>📊 Valeur par Type</h3>
+        <div class="chart-placeholder">
+          <p>Graphique en barres (À intégrer avec ng2-charts)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau récapitulatif -->
+    <div class="summary-table">
+      <h3>📋 Récapitulatif</h3>
+      <table>
+        <tbody>
+          <tr>
+            <td>Articles en stock</td>
+            <td class="value">{{ stats.totalArticles }}</td>
+          </tr>
+          <tr>
+            <td>Quantité totale</td>
+            <td class="value">{{ stats.quantiteTotale }} unités</td>
+          </tr>
+          <tr>
+            <td>Valeur d'inventaire</td>
+            <td class="value highlight">{{ stats.valeurTotale | number:'1.2-2' }} €</td>
+          </tr>
+          <tr>
+            <td>Articles stock faible</td>
+            <td class="value warning">{{ stats.stockFaible }}</td>
+          </tr>
+          <tr>
+            <td>Articles stock critique</td>
+            <td class="value danger">{{ stats.stockCritique }}</td>
+          </tr>
+          <tr>
+            <td>Taux de disponibilité</td>
+            <td class="value">
+              {{ (((stats.totalArticles - stats.stockCritique) / stats.totalArticles) * 100) | number:'1.0-0' }}%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="chargement" class="loading">
+    <div class="spinner"></div>
+    <p>Calcul des statistiques...</p>
+  </div>
+
+</div>

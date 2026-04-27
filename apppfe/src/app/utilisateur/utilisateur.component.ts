@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Utilisateur } from '../Model/Entity';
-import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UtilisateurService } from '../services/utilisateur.service';
 
 @Component({
   selector: 'app-utilisateur',
@@ -25,7 +25,7 @@ export class UtilisateurComponent implements OnInit{
   texteRecherche: string = '';
   dateRecherche: string = '';
 
-  constructor(private utilisateurService: ApiService) {}
+  constructor(private utilisateurService: UtilisateurService) {}
 
   ngOnInit(): void {
     this.chargerUtilisateurs();

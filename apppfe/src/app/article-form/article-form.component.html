@@ -1,0 +1,269 @@
+<div class="article-form-container">
+
+  <div class="form-header">
+    <h2>➕ Créer un Nouvel Article</h2>
+    <p>Ajouter un équipement ou consommable à votre inventaire</p>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="messageSucces" class="alert alert-success">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ messageSucces }}
+  </div>
+  
+  <div *ngIf="articleCree" class="qr-code-container" style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #0d6efd;">
+    <h4>🏷️ Étiquette générée</h4>
+    
+    <qrcode 
+      [qrdata]="articleCree.reference" 
+      [width]="150" 
+      [errorCorrectionLevel]="'M'"
+      [elementType]="'img'">
+    </qrcode>
+    
+    <p style="font-size: 1.2rem; margin-top: 10px;"><strong>{{ articleCree.reference }}</strong></p>
+    
+    <button type="button" class="btn btn-primary" (click)="imprimerEtiquette()">
+      <i class="bi bi-printer"></i> Imprimer l'étiquette
+    </button>
+  </div>
+
+  <div *ngIf="messageErreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ messageErreur }}
+  </div>
+
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="article-form">
+
+    <div class="form-section">
+      <h3>📋 Informations de base</h3>
+
+      <!-- Référence -->
+      <div class="form-group">
+        <label for="reference">
+          <i class="bi bi-tag"></i> Référence *
+        </label>
+        <input 
+          type="text" 
+          id="reference"
+          formControlName="reference"
+          placeholder="EX: ARTICLE-001"
+          [class.is-invalid]="isFieldInvalid('reference')">
+        <small class="error" *ngIf="isFieldInvalid('reference')">
+          {{ getFieldError('reference') }}
+        </small>
+      </div>
+
+      <!-- Désignation -->
+      <div class="form-group">
+        <label for="designation">
+          <i class="bi bi-text-left"></i> Désignation *
+        </label>
+        <input 
+          type="text" 
+          id="designation"
+          formControlName="designation"
+          placeholder="Nom de l'article"
+          [class.is-invalid]="isFieldInvalid('designation')">
+        <small class="error" *ngIf="isFieldInvalid('designation')">
+          {{ getFieldError('designation') }}
+        </small>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">
+          <i class="bi bi-file-text"></i> Description
+        </label>
+        <textarea 
+          id="description"
+          formControlName="description"
+          placeholder="Description complète"
+          rows="4"></textarea>
+      </div>
+
+      <!-- Code-barres -->
+     <div class="form-group">
+        <label for="codeBarres">
+          <i class="bi bi-barcode"></i> Code-barres
+        </label>
+        <div class="input-group" style="display: flex; gap: 10px;">
+          <input 
+            type="text" 
+            id="codeBarres"
+            #codeBarresInput
+            formControlName="codeBarres"
+            placeholder="Cliquez ici ou sur le bouton puis scannez"
+            style="flex: 1;">
+          
+          <button type="button" class="btn btn-outline-secondary" (click)="codeBarresInput.focus()" title="Préparer le lecteur">
+            <i class="bi bi-upc-scan"></i> Scanner
+          </button>
+        </div>
+      </div>
+    </div>
+      
+
+    <div class="form-section">
+      <h3>⚙️ Classification</h3>
+
+      <div class="form-row">
+        <!-- Type Article -->
+        <div class="form-group">
+          <label for="typeArticle">
+            <i class="bi bi-boxes"></i> Type d'article *
+          </label>
+          <select 
+            id="typeArticle"
+            formControlName="typeArticle"
+            [class.is-invalid]="isFieldInvalid('typeArticle')">
+            <option *ngFor="let type of typeArticles" [value]="type">
+              {{ typeArticleLabels[type] }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Statut -->
+        <div class="form-group">
+          <label for="statut">
+            <i class="bi bi-check-circle"></i> Statut *
+          </label>
+          <select 
+            id="statut"
+            formControlName="statut"
+            [class.is-invalid]="isFieldInvalid('statut')">
+            <option *ngFor="let statut of statutArticles" [value]="statut">
+              {{ statutArticleLabels[statut] }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>💰 Informations financières</h3>
+
+      <div class="form-row">
+        <!-- Prix Unitaire -->
+        <div class="form-group">
+          <label for="prixUnitaire">
+            <i class="bi bi-cash-coin"></i> Prix unitaire (€) *
+          </label>
+          <input 
+            type="number" 
+            id="prixUnitaire"
+            formControlName="prixUnitaire"
+            placeholder="0.00"
+            step="0.01"
+            [class.is-invalid]="isFieldInvalid('prixUnitaire')">
+          <small class="error" *ngIf="isFieldInvalid('prixUnitaire')">
+            {{ getFieldError('prixUnitaire') }}
+          </small>
+        </div>
+
+        <!-- Fournisseur -->
+        <div class="form-group">
+          <label for="fournisseur">
+            <i class="bi bi-building"></i> Fournisseur
+          </label>
+          <input 
+            type="text" 
+            id="fournisseur"
+            formControlName="fournisseur"
+            placeholder="Nom du fournisseur">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>📦 Gestion des stocks</h3>
+
+      <div class="form-row">
+        <!-- Quantité -->
+        <div class="form-group">
+          <label for="quantiteEnStock">
+            <i class="bi bi-boxes"></i> Quantité en stock *
+          </label>
+          <input 
+            type="number" 
+            id="quantiteEnStock"
+            formControlName="quantiteEnStock"
+            placeholder="0"
+            [class.is-invalid]="isFieldInvalid('quantiteEnStock')">
+          <small class="error" *ngIf="isFieldInvalid('quantiteEnStock')">
+            {{ getFieldError('quantiteEnStock') }}
+          </small>
+        </div>
+
+        <!-- Seuil Minimum -->
+        <div class="form-group">
+          <label for="seuilMinimum">
+            <i class="bi bi-exclamation-triangle"></i> Seuil minimum *
+          </label>
+          <input 
+            type="number" 
+            id="seuilMinimum"
+            formControlName="seuilMinimum"
+            placeholder="5"
+            [class.is-invalid]="isFieldInvalid('seuilMinimum')">
+        </div>
+
+        <!-- Seuil Critique -->
+        <div class="form-group">
+          <label for="seuilCritique">
+            <i class="bi bi-fire"></i> Seuil critique *
+          </label>
+          <input 
+            type="number" 
+            id="seuilCritique"
+            formControlName="seuilCritique"
+            placeholder="2"
+            [class.is-invalid]="isFieldInvalid('seuilCritique')">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>📅 Dates importantes</h3>
+
+      <div class="form-row">
+        <!-- Date d'achat -->
+        <div class="form-group">
+          <label for="dateAchat">
+            <i class="bi bi-calendar"></i> Date d'achat
+          </label>
+          <input 
+            type="date" 
+            id="dateAchat"
+            formControlName="dateAchat">
+        </div>
+
+        <!-- Date de garantie -->
+        <div class="form-group">
+          <label for="dateGarantie">
+            <i class="bi bi-shield-check"></i> Date de garantie
+          </label>
+          <input 
+            type="date" 
+            id="dateGarantie"
+            formControlName="dateGarantie">
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="chargement">
+        <i class="bi bi-check-lg"></i>
+        {{ chargement ? 'Création en cours...' : 'Créer l\'article' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="chargement">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Réinitialiser
+      </button>
+    </div>
+
+  </form>
+
+</div>

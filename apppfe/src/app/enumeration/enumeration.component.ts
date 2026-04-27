@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
+import { EnumerationService } from '../services/enumeration.service';
 
 @Component({
   selector: 'app-enumeration',
@@ -26,7 +26,7 @@ export class EnumerationComponent implements OnInit {
   StatutTicketListe: string[] = [];
   TypeNoteListe: string[] = [];
   TypeTicketListe: string[] = [];
-  constructor(private fb: FormBuilder, private apiService: ApiService) {
+  constructor(private fb: FormBuilder, private enumservice: EnumerationService) {
     this.monFormulaire = this.fb.group({
       role: [''],
       departement: ['']
@@ -35,61 +35,61 @@ export class EnumerationComponent implements OnInit {
 
   ngOnInit(): void {
   // 1. Rôles
-    this.apiService.getRoles().subscribe({
+    this.enumservice.getRoles().subscribe({
       next: (data) => this.rolesListe = data,
       error: (err) => console.error('Erreur rôles:', err)
     });
 
     // 2. Départements
-    this.apiService.getDepartements().subscribe({
+    this.enumservice.getDepartements().subscribe({
       next: (data) => this.departementsListe = data,
       error: (err) => console.error('Erreur départements:', err)
     });
 
     // 3. Actions Audit
-    this.apiService.getActionAudit().subscribe({
+    this.enumservice.getActionAudit().subscribe({
       next: (data) => this.actionAuditListe = data,
       error: (err) => console.error('Erreur action audit:', err)
     });
 
     // 4. Groupes Technicien
-    this.apiService.getGroupeTechnicien().subscribe({
+    this.enumservice.getGroupeTechnicien().subscribe({
       next: (data) => this.groupeTechnicienListe = data,
       error: (err) => console.error('Erreur groupe technicien:', err)
     });
 
     // 5. Statuts Demande Inscription
-    this.apiService.getStatutDemandeInscri().subscribe({
+    this.enumservice.getStatutDemandeInscri().subscribe({
       next: (data) => this.statutDemandeInscriListe = data,
       error: (err) => console.error('Erreur statut demande:', err)
     });
 
     // 6. Types Alerte
-    this.apiService.getTypeAlerte().subscribe({
+    this.enumservice.getTypeAlerte().subscribe({
       next: (data) => this.typeAlerteListe = data,
       error: (err) => console.error('Erreur type alerte:', err)
     });
 
     // 7. Statuts Utilisateur
-    this.apiService.getStatutUtilisateur().subscribe({
+    this.enumservice.getStatutUtilisateur().subscribe({
       next: (data) => this.statutUtilisateurListe = data,
       error: (err) => console.error('Erreur statut utilisateur:', err)
     });
-    this.apiService.getPriorite().subscribe({
+    this.enumservice.getPriorite().subscribe({
       next: (data) => this.prioriteListe = data,
       error: (err) => console.error('Erreur statut priorité:', err)
     });
 
-     this.apiService.getStatutTicket().subscribe({
+     this.enumservice.getStatutTicket().subscribe({
       next: (data) => this.StatutTicketListe = data,
       error: (err) => console.error('Erreur statut ticket:', err)
     });
 
-    this.apiService.getTypeNote().subscribe({
+    this.enumservice.getTypeNote().subscribe({
       next: (data) => this.TypeNoteListe = data,
       error: (err) => console.error('Erreur statut TypeNote:', err)
     });
-    this.apiService.getTypeTicket().subscribe({
+    this.enumservice.getTypeTicket().subscribe({
       next: (data) => this.TypeTicketListe = data,
       error: (err) => console.error('Erreur statut TypeTicket:', err)
     });

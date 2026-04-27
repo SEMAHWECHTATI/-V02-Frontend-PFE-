@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DemandeCreationDTO } from '../Model/Entity';
-import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DemandeService } from '../services/demande.service';
+import { GroupeService } from '../services/groupe.service';
+import { EnumerationService } from '../services/enumeration.service';
 
     @Component({
         selector: 'app-demande-inscription',
@@ -14,8 +16,10 @@ import { ActivatedRoute, Router } from '@angular/router';
          })
         export class DemandeInscriptionComponent implements OnInit {
 
-      constructor(  private authent: ApiService,
+      constructor(  private demandeservice: DemandeService,
+        private groupeservice: GroupeService,
       private router: Router,
+      private enumservice:EnumerationService,
       private route: ActivatedRoute){}
     // On initialise l'objet basé sur le DTO
      demande: DemandeCreationDTO = {
@@ -47,7 +51,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
   // 👇 3. On appelle le service pour remplir le tableau
   chargerGroupes() {
-    this.authent.getGroupes().subscribe({
+    this.groupeservice.getGroupes().subscribe({
       next: (donnees) => {
         this.listeGroupes = donnees; // On remplit notre tableau
         // console.log("Groupes récupérés depuis la BDD :", this.listeGroupes);
@@ -58,7 +62,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     });
   }
   chargerRole() {
-    this.authent.getRoles().subscribe({
+    this.enumservice.getRoles().subscribe({
       next: (donnees) => {
         this.listeRoles = donnees; // On remplit notre tableau
         // console.log("Rôles récupérés depuis la BDD :", this.listeRoles);
@@ -69,7 +73,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     });
   }
    chargerDepartements() {
-    this.authent.getDepartements().subscribe({
+    this.enumservice.getDepartements().subscribe({
       next: (donnees) => {
         this.listedepartement = donnees; // On remplit notre tableau
         // console.log("Départements récupérés depuis la BDD :", this.listedepartement);
@@ -108,7 +112,7 @@ onSubmit() {
   // console.log('Données reformatées envoyées au backend :', payloadAEnvoyer);
 
   // 2. ENVOI DES DONNÉES FORMATÉES (On utilise 'as any' pour contourner le blocage TypeScript)
-  this.authent.envoyerDemande(payloadAEnvoyer as any).subscribe({
+  this.demandeservice.envoyerDemande(payloadAEnvoyer as any).subscribe({
     next: (reponseBackend) => {
       // console.log("Succès ! Réponse du backend :", reponseBackend);
       this.chargement = false;

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthServiceService } from '../services/auth-service.service';
 
 @Component({
   selector: 'app-changer-mdp',
@@ -19,7 +19,7 @@ export class ChangerMdpComponent {
   chargement: boolean = false;
 
   constructor(
-    private authent: ApiService,
+    private authent: AuthServiceService,
     private router: Router,
     private route: ActivatedRoute
   ) {

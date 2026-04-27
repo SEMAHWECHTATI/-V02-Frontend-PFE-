@@ -1,0 +1,274 @@
+<div class="app-container">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <i class="bi bi-tools"></i>
+        <h5>GITI-KPI</h5>
+      </div>
+      <small *ngIf="user" class="user-info">{{ user.prenom }} {{ user.nom }}</small>
+    </div>
+
+    <nav class="menu">
+      <button 
+        (click)="changerVue('dashboard')" 
+        [class.active]="vueActuelle==='dashboard'"
+        class="menu-btn">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </button>
+
+      <button 
+        (click)="changerVue('liste-tickets')" 
+        [class.active]="vueActuelle==='liste-tickets'"
+        class="menu-btn position-relative">
+        <i class="bi bi-list-task"></i>
+        <span>Tickets</span>
+        <span *ngIf="stats.nouveaux > 0" class="notification-badge">
+          {{ stats.nouveaux }}
+        </span>
+      </button>
+
+      <button 
+        (click)="changerVue('creerTicket')" 
+        [class.active]="vueActuelle==='creerTicket'"
+        class="menu-btn">
+        <i class="bi bi-plus-circle"></i>
+        <span>Nouveau Ticket</span>
+      </button>
+    </nav>
+
+    <button class="logout-btn" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Déconnexion</span>
+    </button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <h2 class="page-title">
+          <span *ngIf="vueActuelle === 'dashboard'">📊 Dashboard</span>
+          <span *ngIf="vueActuelle === 'liste-tickets'">📋 Mes Tickets</span>
+          <span *ngIf="vueActuelle === 'creerTicket'">➕ Nouveau Ticket</span>
+          <span *ngIf="vueActuelle === 'ticket-detail'">🔍 Détail du Ticket</span>
+        </h2>
+      </div>
+      <div class="top-bar-right">
+        <div class="user-profile" *ngIf="user">
+          <div class="avatar">
+            {{ user.prenom?.[0] }}{{ user.nom?.[0] }}
+          </div>
+          <div class="profile-info">
+            <p class="name">{{ user.prenom }} {{ user.nom }}</p>
+            <p class="role">👨‍💼 Technicien</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div class="dashboard-view" *ngIf="vueActuelle === 'dashboard'">
+      
+      <!-- KPI CARDS -->
+      <section class="kpi-section">
+        <div class="section-header">
+          <h3>📈 Vue d'ensemble</h3>
+          <p class="section-subtitle">Statistiques en temps réel</p>
+        </div>
+        
+        <div class="kpi-grid">
+          
+          <!-- Total Tickets -->
+          <div class="kpi-card card-primary" (click)="voirTicketsFiltres('Tous')">
+            <div class="kpi-icon">
+              <i class="bi bi-ticket-perforated"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">Total Tickets</p>
+              <h4 class="kpi-value">{{ stats.total }}</h4>
+              <span class="kpi-change">Tous les tickets</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+
+          <!-- Nouveaux -->
+          <div class="kpi-card card-danger" (click)="voirTicketsFiltres('Nouveau')">
+            <div class="kpi-icon">
+              <i class="bi bi-exclamation-circle-fill"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">Nouveaux</p>
+              <h4 class="kpi-value">{{ stats.nouveaux }}</h4>
+              <span class="kpi-change">À traiter</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+
+          <!-- En Cours -->
+          <div class="kpi-card card-warning" (click)="voirTicketsFiltres('En_Cours')">
+            <div class="kpi-icon">
+              <i class="bi bi-gear-wide-connected"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">En Cours</p>
+              <h4 class="kpi-value">{{ stats.enCours }}</h4>
+              <span class="kpi-change">En traitement</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+
+          <!-- En Attente -->
+          <div class="kpi-card card-info" (click)="voirTicketsFiltres('En_Attente')">
+            <div class="kpi-icon">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">En Attente</p>
+              <h4 class="kpi-value">{{ stats.enAttente }}</h4>
+              <span class="kpi-change">En attente de réponse</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+
+          <!-- Résolus -->
+          <div class="kpi-card card-success" (click)="voirTicketsFiltres('Resolu')">
+            <div class="kpi-icon">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">Résolus/Clôturés</p>
+              <h4 class="kpi-value">{{ stats.resolus }}</h4>
+              <span class="kpi-change">Tickets finalisés</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+
+          <!-- Taux de Résolution -->
+          <div class="kpi-card card-secondary">
+            <div class="kpi-icon">
+              <i class="bi bi-percent"></i>
+            </div>
+            <div class="kpi-content">
+              <p class="kpi-label">Taux de Résolution</p>
+              <h4 class="kpi-value">{{ getTauxResolution() }}%</h4>
+              <span class="kpi-change">Performance</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHARTS SECTION -->
+      <section class="charts-section">
+        <div class="section-header">
+          <h3>📊 Analyse Détaillée</h3>
+          <p class="section-subtitle">Visualisation des données</p>
+        </div>
+
+        <div class="charts-grid">
+          
+          <!-- Graphe Statut -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h5 class="chart-title">
+                <i class="bi bi-pie-chart-fill"></i> Répartition par Statut
+              </h5>
+              <p class="chart-subtitle">Distribution de vos tickets</p>
+            </div>
+            <div class="chart-body">
+              <div class="canvas-container">
+                <canvas baseChart 
+                  [data]="chartStatutData" 
+                  [options]="chartOptions" 
+                  [type]="chartStatutType">
+                </canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Graphe Priorité -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h5 class="chart-title">
+                <i class="bi bi-bar-chart-fill"></i> Volume par Priorité
+              </h5>
+              <p class="chart-subtitle">Tickets classés par urgence</p>
+            </div>
+            <div class="chart-body">
+              <div class="canvas-container">
+                <canvas baseChart 
+                  [data]="chartPrioriteData" 
+                  [options]="chartOptions" 
+                  [type]="chartPrioriteType">
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK STATS -->
+      <section class="quick-stats">
+        <div class="stat-row">
+          <div class="stat-item">
+            <div class="stat-icon primary">
+              <i class="bi bi-lightning-fill"></i>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Tickets Urgents</p>
+              <h5 class="stat-number">{{ getTicketsUrgents() }}</h5>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon success">
+              <i class="bi bi-check-double"></i>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Résolus Aujourd'hui</p>
+              <h5 class="stat-number">{{ getResolvedToday() }}</h5>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon warning">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Temps Moyen</p>
+              <h5 class="stat-number">2.5h</h5>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- AUTRES VUES -->
+    <div class="content-view" *ngIf="vueActuelle !== 'dashboard'">
+      <div class="view-content">
+        <app-liste-tickets *ngIf="vueActuelle==='liste-tickets'" [filtreStatut]="filtreSelectionne"></app-liste-tickets>
+        <app-create-ticket-page *ngIf="vueActuelle==='creerTicket'"></app-create-ticket-page>
+        <app-ticket-detail *ngIf="vueActuelle==='ticket-detail'"></app-ticket-detail>
+      </div>
+    </div>
+
+  </main>
+
+</div>
