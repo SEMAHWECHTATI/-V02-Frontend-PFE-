@@ -28,6 +28,32 @@ export class CreateGroupeComponent implements OnInit {
   isLoading = true;
   showDeleteModal = false;
   selectedGroupeToDelete: any = null;
+  selectedIcon = '';
+
+  iconsDisponibles: string[] = [
+    'bi-wifi',
+    'bi-tools',
+    'bi-diagram-2',
+    'bi-box-seam',
+    'bi-person-check',
+    'bi-shield-lock',
+    'bi-hdd-network',
+    'bi-pc-display',
+    'bi-server',
+    'bi-database',
+    'bi-gear',
+    'bi-cloud',
+    'bi-laptop',
+    'bi-cpu',
+    'bi-router'
+  ];
+
+  newType: GroupeType = {
+    code: '',
+    label: '',
+    icon: '',
+    description: ''
+  };
 
   typeGroupes: GroupeType[] = [
     {
@@ -59,7 +85,8 @@ export class CreateGroupeComponent implements OnInit {
       label: 'Demandeur',
       icon: 'bi-person-check',
       description: 'Utilisateurs qui demandent des services/matériel'
-    }
+    },
+    
   ];
 
   currentUser: any = null;
@@ -70,13 +97,13 @@ export class CreateGroupeComponent implements OnInit {
     private fb: FormBuilder,
     private groupeservice: GroupeService,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object  // ✅ Injection requise
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
     console.log('🚀 Initialisation du composant CreateGroupe');
-    this.chargerUtilisateur();
     this.creerFormulaire();
+    this.chargerUtilisateur();
     this.chargerGroupesExistants();
   }
 
@@ -84,7 +111,6 @@ export class CreateGroupeComponent implements OnInit {
    * ✅ Charge l'utilisateur depuis localStorage (browser uniquement)
    */
   private chargerUtilisateur(): void {
-    // ✅ Vérifier si on est en mode browser AVANT d'accéder à localStorage
     if (!isPlatformBrowser(this.platformId)) {
       console.warn('⚠️ SSR détecté - localStorage indisponible');
       this.isLoading = false;
@@ -93,18 +119,19 @@ export class CreateGroupeComponent implements OnInit {
 
     try {
       const userStr = localStorage.getItem('utilisateurConnecte');
-      
+
       if (userStr) {
         this.currentUser = JSON.parse(userStr);
         console.log('👤 Utilisateur:', this.currentUser.prenom, this.currentUser.nom);
-        
-        // Vérifier les droits d'accès
-        if (this.currentUser.role.toLowerCase() !== 'administrateur' && 
-            this.currentUser.role.toLowerCase() !== 'admin') {
+
+        const roleNormalize = this.currentUser.role?.toLowerCase() || '';
+        if (roleNormalize !== 'administrateur' && roleNormalize !== 'admin') {
           this.errorMessage = '❌ Vous n\'avez pas la permission de gérer les groupes (Admin requis)';
+          console.warn('⚠️ Accès refusé - rôle:', this.currentUser.role);
         }
       } else {
         this.errorMessage = '⚠️ Veuillez vous connecter';
+        console.warn('⚠️ Aucun utilisateur trouvé en localStorage');
       }
     } catch (error) {
       console.error('❌ Erreur parsing utilisateur:', error);
@@ -117,19 +144,23 @@ export class CreateGroupeComponent implements OnInit {
   private creerFormulaire(): void {
     this.groupeForm = this.fb.group({
       nomGroupes: ['', Validators.required],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+      description: [
+        '',
+        [Validators.required, Validators.minLength(10), Validators.maxLength(500)]
+      ]
     });
   }
 
   private chargerGroupesExistants(): void {
     this.groupeservice.getGroupes().subscribe({
-      next: (res: any[]) => {
-        this.groupes = res;
-        console.log('📚 Groupes existants:', res.length);
+      next: (res: any[] | any) => {
+        this.groupes = Array.isArray(res) ? res : res.data || [];
+        console.log('📚 Groupes existants:', this.groupes.length);
       },
       error: (err) => {
         console.error('❌ Erreur chargement groupes:', err);
         this.errorMessage = 'Erreur lors du chargement des groupes';
+        this.groupes = [];
       }
     });
   }
@@ -143,19 +174,32 @@ export class CreateGroupeComponent implements OnInit {
     const control = this.groupeForm.get(fieldName);
     if (!control || !control.errors) return '';
     if (control.errors['required']) return 'Ce champ est requis';
-    if (control.errors['minlength']) return `Minimum ${control.errors['minlength'].requiredLength} caractères`;
-    if (control.errors['maxlength']) return `Maximum ${control.errors['maxlength'].requiredLength} caractères`;
+    if (control.errors['minlength'])
+      return `Minimum ${control.errors['minlength'].requiredLength} caractères`;
+    if (control.errors['maxlength'])
+      return `Maximum ${control.errors['maxlength'].requiredLength} caractères`;
     return 'Valeur invalide';
   }
 
   selecterType(index: number): void {
+    if (index < 0 || index >= this.typeGroupes.length) {
+      console.warn('⚠️ Index invalide:', index);
+      return;
+    }
+    
     this.selectedTypeIndex = index;
-    this.groupeForm.patchValue({ nomGroupes: this.typeGroupes[index].code });
+    this.groupeForm.patchValue({
+      nomGroupes: this.typeGroupes[index].code
+    });
+    this.groupeForm.get('description')?.reset();
+    this.groupeForm.get('description')?.markAsUntouched();
     console.log('📌 Type sélectionné:', this.typeGroupes[index].label);
   }
 
   getTypeSelected(): GroupeType | null {
-    return this.selectedTypeIndex >= 0 ? this.typeGroupes[this.selectedTypeIndex] : null;
+    return this.selectedTypeIndex >= 0 && this.selectedTypeIndex < this.typeGroupes.length
+      ? this.typeGroupes[this.selectedTypeIndex]
+      : null;
   }
 
   getTypeColor(index: number): string {
@@ -167,12 +211,17 @@ export class CreateGroupeComponent implements OnInit {
     return this.groupes.some(g => g.nomGroupes === code);
   }
 
+  selectIcon(icon: string): void {
+    this.selectedIcon = icon;
+    this.newType.icon = icon;
+  }
+
   onSubmit(): void {
     if (!this.groupeForm.valid) {
       Object.keys(this.groupeForm.controls).forEach(key => {
         this.groupeForm.get(key)?.markAsTouched();
       });
-      this.errorMessage = 'Veuillez remplir tous les champs';
+      this.errorMessage = 'Veuillez remplir tous les champs correctement';
       return;
     }
 
@@ -185,9 +234,15 @@ export class CreateGroupeComponent implements OnInit {
       return;
     }
 
+    if (this.isTypeAlreadyCreated(selectedType.code)) {
+      this.errorMessage = `Ce groupe (${selectedType.label}) existe déjà`;
+      this.isSubmitting = false;
+      return;
+    }
+
     const groupeData = {
       nomGroupes: selectedType.code,
-      description: this.groupeForm.value.description.trim()
+      description: this.groupeForm.value.description?.trim() || ''
     };
 
     console.log('📤 Création:', groupeData);
@@ -200,16 +255,70 @@ export class CreateGroupeComponent implements OnInit {
         this.isSubmitting = false;
         this.chargerGroupesExistants();
 
-        setTimeout(() => this.successMessage = '', 3000);
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 4000);
       },
       error: (err) => {
-        this.errorMessage = `❌ Erreur: ${err.error?.erreur || 'Erreur serveur'}`;
+        const errorMsg = err.error?.erreur || err.error?.message || 'Erreur serveur';
+        this.errorMessage = `❌ Erreur: ${errorMsg}`;
         this.isSubmitting = false;
+        console.error('Détail erreur:', err);
       }
     });
   }
 
+  ajouterTypeGroupe(): void {
+    const trimmedCode = this.newType.code?.trim() || '';
+    const trimmedLabel = this.newType.label?.trim() || '';
+    const trimmedDescription = this.newType.description?.trim() || '';
+
+    if (!trimmedCode || !trimmedLabel || !this.newType.icon || !trimmedDescription) {
+      this.errorMessage = 'Veuillez remplir tous les champs du nouveau type';
+      return;
+    }
+
+    if (trimmedDescription.length < 10) {
+      this.errorMessage = 'La description doit contenir au minimum 10 caractères';
+      return;
+    }
+
+    const existe = this.typeGroupes.some(
+      t => t.code.toUpperCase() === trimmedCode.toUpperCase()
+    );
+
+    if (existe) {
+      this.errorMessage = 'Ce code existe déjà';
+      return;
+    }
+
+    this.typeGroupes.push({
+      code: trimmedCode,
+      label: trimmedLabel,
+      icon: this.newType.icon,
+      description: trimmedDescription
+    });
+
+    this.successMessage = `✅ Nouveau type "${trimmedLabel}" ajouté`;
+
+    this.newType = {
+      code: '',
+      label: '',
+      icon: '',
+      description: ''
+    };
+    this.selectedIcon = '';
+
+    setTimeout(() => {
+      this.successMessage = '';
+    }, 3000);
+  }
+
   openDeleteModal(groupe: any): void {
+    if (!groupe || !groupe.id) {
+      console.warn('⚠️ Groupe invalide:', groupe);
+      return;
+    }
     this.selectedGroupeToDelete = groupe;
     this.showDeleteModal = true;
     console.log('🗑️ Modal suppression:', groupe.nomGroupes);
@@ -230,7 +339,7 @@ export class CreateGroupeComponent implements OnInit {
     const groupeId = this.selectedGroupeToDelete.id;
     const groupeName = this.selectedGroupeToDelete.nomGroupes;
 
-    console.log('🗑️ Suppression:', groupeId);
+    console.log('🗑️ Suppression groupe ID:', groupeId);
 
     this.groupeservice.supprimerGroupe(groupeId).subscribe({
       next: (res: any) => {
@@ -239,11 +348,15 @@ export class CreateGroupeComponent implements OnInit {
         this.closeDeleteModal();
         this.chargerGroupesExistants();
 
-        setTimeout(() => this.successMessage = '', 3000);
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
       },
       error: (err) => {
-        this.errorMessage = `❌ ${err.error?.erreur || 'Erreur suppression'}`;
+        const errorMsg = err.error?.erreur || err.error?.message || 'Erreur suppression';
+        this.errorMessage = `❌ ${errorMsg}`;
         this.isDeleting = false;
+        console.error('Détail erreur suppression:', err);
       }
     });
   }
@@ -253,5 +366,9 @@ export class CreateGroupeComponent implements OnInit {
     this.selectedTypeIndex = -1;
     this.successMessage = '';
     this.errorMessage = '';
+    
+    Object.keys(this.groupeForm.controls).forEach(key => {
+      this.groupeForm.get(key)?.markAsUntouched();
+    });
   }
 }

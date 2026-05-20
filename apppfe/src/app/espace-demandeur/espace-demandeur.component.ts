@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { CreateTicketPageComponent } from '../create-ticket-page/create-ticket-page.component';
 import { TicketService } from '../services/ticket.service';
 import { AuthServiceService } from '../services/auth-service.service';
+import { ArticleFormComponent } from "../article-form/article-form.component";
+import { DemandematrielComponent } from "../demandematriel/demandematriel.component";
 
 @Component({
   selector: 'app-espace-demandeur',
   standalone: true,
-  imports: [CommonModule, CreateTicketPageComponent],
+  imports: [CommonModule, CreateTicketPageComponent, ArticleFormComponent, DemandematrielComponent],
   templateUrl: './espace-demandeur.component.html',
   styleUrl: './espace-demandeur.component.css'
 })
@@ -193,5 +195,9 @@ export class EspaceDemandeurComponent implements OnInit {
    */
   ouvrirFormulaireTicket(): void {
     this.changerVue('creerTicket');
+  }
+
+  ouvrirFormulairedemandeMatriel(): void {
+    this.changerVue('demandeMatriel');
   }
 }

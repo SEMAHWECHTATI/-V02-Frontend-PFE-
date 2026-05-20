@@ -1,436 +1,197 @@
-/* ============== RESET ET CONTENEUR GLOBAL ============== */
-.sagem-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
 }
 
-/* Arrière-plan animé */
-.sagem-wrapper::before {
-  content: '';
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  top: -200px;
-  left: -200px;
-  animation: float 8s ease-in-out infinite;
+/* ===== BACKGROUND ===== */
+.sagem-wrapper{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
 }
 
-.sagem-wrapper::after {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  bottom: -150px;
-  right: -150px;
-  animation: float 10s ease-in-out infinite reverse;
+/* ===== MAIN CARD ===== */
+.sagem-container{
+  width:100%;
+  max-width:950px;
+  display:flex;
+  background:#fff;
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(20px); }
+/* ===== LEFT SIDE ===== */
+.sagem-brand-panel{
+  width:40%;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:#fff;
+  padding:50px 35px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
 }
 
-/* ============== CARTE PRINCIPALE ============== */
-.sagem-container {
-  display: flex;
-  width: 100%;
-  max-width: 1000px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  animation: slideInUp 0.8s ease-out;
-  position: relative;
-  z-index: 10;
+.sagem-brand-panel img{
+  margin-bottom:20px;
 }
 
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sagem-brand-panel h2{
+  font-size:32px;
+  font-weight:700;
+  margin-top:15px;
 }
 
-@media (max-width: 768px) {
-  .sagem-container {
-    max-width: 100%;
-    border-radius: 16px;
-  }
+.sagem-brand-panel p{
+  font-size:15px;
+  line-height:1.7;
+  opacity:.9;
 }
 
-/* ============== PANNEAU DE GAUCHE (Brand) ============== */
-.sagem-brand-panel {
-  flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 3.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+/* ===== RIGHT SIDE ===== */
+.sagem-form-panel{
+  width:60%;
+  padding:50px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 
-.sagem-brand-panel::before {
-  content: '';
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  top: -50px;
-  right: -50px;
+.sagem-form-panel h4{
+  font-size:30px;
+  font-weight:700;
+  color:#0f172a;
 }
 
-.sagem-brand-panel::after {
-  content: '';
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  bottom: -30px;
-  left: -30px;
+.sagem-form-panel p{
+  color:#64748b;
+  font-size:14px;
 }
 
-.sagem-brand-panel img {
-  height: 150px;
-  margin-bottom: 2rem;
-  animation: rotateIn 0.8s ease-out;
-  position: relative;
-  z-index: 2;
+/* ===== ALERT ===== */
+.alert-danger{
+  border:none;
+  border-radius:12px;
+  background:#fee2e2;
+  color:#b91c1c;
+  padding:14px;
+  font-size:14px;
 }
 
-@keyframes rotateIn {
-  from {
-    opacity: 0;
-    transform: rotate(-30deg) scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
+/* ===== LABEL ===== */
+.form-label{
+  font-size:14px;
+  font-weight:600;
+  color:#334155;
+  margin-bottom:8px;
 }
 
-.sagem-brand-panel h2 {
-  font-weight: 800;
-  margin-top: 1rem;
-  font-size: 32px;
-  position: relative;
-  z-index: 2;
+/* ===== INPUT ===== */
+.sagem-input-group{
+  display:flex;
+  align-items:center;
+  background:#f8fafc;
+  border:1px solid #dbeafe;
+  border-radius:14px;
+  padding:14px 16px;
+  transition:.3s;
 }
 
-.sagem-brand-panel p {
-  margin-top: 1rem;
-  opacity: 0.95;
-  font-size: 15px;
-  line-height: 1.6;
-  position: relative;
-  z-index: 2;
+.sagem-input-group:focus-within{
+  border-color:#2563eb;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(37,99,235,.1);
 }
 
-@media (max-width: 768px) {
-  .sagem-brand-panel {
-    display: none !important;
-  }
+.sagem-input-group .input-group-text{
+  border:none;
+  background:none;
+  color:#64748b;
+  margin-right:10px;
+  font-size:18px;
 }
 
-/* ============== PANNEAU DE DROITE (Formulaire) ============== */
-.sagem-form-panel {
-  flex: 1;
-  padding: 3.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 500px;
+.sagem-input-group .form-control{
+  border:none;
+  background:none;
+  box-shadow:none;
+  padding:0;
+  font-size:15px;
 }
 
-@media (max-width: 768px) {
-  .sagem-form-panel {
-    padding: 2.5rem;
-  }
+.sagem-input-group .form-control:focus{
+  box-shadow:none;
 }
 
-/* En-tête du formulaire */
-.sagem-form-panel h4 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #2d3748;
-  margin-bottom: 0.5rem;
+/* ===== LINKS ===== */
+a{
+  color:#2563eb !important;
+  text-decoration:none !important;
+  transition:.3s;
 }
 
-.sagem-form-panel > p {
-  color: #718096;
-  font-size: 14px;
-  margin-bottom: 1.5rem;
+a:hover{
+  text-decoration:underline !important;
 }
 
-/* Logo mobile */
-.sagem-form-panel .text-center.d-md-none {
-  animation: slideInDown 0.6s ease-out;
+/* ===== BUTTON ===== */
+.btn-corporate{
+  width:100%;
+  border:none !important;
+  padding:14px !important;
+  border-radius:14px !important;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  color:#fff !important;
+  font-size:16px;
+  font-weight:600;
+  transition:.3s;
 }
 
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.btn-corporate:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 20px rgba(37,99,235,.2);
 }
 
-/* ============== ALERTES ============== */
-.alert-danger {
-  background: linear-gradient(135deg, #fee 0%, #fdd 100%);
-  border: 2px solid #fc8181 !important;
-  color: #c53030;
-  border-radius: 12px;
-  padding: 12px 16px !important;
-  font-weight: 500;
-  animation: shake 0.5s ease;
-  margin-bottom: 1.5rem !important;
+/* ===== FOOTER ===== */
+.border-top{
+  border-color:#e2e8f0 !important;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
+.text-muted{
+  color:#64748b !important;
 }
 
-.alert-danger i {
-  margin-right: 8px;
-}
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
 
-/* ============== FORMULAIRE ============== */
-form {
-  margin: 0;
-}
-
-.mb-3, .mb-4 {
-  margin-bottom: 1.5rem !important;
-}
-
-.form-label {
-  font-weight: 700 !important;
-  color: #2d3748 !important;
-  font-size: 13px !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.75rem !important;
-}
-
-.form-label i {
-  margin-right: 6px;
-  color: #667eea;
-}
-
-/* ============== INPUT GROUPS ============== */
-.sagem-input-group {
-  border: 2px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #f7fafc !important;
-}
-
-.sagem-input-group:focus-within {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-  background: #ffffff !important;
-  transform: translateY(-2px);
-}
-
-.sagem-input-group .input-group-text {
-  background: transparent !important;
-  border: none !important;
-  color: #a0aec0;
-  font-size: 16px;
-  padding: 0 12px;
-  transition: color 0.3s;
-}
-
-.sagem-input-group:focus-within .input-group-text {
-  color: #667eea;
-}
-
-.sagem-input-group .form-control {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  color: #2d3748;
-  font-size: 14px;
-}
-
-.sagem-input-group .form-control::placeholder {
-  color: #cbd5e0;
-}
-
-.sagem-input-group .form-control:focus {
-  box-shadow: none !important;
-}
-
-/* ============== LIEN MOT DE PASSE OUBLIÉ ============== */
-.text-end a {
-  color: #667eea !important;
-  font-weight: 600;
-  transition: all 0.3s;
-  display: inline-block;
-}
-
-.text-end a:hover {
-  color: #764ba2 !important;
-  transform: translateX(3px);
-  text-decoration: underline !important;
-}
-
-/* ============== BOUTON PRINCIPAL ============== */
-.btn-corporate {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  border: none !important;
-  padding: 14px !important;
-  border-radius: 12px !important;
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  cursor: pointer;
-  margin-bottom: 1.5rem !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-corporate::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: left 0.3s;
-}
-
-.btn-corporate:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.btn-corporate:hover:not(:disabled)::before {
-  left: 100%;
-}
-
-.btn-corporate:active:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.btn-corporate:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.spinner-border-sm {
-  width: 16px !important;
-  height: 16px !important;
-  border-width: 2px !important;
-}
-
-/* ============== SÉPARATEUR ============== */
-.border-top {
-  border-top: 2px solid #e2e8f0 !important;
-  padding-top: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.text-muted {
-  color: #718096 !important;
-  font-size: 13px;
-}
-
-/* ============== LIEN INSCRIPTION ============== */
-.text-center a {
-  color: #667eea !important;
-  font-weight: 700;
-  transition: all 0.3s;
-  display: inline-block;
-}
-
-.text-center a:hover {
-  color: #764ba2 !important;
-  transform: translateX(3px);
-}
-
-/* ============== RESPONSIVE ============== */
-@media (max-width: 768px) {
-  .sagem-wrapper {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 15px;
+  .sagem-container{
+    flex-direction:column;
   }
 
-  .sagem-container {
-    max-width: 100%;
+  .sagem-brand-panel{
+    width:100%;
+    padding:40px 25px;
   }
 
-  .sagem-form-panel {
-    padding: 2rem;
-    max-width: 100%;
+  .sagem-form-panel{
+    width:100%;
+    padding:35px 25px;
   }
 
-  .sagem-form-panel h4 {
-    font-size: 24px;
+  .sagem-brand-panel h2{
+    font-size:26px;
   }
 
-  .btn-corporate {
-    padding: 12px !important;
-  }
-
-  .text-center.d-md-none {
-    display: flex !important;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .text-center.d-md-none img {
-    height: 80px;
-  }
-}
-
-@media (max-width: 480px) {
-  .sagem-form-panel {
-    padding: 1.5rem;
-  }
-
-  .sagem-form-panel h4 {
-    font-size: 20px;
-  }
-
-  .form-label {
-    font-size: 12px !important;
-  }
-
-  .sagem-input-group {
-    border-radius: 10px !important;
+  .sagem-form-panel h4{
+    font-size:26px;
   }
 }

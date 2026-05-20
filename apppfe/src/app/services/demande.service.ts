@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApprobationDTO, DemandeCreationDTO, DemandeReponseDTO } from '../Model/Entity';
 import { Observable } from 'rxjs';
@@ -9,7 +9,10 @@ import { Observable } from 'rxjs';
 export class DemandeService {
 
     private demandeUrl = 'http://localhost:8070/api/demandes';
-    constructor(private http: HttpClient) { }
+    // private header = new HttpHeaders().set('Content-Type', 'application/json');
+    constructor(private http: HttpClient) {
+      // this.header.append('Authorization', `Bearer ${localStorage.getItem('token')}`);
+    }
 
     // ==================== DEMANDES ====================
   
@@ -19,6 +22,7 @@ export class DemandeService {
      */
     envoyerDemande(dto: DemandeCreationDTO): Observable<DemandeReponseDTO> {
       console.log('📤 Envoi demande:', dto);
+      // return this.http.post<DemandeReponseDTO>(`${this.demandeUrl}/envoyer`, dto, { headers: this.header });
       return this.http.post<DemandeReponseDTO>(`${this.demandeUrl}/envoyer`, dto);
     }
   

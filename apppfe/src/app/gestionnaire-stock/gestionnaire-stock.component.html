@@ -98,6 +98,28 @@
         <!-- Separator -->
         <div class="menu-separator"></div>
 
+        <!-- Demandes de Matériel -->
+        <a class="menu-item"
+           (click)="changerVue('demandes-gestionnaire')"
+           [class.active]="vueActuelle === 'demandes-gestionnaire'">
+          <div class="menu-icon">
+            <i class="bi bi-inbox"></i>
+          </div>
+          <span class="menu-label">Demandes</span>
+          <span *ngIf="stats.demandesEnAttente > 0" class="menu-badge warning">
+            {{ stats.demandesEnAttente }}
+          </span>
+        </a>
+
+        <a class="menu-item"
+           (click)="changerVue('creer-demande')"
+           [class.active]="vueActuelle === 'creer-demande'">
+          <div class="menu-icon">
+            <i class="bi bi-file-earmark-plus"></i>
+          </div>
+          <span class="menu-label">Créer Demande</span>
+        </a>
+
         <!-- Alertes -->
         <a class="menu-item alert-menu"
            (click)="changerVue('alertes')"
@@ -119,19 +141,6 @@
             <i class="bi bi-graph-up"></i>
           </div>
           <span class="menu-label">Statistiques</span>
-        </a>
-
-        <!-- Separator -->
-        <div class="menu-separator"></div>
-
-        <!-- Nouvel Article -->
-        <a class="menu-item menu-create"
-           (click)="changerVue('creer-article')"
-           [class.active]="vueActuelle === 'creer-article'">
-          <div class="menu-icon">
-            <i class="bi bi-plus-circle-fill"></i>
-          </div>
-          <span class="menu-label">Nouvel Article</span>
         </a>
 
       </nav>
@@ -157,10 +166,10 @@
             <p>Vue d'ensemble de votre inventaire</p>
           </div>
           <div class="view-actions">
-            <button class="btn-icon-small">
+            <button class="btn-icon-small" title="Télécharger">
               <i class="bi bi-download"></i>
             </button>
-            <button class="btn-icon-small">
+            <button class="btn-icon-small" (click)="chargerStatistiques()" title="Actualiser">
               <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
@@ -168,7 +177,7 @@
 
         <!-- KPI Cards -->
         <div class="kpi-grid">
-          <div class="kpi-card primary" (click)="voirTicketsFiltres('total')">
+          <div class="kpi-card primary" (click)="changerVue('articles')">
             <div class="kpi-header">
               <span class="kpi-label">Total Articles</span>
               <i class="bi bi-chevron-right"></i>
@@ -178,7 +187,7 @@
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card success" (click)="voirTicketsFiltres('value')">
+          <div class="kpi-card success">
             <div class="kpi-header">
               <span class="kpi-label">Valeur Totale</span>
               <i class="bi bi-chevron-right"></i>
@@ -188,7 +197,7 @@
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card warning" (click)="voirTicketsFiltres('low')">
+          <div class="kpi-card warning" (click)="changerVue('articles')">
             <div class="kpi-header">
               <span class="kpi-label">Stock Faible</span>
               <i class="bi bi-chevron-right"></i>
@@ -198,7 +207,7 @@
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card danger" (click)="voirTicketsFiltres('critical')">
+          <div class="kpi-card danger" (click)="changerVue('articles')">
             <div class="kpi-header">
               <span class="kpi-label">Stock Critique</span>
               <i class="bi bi-chevron-right"></i>
@@ -208,7 +217,7 @@
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card info">
+          <div class="kpi-card info" (click)="changerVue('alertes')">
             <div class="kpi-header">
               <span class="kpi-label">Alertes Actives</span>
               <i class="bi bi-chevron-right"></i>
@@ -218,13 +227,13 @@
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card critical">
+          <div class="kpi-card critical" (click)="changerVue('demandes-gestionnaire')">
             <div class="kpi-header">
-              <span class="kpi-label">Alertes Critiques</span>
+              <span class="kpi-label">Demandes</span>
               <i class="bi bi-chevron-right"></i>
             </div>
-            <h3 class="kpi-value">{{ stats.alertesCritiques }}</h3>
-            <p class="kpi-desc">Action requise</p>
+            <h3 class="kpi-value">{{ stats.demandesEnAttente }}</h3>
+            <p class="kpi-desc">À valider</p>
             <div class="kpi-indicator"></div>
           </div>
         </div>
@@ -241,6 +250,10 @@
               <i class="bi bi-arrow-left-right"></i>
               <span>Mouvement</span>
             </button>
+            <button (click)="changerVue('creer-demande')" class="btn btn-secondary">
+              <i class="bi bi-file-earmark-plus"></i>
+              <span>Nouvelle Demande</span>
+            </button>
             <button (click)="changerVue('alertes')" class="btn btn-warning">
               <i class="bi bi-exclamation-triangle"></i>
               <span>Alertes</span>
@@ -252,7 +265,7 @@
       <!-- ARTICLES VIEW -->
       <div *ngIf="vueActuelle === 'articles'" class="view">
         <div class="view-header">
-          <h2>📦 Articles</h2>
+          <h2>📦 Gestion des Articles</h2>
         </div>
         <app-article-list></app-article-list>
       </div>
@@ -260,7 +273,7 @@
       <!-- CREER ARTICLE VIEW -->
       <div *ngIf="vueActuelle === 'creer-article'" class="view">
         <div class="view-header">
-          <h2>➕ Nouvel Article</h2>
+          <h2>➕ Créer un Nouvel Article</h2>
         </div>
         <app-article-form></app-article-form>
       </div>
@@ -268,15 +281,31 @@
       <!-- MOUVEMENTS VIEW -->
       <div *ngIf="vueActuelle === 'mouvements'" class="view">
         <div class="view-header">
-          <h2>🔄 Mouvements</h2>
+          <h2>🔄 Mouvements de Stock</h2>
         </div>
         <app-mouvements></app-mouvements>
+      </div>
+
+      <!-- DEMANDES GESTIONNAIRE VIEW -->
+      <div *ngIf="vueActuelle === 'demandes-gestionnaire'" class="view">
+        <div class="view-header">
+          <h2>👤 Demandes à Valider</h2>
+          <p>Validez les demandes de matériel avant validation admin</p>
+        </div>
+      </div>
+
+      <!-- CREER DEMANDE VIEW -->
+      <div *ngIf="vueActuelle === 'creer-demande'" class="view">
+        <div class="view-header">
+          <h2>📝 Créer une Demande</h2>
+        </div>
+        <app-demandematriel></app-demandematriel>
       </div>
 
       <!-- ALERTES VIEW -->
       <div *ngIf="vueActuelle === 'alertes'" class="view">
         <div class="view-header">
-          <h2>⚠️ Alertes</h2>
+          <h2>⚠️ Alertes de Stock</h2>
         </div>
         <app-alertes></app-alertes>
       </div>
@@ -284,7 +313,7 @@
       <!-- STATISTIQUES VIEW -->
       <div *ngIf="vueActuelle === 'statistiques'" class="view">
         <div class="view-header">
-          <h2>📊 Statistiques</h2>
+          <h2>📊 Statistiques Détaillées</h2>
         </div>
         <app-statistiques></app-statistiques>
       </div>

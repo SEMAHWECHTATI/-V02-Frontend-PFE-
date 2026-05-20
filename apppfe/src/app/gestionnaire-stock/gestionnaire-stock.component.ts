@@ -5,9 +5,10 @@ import { ArticleListComponent } from '../article-list/article-list.component';
 import { ArticleFormComponent } from '../article-form/article-form.component';
 import { MouvementsComponent } from '../mouvements/mouvements.component';
 import { AlertesComponent } from '../alertes/alertes.component';
-import { ArticleDetailComponent } from '../article-detail/article-detail.component';
 import { StatistiquesComponent } from '../statistiques/statistiques.component';
+import { DemandematrielComponent } from '../demandematriel/demandematriel.component';
 import { InventoryService } from '../services/inventory.service';
+import { DemandematrielServiceService } from '../services/demandematriel-service.service';
 
 
 @Component({
@@ -18,10 +19,10 @@ import { InventoryService } from '../services/inventory.service';
     FormsModule,
     ArticleListComponent,
     ArticleFormComponent,
-    ArticleDetailComponent,
     MouvementsComponent,
     AlertesComponent,
-    StatistiquesComponent
+    StatistiquesComponent,
+    DemandematrielComponent
   ],
   templateUrl: './gestionnaire-stock.component.html',
   styleUrl: './gestionnaire-stock.component.css'
@@ -29,19 +30,20 @@ import { InventoryService } from '../services/inventory.service';
 export class GestionnaireStockComponent implements OnInit {
 
   private inventoryService = inject(InventoryService);
+  private demandeService = inject(DemandematrielServiceService);
 
   vueActuelle: string = 'dashboard';
   currentUser: any = {};
   today: Date = new Date();
 
-  // Stats
   stats = {
     totalArticles: 0,
     valeurTotale: 0,
     stockFaible: 0,
     stockCritique: 0,
     alertesNonTraitees: 0,
-    alertesCritiques: 0
+    alertesCritiques: 0,
+    demandesEnAttente: 0
   };
 
   ngOnInit(): void {
@@ -67,25 +69,35 @@ export class GestionnaireStockComponent implements OnInit {
   chargerStatistiques(): void {
     console.log('📊 Chargement statistiques');
 
-    // Récupérer statistiques articles
+    // Statistiques articles
     this.inventoryService.getInventoryStatistics().subscribe({
       next: (res) => {
         this.stats.totalArticles = res.nombreArticles || 0;
         this.stats.valeurTotale = res.valeurTotale || 0;
         this.stats.stockFaible = res.articlesFaible || 0;
         this.stats.stockCritique = res.articlesCritique || 0;
-        console.log('✅ Statistiques chargées');
+        console.log('✅ Statistiques articles chargées');
       },
-      error: (err) => console.error('❌ Erreur statistiques:', err)
+      error: (err) => console.error('❌ Erreur statistiques articles:', err)
     });
 
-    // Récupérer alertes
+    // Alertes
     this.inventoryService.getAlertesDashboard().subscribe({
       next: (res) => {
         this.stats.alertesNonTraitees = res.totalNonTraitees || 0;
         this.stats.alertesCritiques = res.totalCritiques || 0;
+        console.log('✅ Alertes chargées');
       },
       error: (err) => console.error('❌ Erreur alertes:', err)
+    });
+
+    // Demandes
+    this.demandeService.getDemandesEnAttente().subscribe({
+      next: (res) => {
+        this.stats.demandesEnAttente = res.total || 0;
+        console.log('✅ Demandes chargées');
+      },
+      error: (err) => console.error('❌ Erreur demandes:', err)
     });
   }
 
@@ -95,6 +107,22 @@ export class GestionnaireStockComponent implements OnInit {
   changerVue(vue: string): void {
     console.log('🔄 Changement vue:', vue);
     this.vueActuelle = vue;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /**
+   * 🔀 Toggle sidebar (mobile)
+   */
+  toggleSidebar(): void {
+    console.log('🔀 Toggle sidebar');
+    // À implémenter si vous voulez un menu mobile coulissant
+  }
+
+  /**
+   * 🔄 Actualiser les statistiques
+   */
+  chargerStatistiquesActualiser(): void {
+    this.chargerStatistiques();
   }
 
   /**
@@ -104,20 +132,4 @@ export class GestionnaireStockComponent implements OnInit {
     localStorage.clear();
     window.location.href = '/authentification';
   }
-
-  /**
- * 🔀 Toggle sidebar (mobile)
- */
-toggleSidebar(): void {
-  console.log('🔀 Toggle sidebar');
-  // À implémenter si vous voulez un menu mobile coulissant
-}
-
-/**
- * 🔍 Voir tickets filtrés
- */
-voirTicketsFiltres(filtre: string): void {
-  console.log('🔍 Filtrage:', filtre);
-  this.changerVue('articles');
-}
 }

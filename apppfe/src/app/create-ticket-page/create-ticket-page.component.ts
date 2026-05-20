@@ -5,11 +5,12 @@ import { Categorie, Priorite, TicketCreateDTO } from '../Model/Entity';
 import { Router, RouterModule } from '@angular/router';
 import { TicketService } from '../services/ticket.service';
 import { CategorieService } from '../services/categorie.service';
+import { ArticleFormComponent } from '../article-form/article-form.component';
 
 @Component({
   selector: 'app-create-ticket-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule,ArticleFormComponent],
   templateUrl: './create-ticket-page.component.html',
   styleUrl: './create-ticket-page.component.css'
 })
@@ -437,6 +438,23 @@ private uploadFiles(idTicket: number): void {
     this.categorieChoisie = cat;
     this.form.patchValue({ categorieId: cat.idCategorie });
     this.etapeActive = 2;
+  }
+
+  /**
+   * 🛠️ Vérifie si la catégorie sélectionnée nécessite le formulaire de matériel
+   */
+isDemandeMateriel(): boolean {
+    // On vérifie que la catégorie ET son type existent pour éviter une erreur
+    if (!this.categorieChoisie || !this.categorieChoisie.typecategorie) {
+        return false;
+    }
+    
+    // Soit on met tout en majuscules pour comparer avec des majuscules :
+    return this.categorieChoisie.typecategorie.toUpperCase().includes('DEMANDE_MATERIEL');
+    
+    // OU si c'est une valeur exacte (pas juste incluse dans une phrase), 
+    // tu peux faire une égalité stricte :
+    // return this.categorieChoisie.typecategorie === 'DEMANDE_MATERIEL';
   }
 
   /**

@@ -61,6 +61,21 @@
           <i class="bi bi-arrow-right"></i>
         </div>
       </div>
+        <!-- Card 1: Signaler un problème -->
+      <div class="action-card card-primary" 
+           [class.active]="vueActuelle === 'demandeMatriel'"
+           (click)="ouvrirFormulairedemandeMatriel()">
+        <div class="card-icon">
+          <i class="bi bi-cart-plus"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Dmenade Matriel</h3>
+          <p class="card-description">Demande souris,PC , clavier ...</p>
+        </div>
+        <div class="card-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </div>
 
       <!-- Card 3: Mes Tickets -->
       <div class="action-card card-info"
@@ -299,6 +314,19 @@
     </div>
     <div class="create-ticket-wrapper">
       <app-create-ticket-page></app-create-ticket-page>
+    </div>
+  </div>
+    <!-- CREER TICKET VIEW -->
+  <div *ngIf="vueActuelle === 'demandeMatriel'" class="view-container fade-in">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="bi bi-plus-circle"></i>
+        Créer un nouveau demande Matriel
+      </h3>
+      <p class="section-subtitle">Décrivez votre problème ou votre demande</p>
+    </div>
+    <div class="create-ticket-wrapper">
+      <app-demandematriel></app-demandematriel>
     </div>
   </div>
 

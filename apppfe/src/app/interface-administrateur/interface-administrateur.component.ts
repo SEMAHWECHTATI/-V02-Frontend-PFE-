@@ -21,65 +21,135 @@ import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component'
   styleUrl: './interface-administrateur.component.css'
 })
 
-
 export class InterfaceAdministrateurComponent implements OnInit {
 
-  // Ajoute cette ligne dans ta classe
-menuTicketsOuvert: boolean = false;
+  // Menu et disposition
+  menuTicketsOuvert: boolean = false;
   vueActuelle: string = 'accueil';
+  isDarkMode: boolean = false;
+  isVerticalLayout: boolean = true;
+  
   user: Utilisateur[] = [];
-  // 1. Ajoutez une variable pour stocker le nombre
   nombreDemandesEnAttente: number = 0;
-  // Variable pour stocker les infos de l'utilisateur
   currentUser: any = null;
   
-constructor(private router: Router, private utilsateurservice: UtilisateurService,
-   private demandeservice: DemandeService,
-  @Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(
+    private router: Router, 
+    private utilsateurservice: UtilisateurService,
+    private demandeservice: DemandeService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { }
 
   ngOnInit(): void {
-   this.chargerUtilisateurs();
+    this.chargerUtilisateurs();
 
-  if (isPlatformBrowser(this.platformId)) {
-    const userStr = localStorage.getItem('utilisateurConnecte');
-    
-    if (userStr) {
-      // On transforme la chaîne en objet
-      let data = JSON.parse(userStr);
+    if (isPlatformBrowser(this.platformId)) {
+      // Charger les préférences
+      this.loadUserPreferences();
+
+      const userStr = localStorage.getItem('utilisateurConnecte');
       
-      // 🚩 SÉCURITÉ : Si le résultat est encore une chaîne (à cause du bug des guillemets), on re-parse !
-      if (typeof data === 'string') {
-        this.currentUser = JSON.parse(data);
-      } else {
-        this.currentUser = data;
+      if (userStr) {
+        let data = JSON.parse(userStr);
+        
+        if (typeof data === 'string') {
+          this.currentUser = JSON.parse(data);
+        } else {
+          this.currentUser = data;
+        }
       }
-    }
-    
-    
-    // console.log("Données nettoyées :", this.currentUser);
 
-    if (this.currentUser?.role === 'Administrateur') {
+      if (this.currentUser?.role === 'Administrateur') {
         this.calculerNouvellesDemandes();
       }
-  }
+
+      // Appliquer le thème
+      this.applyTheme();
+      this.applyLayout();
+    }
   }
 
-  seDeconnecter() {
-    // 1. Supprimer le token ou les infos du localStorage
+  /**
+   * Charger les préférences de l'utilisateur
+   */
+  loadUserPreferences(): void {
     if (isPlatformBrowser(this.platformId)) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+      const theme = localStorage.getItem('appTheme');
+      const layout = localStorage.getItem('appLayout');
+
+      this.isDarkMode = theme === 'dark';
+      this.isVerticalLayout = layout !== 'horizontal';
+    }
+  }
+
+  /**
+   * Appliquer le thème sombre/clair
+   */
+  applyTheme(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const element = document.documentElement;
+      const body = document.body;
+      
+      if (this.isDarkMode) {
+        element.setAttribute('data-theme', 'dark');
+        body.classList.add('dark-mode');
+        localStorage.setItem('appTheme', 'dark');
+      } else {
+        element.removeAttribute('data-theme');
+        body.classList.remove('dark-mode');
+        localStorage.setItem('appTheme', 'light');
+      }
+    }
+  }
+
+  /**
+   * Basculer le mode sombre/clair
+   */
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.applyTheme();
+  }
+
+  /**
+   * Appliquer la disposition
+   */
+  applyLayout(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const container = document.querySelector('.container-fluid');
+      
+      if (!this.isVerticalLayout) {
+        container?.classList.add('horizontal-layout');
+        localStorage.setItem('appLayout', 'horizontal');
+      } else {
+        container?.classList.remove('horizontal-layout');
+        localStorage.setItem('appLayout', 'vertical');
+      }
+    }
+  }
+
+  /**
+   * Changer la disposition
+   */
+  changeLayout(): void {
+    this.isVerticalLayout = !this.isVerticalLayout;
+    this.applyLayout();
+  }
+
+  seDeconnecter(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('utilisateurConnecte');
     }
     
-    // 2. Rediriger vers la page de connexion
-    this.router.navigate(['/login'], { replaceUrl: true });; // Changez selon votre route réelle
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
-  changerVue(nouvelleVue: string) {
+  changerVue(nouvelleVue: string): void {
     this.vueActuelle = nouvelleVue;
   }
 
-  chargerUtilisateurs() {
+  chargerUtilisateurs(): void {
     this.utilsateurservice.getUtilisateurs().subscribe(
       (utilisateurs: Utilisateur[]) => {
         this.user = utilisateurs;
@@ -90,16 +160,15 @@ constructor(private router: Router, private utilsateurservice: UtilisateurServic
     );
   }
 
-  calculerNouvellesDemandes() {
-  this.demandeservice.getAllDemandes().subscribe({
-    next: (demandes) => {
-      // On filtre le tableau pour ne garder que celles en attente, et on compte la longueur (.length)
-      const demandesEnAttente = demandes.filter(d => d.statut === 'En_Attente');
-      this.nombreDemandesEnAttente = demandesEnAttente.length;
-    },
-    error: (err) => {
-      console.error("Erreur lors de la récupération des demandes", err);
-    }
-  });
-}
+  calculerNouvellesDemandes(): void {
+    this.demandeservice.getAllDemandes().subscribe({
+      next: (demandes) => {
+        const demandesEnAttente = demandes.filter(d => d.statut === 'En_Attente');
+        this.nombreDemandesEnAttente = demandesEnAttente.length;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des demandes", err);
+      }
+    });
+  }
 }

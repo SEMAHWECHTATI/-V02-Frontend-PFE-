@@ -1,0 +1,80 @@
+<div class="demande-form-container">
+
+  <div class="form-header">
+    <h2>➕ Nouvelle Demande de Matériel</h2>
+    <p>Demandez le matériel dont vous avez besoin</p>
+  </div>
+
+  <div *ngIf="messageSucces" class="alert alert-success">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ messageSucces }}
+  </div>
+
+  <div *ngIf="messageErreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ messageErreur }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="demande-form">
+
+    <div class="form-section">
+      <h3>📦 Article Demandé</h3>
+
+      <div class="form-group">
+        <label for="articleId">Article *</label>
+        <select id="articleId" formControlName="articleId">
+          <option value="">-- Sélectionner --</option>
+          <option *ngFor="let article of articles" [value]="article.id">
+            {{ article.designation }} (Stock: {{ article.quantiteEnStock }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="quantiteDemandee">Quantité *</label>
+        <input type="number" id="quantiteDemandee" formControlName="quantiteDemandee" min="1">
+      </div>
+
+      <div class="form-group">
+        <label for="type">Type de Demande *</label>
+        <select id="type" formControlName="type">
+          <option *ngFor="let type of typeDemandes" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>💬 Justification</h3>
+
+      <div class="form-group">
+        <label for="justification">Motif de la demande *</label>
+        <textarea id="justification" formControlName="justification" rows="4"
+                  placeholder="Expliquez pourquoi vous avez besoin de ce matériel..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>🎫 Informations Supplémentaires</h3>
+
+      <div class="form-group">
+        <label for="referenceTicket">Référence Ticket (optionnel)</label>
+        <input type="text" id="referenceTicket" formControlName="referenceTicket">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="chargement || form.invalid">
+        <i class="bi bi-check-lg"></i>
+        {{ chargement ? 'Envoi en cours...' : 'Envoyer la Demande' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="form.reset()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Réinitialiser
+      </button>
+    </div>
+
+  </form>
+
+</div>

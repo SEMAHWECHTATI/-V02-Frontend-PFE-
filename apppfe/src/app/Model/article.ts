@@ -59,3 +59,21 @@ export const StatutArticleLabels: { [key in StatutArticle]: string } = {
   [StatutArticle.OBSOLETE]: 'Obsolète',
   [StatutArticle.RUPTURE]: 'Rupture de stock'
 };
+
+export interface DemandeMateriel {
+  nomDemandeur: string;
+  email: string;
+  telephone: string;
+  departement: string;
+  typeMateriel: string;
+  sousTypeMateriel?: string;
+  descriptionMateriel: string;
+  quantite: number;
+  estimBudget: number;
+  justification: string;
+  dateNecessite: string;
+  urgent: boolean;
+  piecesJointes?: File[];
+  dateCreation?: Date;
+  statut?: string;
+}
