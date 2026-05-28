@@ -256,39 +256,40 @@
 
   <!-- MODAL DE SUPPRESSION -->
   <div class="delete-modal" *ngIf="showDeleteModal">
-    <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
-          Confirmer la suppression
-        </h5>
-        <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+  <div class="custom-backdrop" (click)="closeDeleteModal()"></div>
+  
+  <div class="custom-content">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
+        Confirmer la suppression
+      </h5>
+      <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+    </div>
+    <div class="modal-body">
+      <p>Êtes-vous sûr de vouloir supprimer le groupe :</p>
+      <div class="groupe-alert" *ngIf="selectedGroupeToDelete">
+        <strong>{{ selectedGroupeToDelete.nomGroupes }}</strong>
+        <small>{{ selectedGroupeToDelete.description }}</small>
       </div>
-      <div class="modal-body">
-        <p>Êtes-vous sûr de vouloir supprimer le groupe :</p>
-        <div class="groupe-alert" *ngIf="selectedGroupeToDelete">
-          <strong>{{ selectedGroupeToDelete.nomGroupes }}</strong>
-          <small>{{ selectedGroupeToDelete.description }}</small>
-        </div>
-        <p class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Cette action est irréversible !</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" 
-                class="btn btn-secondary" 
-                (click)="closeDeleteModal()"
-                [disabled]="isDeleting">
-          Annuler
-        </button>
-        <button type="button" 
-                class="btn btn-danger" 
-                (click)="supprimerGroupe()"
-                [disabled]="isDeleting">
-          <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
-          <i class="bi bi-trash-fill me-1" *ngIf="!isDeleting"></i>
-          {{ isDeleting ? 'Suppression...' : 'Supprimer' }}
-        </button>
-      </div>
+      <p class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Cette action est irréversible !</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" 
+              class="btn btn-secondary" 
+              (click)="closeDeleteModal()"
+              [disabled]="isDeleting">
+        Annuler
+      </button>
+      <button type="button" 
+              class="btn btn-danger" 
+              (click)="supprimerGroupe()"
+              [disabled]="isDeleting">
+        <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
+        <i class="bi bi-trash-fill me-1" *ngIf="!isDeleting"></i>
+        {{ isDeleting ? 'Suppression...' : 'Supprimer' }}
+      </button>
     </div>
   </div>
+</div>
 </div>

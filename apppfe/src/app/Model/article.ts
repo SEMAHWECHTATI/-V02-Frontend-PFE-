@@ -1,5 +1,18 @@
+export interface Categorie {
+  code: string;
+  label: string;
+  icone: string;
+  prefixe: string;
+}
+
+export interface ApiResponse<T> {
+  message: string;
+  article: T;
+}
+
 export interface Article {
   id?: number;
+  categorie: string;
   reference: string;
   designation: string;
   description?: string;

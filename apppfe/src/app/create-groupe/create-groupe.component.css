@@ -807,6 +807,7 @@ textarea.form-control {
 }
 
 /* ==================== MODAL DE SUPPRESSION ==================== */
+/* ==================== MODAL DE SUPPRESSION ==================== */
 .delete-modal {
   position: fixed;
   top: 0;
@@ -816,20 +817,17 @@ textarea.form-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000; /* On monte très haut pour surcharger toute l'app */
   animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.modal-backdrop {
+/* Changé en .custom-backdrop pour éviter le z-index invisible de Bootstrap */
+.custom-backdrop {
   position: absolute;
   top: 0;
   left: 0;
@@ -837,17 +835,19 @@ textarea.form-control {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   cursor: pointer;
+  z-index: 1; /* Couche basse à l'intérieur du conteneur */
 }
 
-.modal-content {
+/* Changé en .custom-content */
+.custom-content {
   position: relative;
-  background: var(--surface);
+  background: #06c3f7; /* Votre couleur cyan */
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   max-width: 500px;
   width: 90%;
   animation: slideUp 0.3s ease;
-  z-index: 1001;
+  z-index: 2; /* STRICTEMENT SUPÉRIEUR au backdrop (2 > 1) */
 }
 
 @keyframes slideUp {
@@ -861,7 +861,9 @@ textarea.form-control {
   }
 }
 
+/* Le reste de votre CSS (modal-header, footer, etc.) reste identique */
 .modal-header {
+  background-color: #10b981;
   padding: 1.5rem;
   border-bottom: 1px solid var(--border);
   display: flex;

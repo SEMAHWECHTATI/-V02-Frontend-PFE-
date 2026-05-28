@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TicketService } from '../services/ticket.service';
+import { Article } from '../Model/article';
+import { InventoryService } from '../services/inventory.service';
+import { forkJoin } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -40,15 +44,22 @@ export class TicketDetailComponent implements OnInit, OnChanges {
   fileUploadInProgress: boolean = false;
   piecesJointes: any[] = [];
 
+  // ===== PIÈCES CONSOMMÉES =====
+  piecesConsommees: Array<{ categorieId?: number, articleId?: number, quantite: number }> = [];
+  listeCategoriesPieces: Article[] = []; 
+  listeArticlesGlobal: Article[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ticketservice: TicketService
+    private ticketservice: TicketService,
+    private articleservice: InventoryService
   ) {}
 
   ngOnInit(): void {
     console.log('🎫 Initialisation TicketDetailComponent');
     this.chargerUtilisateur();
+    this.chargerCatalogueStock(); // Charge les catégories et les articles pour le modal
     
     if (this.ticketId) {
       this.chargerTicketDetails(this.ticketId);
@@ -67,6 +78,79 @@ export class TicketDetailComponent implements OnInit, OnChanges {
       console.log('🔄 Changement ticketId:', changes['ticketId'].currentValue);
       this.chargerTicketDetails(changes['ticketId'].currentValue);
     }
+  }
+
+  /**
+   * 📦 Charger les catégories et articles disponibles depuis l'API
+   */
+  private chargerCatalogueStock(): void {
+    this.articleservice.getAllArticles().subscribe(
+      res => {
+        // Extraire les articles - la réponse peut être wrappée dans un objet
+        let articles: any[] = [];
+        
+        if (Array.isArray(res)) {
+          articles = res;
+        } else if (res && typeof res === 'object') {
+          // Chercher un tableau dans les propriétés communes
+          if (Array.isArray(res.data)) {
+            articles = res.data;
+          } else if (Array.isArray(res.articles)) {
+            articles = res.articles;
+          } else if (Array.isArray(res.result)) {
+            articles = res.result;
+          } else {
+            articles = [];
+          }
+        }
+        
+        if (!articles || articles.length === 0) {
+          this.listeArticlesGlobal = [];
+          this.listeCategoriesPieces = [];
+          return;
+        }
+        
+        this.listeArticlesGlobal = articles;
+        
+        // Extraire les catégories uniques des articles
+        const categoriesMap = new Map();
+        
+        articles.forEach((article: any) => {
+          if (!article) return;
+          
+          const categorie = article.categorie;
+          let categorieId = null;
+          let categorieName = null;
+          let reference = article.reference || '';
+          
+          if (typeof categorie === 'object' && categorie !== null) {
+            categorieId = categorie.id;
+            categorieName = categorie.nomCategorie || categorie.label || categorie.categorie;
+          } else if (typeof categorie === 'string' && categorie.trim()) {
+            categorieId = categorie.trim();
+            categorieName = categorie.trim();
+          }
+          
+          if (categorieId) {
+            const key = `${categorieId}`;
+            if (!categoriesMap.has(key)) {
+              categoriesMap.set(key, {
+                id: categorieId,
+                categorie: categorieName,
+                reference: reference
+              });
+            }
+          }
+        });
+        
+        this.listeCategoriesPieces = Array.from(categoriesMap.values());
+      },
+      error => {
+        console.error('❌ Erreur chargement articles:', error);
+        this.listeArticlesGlobal = [];
+        this.listeCategoriesPieces = [];
+      }
+    );
   }
 
   /**
@@ -100,11 +184,33 @@ export class TicketDetailComponent implements OnInit, OnChanges {
 
     this.ticketservice.getTicketById(idTicket).subscribe({
       next: (res) => {
-        this.ticket = res;
-        console.log('✅ Ticket chargé:', res.reference);
-        this.isLoading = false;
-        this.chargerNotes(idTicket);
-        this.chargerPiecesJointes(idTicket);
+        // Extraire le ticket - la réponse peut être wrappée dans un objet
+        let ticket: any = null;
+        const response = res as any;
+        
+        if (response && typeof response === 'object') {
+          // Vérifier si les données sont wrappées dans une propriété
+          if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+            ticket = response.data;
+          } else if (response.ticket && typeof response.ticket === 'object') {
+            ticket = response.ticket;
+          } else {
+            // Sinon, utiliser directement la réponse
+            ticket = response;
+          }
+        }
+        
+        if (ticket && ticket.idTicket) {
+          this.ticket = ticket;
+          console.log('✅ Ticket chargé:', ticket.reference, 'ID:', ticket.idTicket);
+          this.isLoading = false;
+          this.chargerNotes(idTicket);
+          this.chargerPiecesJointes(idTicket);
+        } else {
+          console.error('❌ Structure ticket invalide:', res);
+          this.errorMessage = 'Structure de données ticket invalide';
+          this.isLoading = false;
+        }
       },
       error: (err) => {
         console.error('❌ Erreur chargement ticket:', err);
@@ -155,24 +261,15 @@ export class TicketDetailComponent implements OnInit, OnChanges {
 
   // ===== PERMISSIONS =====
 
-  /**
-   * ✅ Vérifier si c'est un technicien ou admin
-   */
   isTechnicienOrAdmin(): boolean {
     return ['technicien', 'administrateur', 'admin'].includes(this.userRole);
   }
 
-  /**
-   * ✅ Vérifier si c'est le demandeur ou admin
-   */
   isDemandeurOrAdmin(): boolean {
     const isOwner = this.ticket?.demandeur?.id === this.currentUser?.id;
     return isOwner || ['administrateur', 'admin'].includes(this.userRole);
   }
 
-  /**
-   * ✅ Vérifier si c'est un admin
-   */
   isAdmin(): boolean {
     return ['administrateur', 'admin'].includes(this.userRole);
   }
@@ -204,7 +301,7 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     });
   }
 
-  /**
+/**
    * 🔍 OUVRIR LA MODAL DE RÉSOLUTION
    */
   ouvrirModalResolution(): void {
@@ -212,6 +309,12 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     this.tempsIntervention = 0;
     this.tempsCalculeAuto = false;
     this.noteResolution = '';
+    
+    // ✅ Initialise le tableau avec une ligne vide par défaut au lieu d'un tableau vide
+    this.piecesConsommees = [
+      { categorieId: undefined, articleId: undefined, quantite: 1 }
+    ]; 
+    
     this.showResolveModal = true;
     this.errorMessage = '';
   }
@@ -219,10 +322,20 @@ export class TicketDetailComponent implements OnInit, OnChanges {
   /**
    * ✅ RÉSOUDRE LE TICKET
    */
+  /**
+   * ✅ RÉSOUDRE LE TICKET + ENREGISTRER LES PIÈCES
+   */
   resoudreTicket(): void {
-    console.log('✅ Résolution du ticket');
+    console.log('✅ Tentative de résolution du ticket');
 
-    // Validations
+    // 0. Validation du ticket
+    if (!this.ticket || !this.ticket.idTicket) {
+      this.errorMessage = '⚠️ Erreur: Ticket non chargé correctement. Veuillez rafraîchir la page.';
+      console.error('❌ Ticket non valide:', this.ticket);
+      return;
+    }
+
+    // 1. Validations de base
     if (!this.noteResolution.trim()) {
       this.errorMessage = '⚠️ Veuillez ajouter une note de résolution';
       return;
@@ -233,11 +346,18 @@ export class TicketDetailComponent implements OnInit, OnChanges {
       return;
     }
 
+    // 2. Validation des pièces consommées (si le technicien en a ajouté)
+    if (this.piecesConsommees.length > 0 && !this.validerPieces()) {
+      this.errorMessage = '⚠️ Veuillez vérifier les pièces saisies (article sélectionné et quantité > 0)';
+      return;
+    }
+
     this.actionInProgress = true;
     this.errorMessage = '';
 
     const noteFinale = `${this.noteResolution}\n\n⏱️ Temps d'intervention : ${this.tempsIntervention} minute(s).`;
 
+    // 3. Appel API pour passer le ticket à l'état Résolu
     this.ticketservice.resoudreTicket(
       this.ticket.idTicket,
       this.currentUser.id,
@@ -245,24 +365,108 @@ export class TicketDetailComponent implements OnInit, OnChanges {
       this.tempsIntervention
     ).subscribe({
       next: (res) => {
-        console.log('✅ Ticket résolu');
-        this.ticket = res;
+        console.log('✅ Ticket marqué comme résolu sur le serveur');
+        
+        // Mettre à jour l'état local du ticket - extraire de la réponse wrappée
+        const response = res as any;
+        if (response.ticket) {
+          this.ticket = response.ticket;
+        } else {
+          this.ticket = res;
+        }
+        
         this.ticket.statut = 'Resolu';
         this.ticket.noteResolution = noteFinale;
-        this.ticket.delaiResolution = this.tempsIntervention;
-        this.ticket.dateResolution = new Date().toISOString().split('T')[0];
+        
+        console.log('✅ Ticket mis à jour localement - ID:', this.ticket.idTicket);
 
+        // 4. Enregistrement des pièces consommées en base de données
+        this.enregistrerLesPiecesDuTicket();
+
+        // Nettoyage et fermeture du modal
         this.showResolveModal = false;
         this.actionInProgress = false;
-        this.successMessage = '✅ Ticket résolu ! Vous pouvez maintenant le clôturer.';
+        this.successMessage = '✅ Ticket résolu et pièces de rechange décomptées !';
         localStorage.removeItem(`ticket_start_${this.ticket.idTicket}`);
       },
       error: (err) => {
-        console.error('❌ Erreur résolution:', err);
+        console.error('❌ Erreur résolution ticket:', err);
         this.errorMessage = 'Erreur lors de la résolution du ticket';
         this.actionInProgress = false;
       }
     });
+  }
+
+  /**
+   * 🛠️ Envoie chaque pièce enregistrée dans le tableau vers le Backend
+   * ET réduit la quantité de stock correspondante
+   */
+  private enregistrerLesPiecesDuTicket(): void {
+    if (this.piecesConsommees.length === 0) return;
+
+    // Utiliser la référence ou l'ID du ticket pour le commentaire
+    const ticketIdentifiant = this.ticket.reference || `Ticket #${this.ticket.idTicket}`;
+
+    // Préparer les appels API en parallèle
+    const observables: any[] = [];
+
+    this.piecesConsommees.forEach(piece => {
+      // Vérifier que articleId est valide
+      if (!piece.articleId || piece.quantite <= 0) {
+        return;
+      }
+
+      // Construction du JSON pour ConsommationPiece
+      const consommationPayload = {
+        quantite: piece.quantite,
+        commentaire: `Utilisé lors de la résolution du ${ticketIdentifiant}`,
+        referenceTicket: this.ticket.reference || this.ticket.idTicket,
+        article: { id: piece.articleId },
+        responsable: { id: this.currentUser.id }
+      };
+
+      // 1️⃣ Ajouter la consommation
+      const ajouterConsommation$ = this.ticketservice.ajouterConsommationPiece(consommationPayload);
+      
+      // 2️⃣ Réduire le stock (appel parallèle)
+      const diminuerStock$ = this.articleservice.getStockByArticleId(piece.articleId).pipe(
+        switchMap(stockData => {
+          const stockId = stockData.id || stockData.stockId;
+          return this.articleservice.diminuerQuantite(stockId, piece.quantite);
+        })
+      );
+
+      // Ajouter les deux appels à la liste
+      observables.push(
+        forkJoin([
+          ajouterConsommation$,
+          diminuerStock$
+        ])
+      );
+    });
+
+    // Exécuter tous les appels en parallèle
+    if (observables.length > 0) {
+      forkJoin(observables).subscribe({
+        next: (results) => {
+          this.successMessage = '✅ Ticket résolu et pièces de rechange décomptées !';
+        },
+        error: (err) => {
+          console.error('❌ Erreur gestion pièces:', err.status, err.statusText);
+          
+          if (err.status === 403) {
+            this.errorMessage = '❌ Accès refusé : Vérifiez vos permissions pour gérer le stock';
+          } else if (err.status === 404) {
+            this.errorMessage = '❌ Ressource non trouvée : Vérifiez l\'ID de l\'article';
+          } else {
+            this.errorMessage = '❌ Erreur lors de la mise à jour du stock';
+          }
+        }
+      });
+    }
+
+    // Vider le tableau après traitement
+    this.piecesConsommees = [];
   }
 
   /**
@@ -324,9 +528,6 @@ export class TicketDetailComponent implements OnInit, OnChanges {
 
   // ===== NOTES ET COMMENTAIRES =====
 
-  /**
-   * 📝 Envoyer une note/commentaire
-   */
   envoyerNote(): void {
     console.log('📝 Envoi d\'une note');
 
@@ -361,9 +562,6 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     });
   }
 
-  /**
-   * 🗑️ Supprimer une note
-   */
   supprimerNote(idNote: number): void {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
       return;
@@ -384,15 +582,11 @@ export class TicketDetailComponent implements OnInit, OnChanges {
 
   // ===== GESTION DES FICHIERS =====
 
-  /**
-   * 📎 Sélectionner un fichier
-   */
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
       console.log('📎 Fichier sélectionné:', file.name);
       
-      // Vérifier la taille
       if (file.size > 5 * 1024 * 1024) {
         this.errorMessage = '❌ Le fichier dépasse 5MB';
         return;
@@ -403,9 +597,6 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * 📤 Uploader un fichier
-   */
   uploadFichier(): void {
     if (!this.selectedFile) {
       this.errorMessage = '⚠️ Veuillez sélectionner un fichier';
@@ -421,7 +612,6 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     this.fileUploadInProgress = true;
     this.errorMessage = '';
 
-    // ✅ PASSER L'ID UTILISATEUR
     this.ticketservice.uploadPieceJointe(
       this.ticket.idTicket,
       this.selectedFile,
@@ -432,14 +622,12 @@ export class TicketDetailComponent implements OnInit, OnChanges {
         this.fileUploadInProgress = false;
         this.selectedFile = null;
 
-        // Ajouter à la liste des pièces jointes
         if (!this.piecesJointes) {
           this.piecesJointes = [];
         }
         this.piecesJointes.push(res.data || res);
         this.successMessage = '✅ Fichier uploadé avec succès';
 
-        // Réinitialiser l'input fichier
         const fileInput = document.getElementById('fileInput') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
       },
@@ -451,9 +639,6 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     });
   }
 
-  /**
-   * 🗑️ Supprimer une pièce jointe
-   */
   supprimerPieceJointe(idPieceJointe: number): void {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
       return;
@@ -474,72 +659,113 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     });
   }
 
-  /**
- * 📥 Télécharger une pièce jointe
- */
-telechargerPieceJointe(piece: any): void {
-  if (!piece?.idJointe) {
-    this.errorMessage = '❌ ID de la pièce jointe invalide';
-    console.error('❌ ID invalide:', piece);
-    return;
+  telechargerPieceJointe(piece: any): void {
+    if (!piece?.idJointe) {
+      this.errorMessage = '❌ ID de la pièce jointe invalide';
+      return;
+    }
+
+    this.fileUploadInProgress = true;
+
+    this.ticketservice.downloadPieceJointe(piece.idJointe).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomJointe || 'fichier-telechargé';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.fileUploadInProgress = false;
+        this.successMessage = `✅ ${piece.nomJointe} téléchargé`;
+      },
+      error: (err) => {
+        console.error('❌ Erreur téléchargement:', err);
+        this.fileUploadInProgress = false;
+        this.errorMessage = `❌ Erreur téléchargement: ${err.error?.error || err.message}`;
+      }
+    });
   }
 
-  console.log('📥 Téléchargement:', piece.nomJointe, '- ID:', piece.idJointe);
-  this.fileUploadInProgress = true;
-
-  // ✅ Appeler le service pour télécharger
-  this.ticketservice.downloadPieceJointe(piece.idJointe).subscribe({
-    next: (blob: Blob) => {
-      console.log('✅ Fichier téléchargé, taille:', blob.size, 'bytes');
-      
-      // ✅ Créer une URL blob
-      const url = window.URL.createObjectURL(blob);
-      console.log('✅ URL blob créée:', url);
-      
-      // ✅ Créer un lien temporaire
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = piece.nomJointe || 'fichier-telechargé';
-      link.style.display = 'none';
-      
-      // ✅ Ajouter au DOM et cliquer
-      document.body.appendChild(link);
-      console.log('✅ Lien créé, lancement du téléchargement...');
-      link.click();
-      
-      // ✅ Nettoyer
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      this.fileUploadInProgress = false;
-      this.successMessage = `✅ ${piece.nomJointe} téléchargé`;
-      
-    },
-    error: (err) => {
-      console.error('❌ Erreur téléchargement:', err);
-      this.fileUploadInProgress = false;
-      this.errorMessage = `❌ Erreur téléchargement: ${err.error?.error || err.message}`;
-    }
-  });
-}
-
-  // ===== AUTRES FONCTIONS =====
+  // ===== COMPLÉMENTS PIÈCES CONSOMMÉES =====
 
   /**
-   * 🗑️ Supprimer le ticket
+   * ➕ Ajouter une nouvelle ligne vide dans le tableau des pièces consommées
    */
+  ajouterPieceConsommee(): void {
+    this.piecesConsommees.push({
+      categorieId: undefined,
+      articleId: undefined,
+      quantite: 1
+    });
+  }
+
+  /**
+   * 🗑️ Supprimer une ligne spécifique
+   */
+  supprimerPieceConsommee(index: number): void {
+    this.piecesConsommees.splice(index, 1);
+  }
+
+  /**
+   * 🔄 Réinitialiser la sélection de l'article si la catégorie de la ligne change
+   */
+  onCategorieChange(item: any): void {
+    item.articleId = undefined;
+  }
+
+  /**
+   * 🔍 Filtrer dynamiquement la liste globale des articles selon l'id de la catégorie sélectionnée
+   */
+  getArticlesParCategorie(categorieId?: number | string): Article[] {
+    if (!categorieId) return [];
+    
+    return this.listeArticlesGlobal.filter(art => {
+      const categorie = (art as any).categorie;
+      
+      // Cas 1: categorie est un objet avec id
+      if (typeof categorie === 'object' && categorie !== null && categorie.id) {
+        return Number(categorie.id) === Number(categorieId);
+      }
+      
+      // Cas 2: categorie est une string
+      if (typeof categorie === 'string' && categorie.trim()) {
+        return categorie.trim() === String(categorieId).trim();
+      }
+      
+      return false;
+    });
+  }
+
+  /**
+   * ⚙️ Validation: S'assure que chaque ligne ajoutée dispose d'un article valide et d'une quantité > 0
+   */
+  validerPieces(): boolean {
+    for (const piece of this.piecesConsommees) {
+      if (!piece.articleId || !piece.quantite || piece.quantite <= 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // ===== AUTRES FONCTIONS DE GESTION =====
+
   supprimerTicket(): void {
     if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce ticket ?')) {
       return;
     }
 
-    console.log('🗑️ Suppression du ticket:', this.ticket.idTicket);
     this.actionInProgress = true;
     this.errorMessage = '';
 
     this.ticketservice.supprimerTicket(this.ticket.idTicket).subscribe({
       next: () => {
-        console.log('✅ Ticket supprimé');
         this.successMessage = '✅ Ticket supprimé avec succès';
         setTimeout(() => {
           this.router.navigate(['/technicien/liste-tickets']);
@@ -553,9 +779,6 @@ telechargerPieceJointe(piece: any): void {
     });
   }
 
-  /**
-   * 🎨 Obtenir la classe CSS pour le statut
-   */
   getStatusClass(statut: string): string {
     const statusMap: { [key: string]: string } = {
       'Nouveau': 'bg-danger',
@@ -567,9 +790,6 @@ telechargerPieceJointe(piece: any): void {
     return statusMap[statut] || 'bg-light text-dark';
   }
 
-  /**
-   * 📊 Obtenir la couleur de priorité
-   */
   getPrioriteColor(priorite: string): string {
     const colorMap: { [key: string]: string } = {
       'Basse': '#28a745',
@@ -580,11 +800,7 @@ telechargerPieceJointe(piece: any): void {
     return colorMap[priorite] || '#6c757d';
   }
 
-  /**
-   * 🔄 Rafraîchir le ticket
-   */
   rafraichirTicket(): void {
-    console.log('🔄 Rafraîchissement du ticket');
     if (this.ticket?.idTicket) {
       this.chargerTicketDetails(this.ticket.idTicket);
     }

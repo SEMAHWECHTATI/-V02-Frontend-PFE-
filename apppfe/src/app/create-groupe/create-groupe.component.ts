@@ -81,14 +81,96 @@ export class CreateGroupeComponent implements OnInit {
       description: 'Gestion du stock matériel, commandes, inventaire'
     },
     {
+      code: 'IT_Management',
+      label: 'IT Management',
+      icon: 'bi-briefcase',
+      description: 'Gestion de projets IT, management d\'équipe, stratégie'
+    },
+    {
       code: 'Demandeur',
       label: 'Demandeur',
       icon: 'bi-person-check',
       description: 'Utilisateurs qui demandent des services/matériel'
     },
-    
-  ];
-
+    {
+      code: 'IT_Devlopper',
+      label: 'IT Devlopper',
+      icon: 'bi-code-slash',
+      description: 'Développement logiciel, programmation, conception d\'applications'
+    },
+    {
+      code: 'IT_Devops',
+      label: 'IT Devops',
+      icon: 'bi-infinity',
+      description: 'Déploiement, infrastructure cloud, intégration et livraison continues (CI/CD)'
+    },
+    {
+      code: 'Autre',
+      label: 'Autre',
+      icon: 'bi-three-dots',
+      description: 'Autres profils et fonctions non spécifiés'
+    },
+    {
+      code: 'IT_Cybersecurite',
+      label: 'IT Cybersécurité',
+      icon: 'bi-shield-lock',
+      description: 'Gestion de la sécurité, audits, pare-feu, gestion des incidents de sécurité'
+    },
+    {
+      code: 'IT_Helpdesk',
+      label: 'IT Support & Helpdesk',
+      icon: 'bi-headset',
+      description: 'Support de premier niveau, assistance aux utilisateurs au quotidien'
+    },
+    {
+      code: 'IT_DBA',
+      label: 'IT Administrateur de Bases de Données',
+      icon: 'bi-database',
+      description: 'Maintenance, optimisation et sécurisation des bases de données'
+    },
+    {
+      code: 'IT_Cloud',
+      label: 'IT Infrastructure & Cloud',
+      icon: 'bi-cloud-arrow-up',
+      description: 'Gestion des serveurs cloud (AWS, Azure), virtualisation et stockage'
+    },
+    {
+      code: 'IT_Business_Analyst',
+      label: 'IT Business Analyst',
+      icon: 'bi-clipboard-data',
+      description: 'Analyse des besoins métiers et traduction en spécifications techniques'
+    },
+    {
+      code: 'IT_QA_Testing',
+      label: 'IT Assurance Qualité & Tests',
+      icon: 'bi-check2-square',
+      description: 'Tests d’applications, automatisation des tests, validation des livraisons'
+    },
+    {
+      code: 'IT_ERP_Systems',
+      label: 'IT Intégration ERP & SAP',
+      icon: 'bi-gear-wide-connected',
+      description: 'Gestion, configuration et support autour des systèmes ERP d\'entreprise'
+    },
+    {
+      code: 'IT_Telecom',
+      label: 'IT Téléphonie & Télécom',
+      icon: 'bi-telephone-outbound',
+      description: 'Gestion de la téléphonie IP, des abonnements mobiles et des communications'
+    },
+    {
+      code: 'IT_Data_BI',
+      label: 'IT Data & Business Intelligence',
+      icon: 'bi-bar-chart-line',
+      description: 'Création de dashboards, analyse de données, rapports d’activité'
+    },
+    {
+      code: 'IT_Formation',
+      label: 'IT Formation & Support Utilisateurs',
+      icon: 'bi-journal-bookmark',
+      description: 'Conduite du changement, rédaction des documentations et formation des équipes'
+    }
+];
   currentUser: any = null;
   groupes: any[] = [];
   selectedTypeIndex = -1;
@@ -330,37 +412,43 @@ export class CreateGroupeComponent implements OnInit {
   }
 
   supprimerGroupe(): void {
-    if (!this.selectedGroupeToDelete?.id) {
-      this.errorMessage = 'Groupe invalide';
-      return;
-    }
+  // 1. On force le log AVANT toute vérification 👇
+  console.log('👆 Bouton cliqué ! Objet reçu complet :', this.selectedGroupeToDelete);
 
-    this.isDeleting = true;
-    const groupeId = this.selectedGroupeToDelete.id;
-    const groupeName = this.selectedGroupeToDelete.nomGroupes;
-
-    console.log('🗑️ Suppression groupe ID:', groupeId);
-
-    this.groupeservice.supprimerGroupe(groupeId).subscribe({
-      next: (res: any) => {
-        this.successMessage = `✅ Groupe "${groupeName}" supprimé !`;
-        this.isDeleting = false;
-        this.closeDeleteModal();
-        this.chargerGroupesExistants();
-
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
-      },
-      error: (err) => {
-        const errorMsg = err.error?.erreur || err.error?.message || 'Erreur suppression';
-        this.errorMessage = `❌ ${errorMsg}`;
-        this.isDeleting = false;
-        console.error('Détail erreur suppression:', err);
-      }
-    });
+  if (!this.selectedGroupeToDelete?.id) {
+    // On affiche l'erreur dans la console pour voir les clés disponibles
+    console.error('❌ L\'ID est indéfinie ! Regardez l\'objet imprimé au-dessus pour trouver le bon nom de clé.');
+    
+    // Astuce : utilisez une alerte native ou mettez temporairement un alert() pour le voir par-dessus la modale
+    alert('Erreur : l\'objet ne contient pas de propriété "id" !');
+    return;
   }
 
+  this.isDeleting = true;
+  const groupeId = this.selectedGroupeToDelete.id;
+  const groupeName = this.selectedGroupeToDelete.nomGroupes;
+
+  console.log('🗑️ Suppression groupe ID:', groupeId);
+
+  this.groupeservice.supprimerGroupe(groupeId).subscribe({
+    next: (res: any) => {
+      this.successMessage = `✅ Groupe "${groupeName}" supprimé !`;
+      this.isDeleting = false;
+      this.closeDeleteModal();
+      this.chargerGroupesExistants();
+
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+    },
+    error: (err) => {
+      const errorMsg = err.error?.erreur || err.error?.message || 'Erreur suppression';
+      this.errorMessage = `❌ ${errorMsg}`;
+      this.isDeleting = false;
+      console.error('Détail erreur suppression:', err);
+    }
+  });
+}
   resetForm(): void {
     this.groupeForm.reset();
     this.selectedTypeIndex = -1;

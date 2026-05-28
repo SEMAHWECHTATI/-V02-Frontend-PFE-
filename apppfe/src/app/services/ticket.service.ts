@@ -13,6 +13,7 @@ export class TicketService {
   private notesUrl = 'http://localhost:8070/api/notes';
   private historiqueUrl = 'http://localhost:8070/api/historique';
   private fichiersUrl = 'http://localhost:8070/api/fichiers';
+  private consommationsUrl = 'http://localhost:8070/api/consommations-pieces';
 
   // ==================== SUBJECTS (Pour la gestion d'état) ====================
   
@@ -295,4 +296,25 @@ downloadPieceJointe(idPieceJointe: number): Observable<Blob> {
     responseType: 'blob' 
   });
 }
+
+/**
+   * 📤 Enregistrer une consommation de pièce
+   */
+  ajouterConsommationPiece(consommation: any): Observable<any> {
+    return this.http.post(`${this.consommationsUrl}`, consommation);
+  }
+
+  /**
+   * 📥 Récupérer les pièces consommées pour un ticket spécifique
+   */
+  getConsommationsParTicket(referenceTicket: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.consommationsUrl}/ticket/${referenceTicket}`);
+  }
+
+  /**
+   * 🗑️ Supprimer/Annuler une consommation
+   */
+  supprimerConsommationPiece(idConsommation: number): Observable<void> {
+    return this.http.delete<void>(`${this.consommationsUrl}/${idConsommation}`);
+  }
 }

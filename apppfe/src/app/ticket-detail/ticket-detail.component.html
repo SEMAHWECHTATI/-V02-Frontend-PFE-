@@ -1,6 +1,5 @@
 <div class="container-fluid" *ngIf="!isLoading && ticket">
   
-  <!-- ================== EN-TÊTE & ACTIONS ================== -->
   <div class="card shadow-sm border-0 mb-4 modern-card">
     <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
@@ -15,10 +14,8 @@
         </span>
       </div>
 
-      <!-- 🎯 BOUTONS D'ACTIONS -->
       <div class="action-buttons d-flex gap-2 flex-wrap">
         
-        <!-- 1️⃣ Démarrer l'intervention (si Nouveau) -->
         <button *ngIf="ticket.statut === 'Nouveau' && isTechnicienOrAdmin()" 
                 class="btn btn-primary" 
                 (click)="demarrerTicket()" 
@@ -26,7 +23,6 @@
           <i class="bi bi-play-circle"></i> Démarrer l'intervention
         </button>
 
-        <!-- 2️⃣ Résoudre le ticket (si En Cours) - OUVRE MODALE -->
         <button *ngIf="(ticket.statut === 'En_Cours' || ticket.statut === 'En_Attente') && isTechnicienOrAdmin()" 
                 class="btn btn-success" 
                 (click)="ouvrirModalResolution()" 
@@ -34,7 +30,6 @@
           <i class="bi bi-check2-circle"></i> Résoudre le ticket
         </button>
 
-        <!-- 3️⃣ Clôturer (si Résolu) - CHANGE STATUT À CLOTURE -->
         <ng-container *ngIf="ticket.statut === 'Resolu' && isDemandeurOrAdmin()">
           <button class="btn btn-success" 
                   (click)="cloturerTicket()" 
@@ -48,7 +43,6 @@
           </button>
         </ng-container>
 
-        <!-- 4️⃣ Supprimer (Admin uniquement) -->
         <button *ngIf="isAdmin()" 
                 class="btn btn-danger" 
                 (click)="supprimerTicket()" 
@@ -56,7 +50,6 @@
           <i class="bi bi-trash"></i> Supprimer
         </button>
 
-        <!-- 5️⃣ Archivé (si Cloture) -->
         <div *ngIf="ticket.statut === 'Cloture'" class="text-muted fw-bold">
           <i class="bi bi-lock"></i> Ticket clôturé et archivé
         </div>
@@ -64,7 +57,6 @@
     </div>
   </div>
 
-  <!-- ================== MESSAGES D'ALERTE ================== -->
   <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
     <button type="button" class="btn-close" (click)="successMessage = ''"></button>
@@ -75,10 +67,8 @@
     <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
   </div>
 
-  <!-- ================== CONTENU PRINCIPAL ================== -->
   <div class="row">
     
-    <!-- 📋 COLONNE GAUCHE : DÉTAILS -->
     <div class="col-lg-5 mb-4">
       <div class="card shadow-sm border-0 h-100 modern-card">
         <div class="card-header bg-white py-3">
@@ -88,7 +78,6 @@
         </div>
         <div class="card-body">
           
-          <!-- Description -->
           <div class="detail-group mb-3">
             <label class="text-muted small text-uppercase">Description</label>
             <div class="p-3 bg-light rounded mt-1">
@@ -98,7 +87,6 @@
 
           <hr>
           
-          <!-- Infos principales -->
           <div class="row mb-3">
             <div class="col-6">
               <label class="text-muted small text-uppercase">Demandeur</label>
@@ -132,7 +120,6 @@
             </div>
           </div>
 
-          <!-- Solution appliquée -->
           <div *ngIf="ticket.noteResolution" class="alert alert-success mt-4">
             <h6 class="alert-heading">
               <i class="bi bi-check-circle-fill"></i> Solution appliquée
@@ -143,7 +130,6 @@
       </div>
     </div>
 
-    <!-- 💬 COLONNE DROITE : CHAT & HISTORIQUE -->
     <div class="col-lg-7 mb-4">
       <div class="card shadow-sm border-0 h-100 modern-card d-flex flex-column">
         <div class="card-header bg-white py-3">
@@ -152,17 +138,14 @@
           </h5>
         </div>
         
-        <!-- Zone de chat (scrollable) -->
         <div class="card-body chat-box flex-grow-1" style="max-height: 500px; overflow-y: auto; background-color: #f8f9fa;">
           
-          <!-- État vide -->
           <div *ngIf="notes.length === 0" class="text-center text-muted mt-5">
             <i class="bi bi-chat-square-text" style="font-size: 2rem;"></i>
             <p>Aucun message pour le moment.</p>
           </div>
 
-          <!-- Messages -->
-          <div *ngFor="let note of notes" class="mb-4">
+          <div class="mb-4" *ngFor="let note of notes">
             <div class="d-flex flex-column" 
                  [ngClass]="note.utilisateur?.id === currentUser.id ? 'align-items-end' : 'align-items-start'">
               <small class="text-muted mb-1 px-1">
@@ -176,8 +159,8 @@
             </div>
           </div>
         </div>
+        
 
-        <!-- Zone de saisie (uniquement si pas clôturé) -->
         <div class="card-footer bg-white border-top-0 py-3" *ngIf="ticket.statut !== 'Cloture'">
           <div class="input-group">
             <textarea class="form-control bg-light border-0" 
@@ -195,13 +178,13 @@
     </div>
   </div>
 
-  <!-- ================== PIÈCES JOINTES ================== -->
   <div class="card shadow-sm border-0 mb-4 modern-card">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
       <h5 class="mb-0">
         <i class="bi bi-paperclip text-primary"></i> 
         Pièces jointes 
-      <span class="badge bg-primary ms-2">{{ piecesJointes.length || 0 }}</span>      </h5>
+        <span class="badge bg-primary ms-2">{{ piecesJointes.length || 0 }}</span>
+      </h5>
       <button class="btn btn-sm btn-outline-primary" 
               data-bs-toggle="collapse" 
               data-bs-target="#uploadZone"
@@ -212,7 +195,6 @@
 
     <div class="card-body">
       
-      <!-- ✅ ZONE D'UPLOAD (Collapsible) -->
       <div id="uploadZone" class="collapse mb-4" *ngIf="ticket.statut !== 'Cloture' && isTechnicienOrAdmin()">
         <div class="card card-body bg-light border-dashed p-4">
           <h6 class="mb-3">
@@ -231,7 +213,6 @@
             </small>
           </div>
 
-          <!-- Aperçu du fichier sélectionné -->
           <div *ngIf="selectedFile" class="alert alert-info mb-3">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -249,7 +230,6 @@
             </div>
           </div>
 
-          <!-- Bouton d'upload -->
           <button class="btn btn-primary" 
                   (click)="uploadFichier()"
                   [disabled]="!selectedFile || fileUploadInProgress"
@@ -261,7 +241,6 @@
         </div>
       </div>
 
-      <!-- 📋 LISTE DES PIÈCES JOINTES -->
       <div *ngIf="piecesJointes && piecesJointes.length > 0">
         <div class="table-responsive">
           <table class="table table-hover table-sm mb-0">
@@ -292,14 +271,12 @@
                   <small class="text-muted">{{ piece.dateAjout | date:'dd/MM/yyyy HH:mm' }}</small>
                 </td>
                 <td>
-                  <!-- 📥 Télécharger -->
                   <button class="btn btn-sm btn-outline-primary" 
                           (click)="telechargerPieceJointe(piece)"
                           title="Télécharger">
                     <i class="bi bi-download"></i>
                   </button>
 
-                  <!-- 🗑️ Supprimer (si technicien/admin) -->
                   <button class="btn btn-sm btn-outline-danger" 
                           (click)="supprimerPieceJointe(piece.idJointe)"
                           *ngIf="isTechnicienOrAdmin()"
@@ -313,7 +290,6 @@
         </div>
       </div>
 
-      <!-- État vide -->
       <div *ngIf="!piecesJointes || piecesJointes.length === 0" class="text-center text-muted py-4">
         <i class="bi bi-inbox" style="font-size: 2rem;"></i>
         <p class="mt-2">Aucune pièce jointe pour le moment.</p>
@@ -322,11 +298,8 @@
   </div>
 </div>
 
-<!-- ================== MODALE RÉSOUDRE ================== -->
 <div *ngIf="showResolveModal" class="modal-overlay">
-  <div class="modal-content">
-    
-    <!-- En-tête -->
+  <div class="modal-content" style="max-width: 650px;"> 
     <div class="modal-header">
       <h5 class="modal-title">
         <i class="bi bi-check2-circle text-success"></i> Résoudre le ticket
@@ -334,39 +307,94 @@
       <button type="button" class="btn-close" (click)="showResolveModal = false"></button>
     </div>
     
-    <!-- Contenu -->
     <div class="modal-body">
       
-      <!-- Note de résolution -->
       <div class="form-group mb-3">
         <label class="form-label fw-bold">Note de résolution *</label>
         <textarea class="form-control" 
-                  rows="4" 
+                  rows="3" 
+                  name="noteResolution"
                   placeholder="Décrivez les actions effectuées..." 
                   [(ngModel)]="noteResolution"></textarea>
       </div>
 
-      <!-- ⏱️ CHAMP TEMPS MANUEL -->
-      <div class="form-group bg-light p-3 rounded border">
-        <label class="form-label fw-bold text-primary">
+      <div class="form-group bg-light p-3 rounded border mb-3">
+        <label class="form-label fw-bold text-primary mb-1">
           <i class="bi bi-stopwatch"></i> Temps d'intervention *
         </label>
         <div class="input-group">
           <input type="number" 
                  class="form-control" 
+                 name="tempsIntervention"
                  [(ngModel)]="tempsIntervention" 
                  min="1" 
                  placeholder="Saisissez le temps en minutes">
           <span class="input-group-text">minutes</span>
         </div>
-        <small class="text-muted mt-1 d-block">
-          <i class="bi bi-info-circle"></i> 
-          Saisissez manuellement le temps passé sur cette intervention.
-        </small>
       </div>
+
+      <div class="form-group bg-light p-3 rounded border">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label fw-bold text-success mb-0">
+            <i class="bi bi-tools"></i> Pièces consommées (Optionnel)
+          </label>
+          <button type="button" class="btn btn-xs btn-sm btn-outline-success" (click)="ajouterPieceConsommee()">
+            <i class="bi bi-plus-lg"></i> Ajouter une pièce
+          </button>
+        </div>
+
+        <div *ngIf="piecesConsommees.length === 0" class="text-muted small text-center py-2 bg-white rounded border border-dashed">
+          Aucune pièce enregistrée pour cette intervention.
+        </div>
+
+        <div class="row g-2 align-items-center mb-2 p-2 bg-white rounded border shadow-sm mx-0" 
+             *ngFor="let item of piecesConsommees; let idx = index">
+          
+          <div class="col-md-4">
+            <select class="form-select form-select-sm" 
+                    [name]="'categorie-' + idx"
+                    [(ngModel)]="item.categorieId" 
+                    (change)="onCategorieChange(item)">
+              <option [ngValue]="undefined" disabled selected>-- Catégorie --</option>
+              <option *ngFor="let cat of listeCategoriesPieces" [ngValue]="cat.id">
+                ({{ cat.categorie }})
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-5">
+            <select class="form-select form-select-sm" 
+                    [name]="'article-' + idx"
+                    [(ngModel)]="item.articleId"
+                    [disabled]="!item.categorieId">
+              <option [ngValue]="undefined" disabled selected>-- Désignation pièce --</option>
+              <option *ngFor="let art of getArticlesParCategorie(item.categorieId)" [ngValue]="art.id">
+                {{art.designation}}  -  {{ art.reference }} 
+              </option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <input type="number" 
+                   class="form-control form-control-sm" 
+                   [name]="'quantite-' + idx"
+                   [(ngModel)]="item.quantite" 
+                   min="1" 
+                   placeholder="Qté">
+          </div>
+
+          <div class="col-md-1 text-end">
+            <button type="button" 
+                    class="btn btn-sm btn-outline-danger border-0" 
+                    (click)="supprimerPieceConsommee(idx)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Boutons -->
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="showResolveModal = false">
         Annuler
@@ -374,14 +402,13 @@
       <button type="button" 
               class="btn btn-success" 
               (click)="resoudreTicket()" 
-              [disabled]="!noteResolution.trim() || actionInProgress || tempsIntervention <= 0">
+              [disabled]="!noteResolution.trim() || actionInProgress || tempsIntervention <= 0 || !validerPieces()">
         <i class="bi bi-check-lg"></i> Résoudre le ticket
       </button>
     </div>
   </div>
 </div>
 
-<!-- ================== LOADER ================== -->
 <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 50vh;">
   <div class="spinner-border text-primary" role="status"></div>
   <span class="ms-3">Chargement des détails du ticket...</span>

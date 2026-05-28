@@ -1,0 +1,225 @@
+<div class="demandes-list-container">
+
+  <!-- Header -->
+  <div class="form-header">
+    <h2>{{ titre }}</h2>
+    <p>{{ description }}</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="demandes.length === 0" class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <p>Aucune demande</p>
+  </div>
+
+  <!-- TABLE -->
+  <div *ngIf="demandes.length > 0" class="table-responsive">
+    
+    <table class="table custom-table align-middle">
+
+      <thead>
+        <tr>
+          <th>Article</th>
+          <th>Demandeur</th>
+          <th>Quantité</th>
+          <th>Type</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <!-- ROW PRINCIPALE -->
+        <ng-container *ngFor="let demande of demandes">
+
+          <tr class="table-row">
+
+            <td>
+              <div class="fw-bold">
+                {{ demande.article?.designation }}
+              </div>
+            </td>
+
+            <td>
+              {{ demande.utilisateurDemandeur?.nom }}
+              {{ demande.utilisateurDemandeur?.prenom }}
+            </td>
+
+            <td>
+              {{ demande.quantiteDemandee }}
+            </td>
+
+            <td>
+              <span class="badge bg-primary">
+                {{ demande.type }}
+              </span>
+            </td>
+
+            <td>
+  <span class="status-badge"
+        [ngClass]="getStatusClass(demande.statut)">
+    {{ demande.statut }}
+  </span>
+</td>
+
+            <td>
+              {{ demande.dateCreation | date:'dd/MM/yyyy' }}
+            </td>
+
+            <td class="text-center">
+
+              <!-- BTN DETAILS -->
+              <button 
+                class="btn btn-outline-primary btn-sm me-2"
+                (click)="demande.showDetails = !demande.showDetails">
+
+                <i class="bi"
+                  [ngClass]="demande.showDetails ? 'bi-chevron-up' : 'bi-chevron-down'">
+                </i>
+
+                {{ demande.showDetails ? 'Fermer' : 'Détails' }}
+              </button>
+
+            </td>
+
+          </tr>
+
+          <!-- DETAILS ROW -->
+          <tr *ngIf="demande.showDetails" class="details-row">
+
+            <td colspan="7">
+
+              <div class="details-container">
+
+                <!-- INFOS ARTICLE -->
+                <div class="detail-section">
+                  <h5>
+                    <i class="bi bi-box"></i>
+                    Informations Article
+                  </h5>
+
+                  <div class="detail-grid">
+                    <div>
+                      <span class="label">Désignation:</span>
+                      {{ demande.article?.designation }}
+                    </div>
+
+                    <div>
+                      <span class="label">Quantité:</span>
+                      {{ demande.quantiteDemandee }}
+                    </div>
+
+                    <div>
+                      <span class="label">Type:</span>
+                      {{ demande.type }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- DEMANDEUR -->
+                <div class="detail-section">
+                  <h5>
+                    <i class="bi bi-person"></i>
+                    Demandeur
+                  </h5>
+
+                  <div class="detail-grid">
+
+                    <div>
+                      <span class="label">Nom:</span>
+                      {{ demande.utilisateurDemandeur?.nom }}
+                      {{ demande.utilisateurDemandeur?.prenom }}
+                    </div>
+
+                    <div>
+                      <span class="label">Email:</span>
+                      {{ demande.utilisateurDemandeur?.email }}
+                    </div>
+
+                    <div>
+                      <span class="label">Téléphone:</span>
+                      {{ demande.utilisateurDemandeur?.telephone }}
+                    </div>
+
+                    <div>
+                      <span class="label">Département:</span>
+                      {{ demande.utilisateurDemandeur?.departement }}
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- JUSTIFICATION -->
+                <div class="detail-section">
+                  <h5>
+                    <i class="bi bi-chat-dots"></i>
+                    Justification
+                  </h5>
+
+                  <p class="justify-text">
+                    {{ demande.justification }}
+                  </p>
+                </div>
+
+                <!-- REJET -->
+                <div *ngIf="demande.motifRejet" class="detail-section rejection-box">
+
+                  <h5>
+                    <i class="bi bi-x-circle"></i>
+                    Motif du rejet
+                  </h5>
+
+                  <p>
+                    {{ demande.motifRejet }}
+                  </p>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div *ngIf="showActions" class="action-buttons">
+
+                  <button 
+                    *ngIf="type === 'enAttente'"
+                    class="btn btn-success btn-sm"
+                    (click)="onValiderGestionnaire(demande)">
+
+                    <i class="bi bi-check-circle"></i>
+                    Valider
+                  </button>
+
+                  <button 
+                    *ngIf="type === 'valideeGestionnaire'"
+                    class="btn btn-success btn-sm"
+                    (click)="onValiderAdmin(demande)">
+
+                    <i class="bi bi-check-lg"></i>
+                    Valider & Consommer
+                  </button>
+
+                  <button 
+                    class="btn btn-danger btn-sm"
+                    (click)="onRejeter(demande)">
+
+                    <i class="bi bi-x-circle"></i>
+                    Rejeter
+                  </button>
+
+                </div>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </ng-container>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

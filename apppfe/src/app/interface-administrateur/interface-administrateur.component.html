@@ -1,7 +1,6 @@
 <div class="container-fluid" [class.dark-mode]="isDarkMode" [class.horizontal-layout]="!isVerticalLayout">
     <div class="row flex-nowrap" [class.horizontal-row]="!isVerticalLayout">
         
-        <!-- SIDEBAR VERTICALE -->
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark sidebar shadow" *ngIf="isVerticalLayout">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
                 <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
@@ -17,23 +16,23 @@
                         <a class="nav-link align-middle px-0 text-white" 
                            [class.active]="vueActuelle === 'accueil'" 
                            (click)="changerVue('accueil')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline "><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
+                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
                         </a>
                     </li>
 
                     <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
-                          <a (click)="menuTicketsOuvert = !menuTicketsOuvert" 
-       class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
-       [class.active]="vueActuelle === 'creerTicket' || vueActuelle === 'liste-tickets' || vueActuelle === 'mesInterventions'"
-       style="cursor: pointer;">
-        <div>
-            <i class="bi bi-tools me-2 text-success"></i> 
-            <span class="ms-1 d-none d-sm-inline">Interventions & Tickets</span>
-        </div>
-        <i class="bi d-none d-sm-inline ms-2" 
-           [ngClass]="menuTicketsOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
-           style="font-size: 0.8rem;"></i>
-    </a>
+                        <a (click)="menuTicketsOuvert = !menuTicketsOuvert" 
+                           class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
+                           [class.active]="vueActuelle === 'creerTicket' || vueActuelle === 'liste-tickets' || vueActuelle === 'mesInterventions'"
+                           style="cursor: pointer;">
+                            <div>
+                                <i class="bi bi-tools me-2 text-success"></i> 
+                                <span class="ms-1 d-none d-sm-inline">Interventions & Tickets</span>
+                            </div>
+                            <i class="bi d-none d-sm-inline ms-2" 
+                               [ngClass]="menuTicketsOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
+                               style="font-size: 0.8rem;"></i>
+                        </a>
 
                         <ul class="nav flex-column ms-3 collapse" [ngClass]="{'show': menuTicketsOuvert}">
                             <li class="w-100">
@@ -80,13 +79,41 @@
                             </li>
                         </ul>
                     </li>
-
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Gestionnaire_Stock'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'inventaire'" 
-                           (click)="changerVue('inventaire')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-archive me-2 text-success"></i> Inventaire & Stocks</span>
+                    
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
+                        <a (click)="menuInventaireOuvert = !menuInventaireOuvert" 
+                           class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
+                           [class.active]="vueActuelle === 'demandermatriel' || vueActuelle === 'liste-demandematiel' || vueActuelle === 'mesdemandes'"
+                           style="cursor: pointer;">
+                            <div>
+                                <i class="bi bi-archive me-2 text-success"></i> 
+                                <span class="ms-1 d-none d-sm-inline">Inventaire & Stocks</span>
+                            </div>
+                            <i class="bi d-none d-sm-inline ms-2" 
+                               [ngClass]="menuInventaireOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
+                               style="font-size: 0.8rem;"></i>
                         </a>
+
+                        <ul class="nav flex-column ms-3 collapse" [ngClass]="{'show': menuInventaireOuvert}">
+                            <li class="w-100">
+                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'demandermatriel'" (click)="changerVue('demandermatriel')" style="cursor: pointer;">
+                                    <i class="bi bi-plus-circle me-2 text-info"></i> 
+                                    <span class="d-none d-sm-inline">Créer une demande de matériel</span>
+                                </a>
+                            </li>
+                            <li class="w-100">
+                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'liste-demandematiel'" (click)="changerVue('liste-demandematiel')" style="cursor: pointer;">
+                                    <i class="bi bi-list-task me-2 text-warning"></i> 
+                                    <span class="d-none d-sm-inline">Liste des demandes de matériel</span>
+                                </a>
+                            </li>
+                            <li class="w-100">
+                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesdemandes'" (click)="changerVue('mesdemandes')" style="cursor: pointer;">
+                                    <i class="bi bi-clock-history me-2 text-secondary"></i> 
+                                    <span class="d-none d-sm-inline">Mes demandes de matériel</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
@@ -94,7 +121,7 @@
                            [class.active]="vueActuelle === 'alertes'" 
                            (click)="changerVue('alertes')" style="cursor: pointer;">
                             <span class="ms-1 d-none d-sm-inline">
-                                <i class="bi bi-bell-fill me-2 text-danger"></i> Alertes & Notifications
+                                <i class="bi bi-bell-fill"></i> Alertes & Notifications
                                 <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span>
                             </span>
                         </a>
@@ -144,74 +171,7 @@
             </div>
         </div>
 
-        <!-- MENU HORIZONTAL -->
-        
-        <!-- CONTENU PRINCIPAL -->
-        <div class="col py-4 px-4" [class.bg-light]="!isDarkMode" [class.bg-dark]="isDarkMode" style="min-height: 100vh; overflow-y: auto;">
-            
-            <!-- HEADER AVEC CONTRÔLES -->
-            <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm" 
-                 [class.bg-white]="!isDarkMode" [class.bg-dark]="isDarkMode"
-                 [class.border-start]="!isDarkMode" [class.border-primary]="!isDarkMode" 
-                 [class.border-4]="!isDarkMode"
-                 *ngIf="currentUser">
-                <div class="d-flex align-items-center gap-3">
-                    <h2 class="fw-bold" [class.text-danger]="!isDarkMode" [class.text-light]="isDarkMode" style="margin-bottom: 0;">
-                         {{ currentUser?.role }}
-                    </h2>
-                     <span class="badge" [class.bg-warning]="!isDarkMode" [class.bg-secondary]="isDarkMode" 
-                          [class.text-dark]="!isDarkMode" [class.text-light]="isDarkMode" style="padding: 8px 12px;">
-                        <i class="bi bi-building"></i> {{ currentUser?.departement }}
-                    </span>
-                    <a href="https://sagemcom.com/fr" target="_blank">
-                        <img src="/assets/logo-sagem.png" alt="Sagem Logo" style="height: 80px;">
-                    </a>
-                </div>
-               
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge" [class.bg-primary]="!isDarkMode" [class.bg-secondary]="isDarkMode" style="padding: 8px 12px;">
-                        <i class="bi bi-person"></i> {{ currentUser?.prenom }} {{ currentUser?.nom }}
-                    </span>
-                    <span class="badge" [class.bg-info]="!isDarkMode" [class.bg-secondary]="isDarkMode" style="padding: 8px 12px;">
-                        <i class="bi bi-briefcase"></i> {{ currentUser?.role }}
-                    </span>
-                     <div class="d-flex align-items-center gap-2">
-                    <!-- Bouton Mode Sombre -->
-                    <button class="btn btn-sm" [class.btn-light]="isDarkMode" [class.btn-dark]="!isDarkMode" 
-                            (click)="toggleDarkMode()" [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
-                        <i [ngClass]="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon'"></i>
-                    </button>
-                    <!-- Bouton Changement Disposition -->
-                    <button class="btn btn-sm" [class.btn-light]="isDarkMode" [class.btn-dark]="!isDarkMode"
-                            (click)="changeLayout()" [title]="isVerticalLayout ? 'Menu horizontal' : 'Menu vertical'">
-                        <i [ngClass]="isVerticalLayout ? 'bi bi-layout-three-columns' : 'bi bi-layout-sidebar'"></i>
-                    </button>
-                </div>
-                   
-                </div>
-            </div>
-            <div class="bande-container">
-    <div class="bande-news">
-        <span> 📢 Bienvenue sur votre interface de gestion GITI-KPI !</span>
-        <span>🔥 Flash Info :  Alertes & Notifications
-                                <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span>            
-            !</span>
-        <span>🚀  <i class="bi bi-file-earmark-person me-2 text-warning"></i> Demandes d'accès
-                                <span class="badge bg-danger ms-2 rounded-pill" *ngIf="nombreDemandesEnAttente > 0">
-                                    {{ nombreDemandesEnAttente }}
-                                </span></span>
-        <span>🌍 Actualité : Le web design évolue rapidement.</span>
-        
-    </div>
-</div>
-<nav class="horizontal-navbar" *ngIf="!isVerticalLayout">
-    <!-- <div class="container-logo">
-        <a href="https://sagemcom.com/fr" target="_blank">
-            <img src="assets/newlog.png" alt="Sagem Logo" style="height: 50px;">
-        </a>    
-        
-        </div> -->
-      
+        <nav class="horizontal-navbar" *ngIf="!isVerticalLayout">
             <div class="h-menu-container">
                 <ul class="h-nav-menu">
                     <li *ngIf="currentUser?.role === 'Administrateur'">
@@ -232,10 +192,17 @@
                             <li><a (click)="changerVue('mesInterventions')">Mes interventions</a></li>
                         </ul>
                     </li>
-                    <li *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Gestionnaire_Stock'">
-                        <a (click)="changerVue('inventaire')" [class.active]="vueActuelle === 'inventaire'">
+                    
+                    <li class="dropdown" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Gestionnaire_Stock' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
+                        <a (click)="menuInventaireOuvert = !menuInventaireOuvert" [class.active]="vueActuelle === 'demandermatriel' || vueActuelle === 'liste-demandematiel' || vueActuelle === 'mesdemandes'">
                             <i class="bi bi-archive"></i> Inventaire
+                            <i class="bi" [ngClass]="menuInventaireOuvert ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                         </a>
+                        <ul class="dropdown-menu" [ngClass]="{'show': menuInventaireOuvert}">
+                            <li><a (click)="changerVue('demandermatriel')">Créer une demande matériel</a></li>
+                            <li><a (click)="changerVue('liste-demandematiel')">Liste des demandes matériel</a></li>
+                            <li><a (click)="changerVue('mesdemandes')">Mes demandes matériel</a></li>
+                        </ul>
                     </li>
                     <li *ngIf="currentUser?.role === 'Administrateur'">
                         <a (click)="changerVue('alertes')" [class.active]="vueActuelle === 'alertes'">
@@ -252,16 +219,67 @@
                             <i class="bi bi-file-earmark-person"></i> Demandes
                         </a>
                     </li>
-                   
                 </ul>
              
-                    <button class="btn btn-outline-danger btn-sm" (click)="seDeconnecter()">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
-                </div>
+                <button class="btn btn-outline-danger btn-sm" (click)="seDeconnecter()">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </div>
         </nav>
 
-            <!-- CONTENU DYNAMIQUE -->
+        <div class="col py-4 px-4" [class.bg-light]="!isDarkMode" [class.bg-dark]="isDarkMode" style="min-height: 100vh; overflow-y: auto;">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm" 
+                 [class.bg-white]="!isDarkMode" [class.bg-dark]="isDarkMode"
+                 [class.border-start]="!isDarkMode" [class.border-primary]="!isDarkMode" 
+                 [class.border-4]="!isDarkMode"
+                 *ngIf="currentUser">
+                <div class="d-flex align-items-center gap-3">
+                    <h2 class="fw-bold" [class.text-danger]="!isDarkMode" [class.text-light]="isDarkMode" style="margin-bottom: 0;">
+                         {{ currentUser?.role }}
+                    </h2>
+                    <span class="badge" [class.bg-warning]="!isDarkMode" [class.bg-secondary]="isDarkMode" 
+                          [class.text-dark]="!isDarkMode" [class.text-light]="isDarkMode" style="padding: 8px 12px;">
+                        <i class="bi bi-building"></i> {{ currentUser?.departement }}
+                    </span>
+                    <a href="https://sagemcom.com/fr" target="_blank">
+                        <img src="/assets/logo-sagem.png" alt="Sagem Logo" style="height: 80px;">
+                    </a>
+                </div>
+               
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge" [class.bg-primary]="!isDarkMode" [class.bg-secondary]="isDarkMode" style="padding: 8px 12px;">
+                        <i class="bi bi-person"></i> {{ currentUser?.prenom }} {{ currentUser?.nom }}
+                    </span>
+                    <span class="badge" [class.bg-info]="!isDarkMode" [class.bg-secondary]="isDarkMode" style="padding: 8px 12px;">
+                        <i class="bi bi-briefcase"></i> {{ currentUser?.role }}
+                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm" [class.btn-light]="isDarkMode" [class.btn-dark]="!isDarkMode" 
+                                (click)="toggleDarkMode()" [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
+                            <i [ngClass]="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon'"></i>
+                        </button>
+                        <button class="btn btn-sm" [class.btn-light]="isDarkMode" [class.btn-dark]="!isDarkMode"
+                                (click)="changeLayout()" [title]="isVerticalLayout ? 'Menu horizontal' : 'Menu vertical'">
+                            <i [ngClass]="isVerticalLayout ? 'bi bi-layout-three-columns' : 'bi bi-layout-sidebar'"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bande-container">
+                <div class="bande-news">
+                    <span> 📢 Bienvenue sur votre interface de gestion GITI-KPI !</span>
+                    <span>🔥 Flash Info : Alertes & Notifications <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span> !</span>
+                    <span>🚀 <i class="bi bi-file-earmark-person me-2 text-warning"></i> Demandes d'accès
+                        <span class="badge bg-danger ms-2 rounded-pill" *ngIf="nombreDemandesEnAttente > 0">
+                            {{ nombreDemandesEnAttente }}
+                        </span>
+                    </span>
+                    <span>🌍 Actualité : Le web design évolue rapidement.</span>
+                </div>
+            </div>
+
             <div *ngIf="vueActuelle === 'accueil'">
                 <h4 class="mb-3" [class.text-secondary]="!isDarkMode" [class.text-light]="isDarkMode">Aperçu Global (Temps Réel)</h4>
                 <div class="row g-4 mb-5">
@@ -303,6 +321,9 @@
                     </div>
                 </div>
             </div>
+            <div *ngIf="vueActuelle === 'demandermatriel'">
+                <app-demandematriel></app-demandematriel>
+            </div>
 
             <div *ngIf="vueActuelle === 'creerTicket'">
                 <app-create-ticket-page></app-create-ticket-page>
@@ -324,6 +345,15 @@
             </div>
             <div *ngIf="vueActuelle === 'enumerations'">
                 <app-enumeration></app-enumeration>
+            </div>
+            <div *ngIf="vueActuelle === 'demandermatriel'">
+                <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Formulaire de demande de matériel...</div>
+            </div>
+            <div *ngIf="vueActuelle === 'liste-demandematiel'">
+                <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Liste globale des demandes de matériel...</div>
+            </div>
+            <div *ngIf="vueActuelle === 'mesdemandes'">
+                <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Liste de vos demandes de matériel...</div>
             </div>
             <div *ngIf="vueActuelle === 'inventaire'">
                 <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Module du catalogue matériel, mouvements de stock et valeurs IT.</div>

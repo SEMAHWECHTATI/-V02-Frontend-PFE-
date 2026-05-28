@@ -1,6 +1,5 @@
 <div class="stock-app-container">
 
-  <!-- HEADER -->
   <header class="stock-header">
     <div class="header-content">
       <div class="logo-section">
@@ -23,7 +22,7 @@
           </div>
           <div class="user-menu">
             <p class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</p>
-            <span class="user-role">Gestionnaire</span>
+            <span class="user-role">{{ currentUser.role === 'Administrateur' ? 'Administrateur' : 'Gestionnaire' }}</span>
           </div>
           <button class="btn-logout" (click)="deconnexion()" title="Déconnexion">
             <i class="bi bi-box-arrow-right"></i>
@@ -33,13 +32,9 @@
     </div>
   </header>
 
-  <!-- MAIN LAYOUT -->
   <div class="main-layout">
 
-    <!-- SIDEBAR - VERSION MODERNE -->
     <aside class="sidebar">
-      
-      <!-- Sidebar Header -->
       <div class="sidebar-header">
         <h2>Menu</h2>
         <button class="sidebar-toggle" (click)="toggleSidebar()">
@@ -47,118 +42,64 @@
         </button>
       </div>
 
-      <!-- Navigation Menu -->
       <nav class="menu">
-        
-        <!-- Dashboard -->
-        <a class="menu-item" 
-           (click)="changerVue('dashboard')"
-           [class.active]="vueActuelle === 'dashboard'">
-          <div class="menu-icon">
-            <i class="bi bi-speedometer2"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('dashboard')" [class.active]="vueActuelle === 'dashboard'">
+          <div class="menu-icon"><i class="bi bi-speedometer2"></i></div>
           <span class="menu-label">Dashboard</span>
-          <span *ngIf="stats.alertesNonTraitees > 0" class="menu-badge">
-            {{ stats.alertesNonTraitees }}
-          </span>
+          <span *ngIf="stats.alertesNonTraitees > 0" class="menu-badge">{{ stats.alertesNonTraitees }}</span>
         </a>
 
-        <!-- Articles -->
-        <a class="menu-item"
-           (click)="changerVue('articles')"
-           [class.active]="vueActuelle === 'articles'">
-          <div class="menu-icon">
-            <i class="bi bi-box2-heart"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('articles')" [class.active]="vueActuelle === 'articles'">
+          <div class="menu-icon"><i class="bi bi-box2-heart"></i></div>
           <span class="menu-label">Articles</span>
-          <span *ngIf="stats.totalArticles > 0" class="menu-badge">
-            {{ stats.totalArticles }}
-          </span>
+          <span *ngIf="stats.totalArticles > 0" class="menu-badge">{{ stats.totalArticles }}</span>
         </a>
 
-        <a class="menu-item"
-           (click)="changerVue('creer-article')"
-           [class.active]="vueActuelle === 'creer-article'">
-          <div class="menu-icon">
-            <i class="bi bi-plus-circle"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('creer-article')" [class.active]="vueActuelle === 'creer-article'">
+          <div class="menu-icon"><i class="bi bi-plus-circle"></i></div>
           <span class="menu-label">Ajouter Article</span>
         </a>
 
-        <!-- Mouvements -->
-        <a class="menu-item"
-           (click)="changerVue('mouvements')"
-           [class.active]="vueActuelle === 'mouvements'">
-          <div class="menu-icon">
-            <i class="bi bi-arrow-left-right"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('mouvements')" [class.active]="vueActuelle === 'mouvements'">
+          <div class="menu-icon"><i class="bi bi-arrow-left-right"></i></div>
           <span class="menu-label">Mouvements</span>
         </a>
 
-        <!-- Separator -->
         <div class="menu-separator"></div>
 
-        <!-- Demandes de Matériel -->
-        <a class="menu-item"
-           (click)="changerVue('demandes-gestionnaire')"
-           [class.active]="vueActuelle === 'demandes-gestionnaire'">
-          <div class="menu-icon">
-            <i class="bi bi-inbox"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('demandes-gestionnaire')" [class.active]="vueActuelle === 'demandes-gestionnaire'">
+          <div class="menu-icon"><i class="bi bi-inbox"></i></div>
           <span class="menu-label">Demandes</span>
-          <span *ngIf="stats.demandesEnAttente > 0" class="menu-badge warning">
-            {{ stats.demandesEnAttente }}
-          </span>
+          <span *ngIf="stats.demandesEnAttente > 0" class="menu-badge warning">{{ stats.demandesEnAttente }}</span>
         </a>
 
-        <a class="menu-item"
-           (click)="changerVue('creer-demande')"
-           [class.active]="vueActuelle === 'creer-demande'">
-          <div class="menu-icon">
-            <i class="bi bi-file-earmark-plus"></i>
-          </div>
+        <a class="menu-item" (click)="changerVue('creer-demande')" [class.active]="vueActuelle === 'creer-demande'">
+          <div class="menu-icon"><i class="bi bi-file-earmark-plus"></i></div>
           <span class="menu-label">Créer Demande</span>
         </a>
 
-        <!-- Alertes -->
-        <a class="menu-item alert-menu"
-           (click)="changerVue('alertes')"
-           [class.active]="vueActuelle === 'alertes'">
-          <div class="menu-icon">
-            <i class="bi bi-exclamation-triangle"></i>
-          </div>
+        <a class="menu-item alert-menu" (click)="changerVue('alertes')" [class.active]="vueActuelle === 'alertes'">
+          <div class="menu-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <span class="menu-label">Alertes</span>
-          <span *ngIf="stats.alertesCritiques > 0" class="menu-badge critical">
-            {{ stats.alertesCritiques }}
-          </span>
+          <span *ngIf="stats.alertesCritiques > 0" class="menu-badge critical">{{ stats.alertesCritiques }}</span>
         </a>
 
-        <!-- Statistiques -->
-        <a class="menu-item"
-           (click)="changerVue('statistiques')"
-           [class.active]="vueActuelle === 'statistiques'">
-          <div class="menu-icon">
-            <i class="bi bi-graph-up"></i>
-          </div>
+        <a *ngIf="currentUser.role === 'Administrateur'" class="menu-item" (click)="changerVue('statistiques')" [class.active]="vueActuelle === 'statistiques'">
+          <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
           <span class="menu-label">Statistiques</span>
         </a>
-
       </nav>
 
-      <!-- Sidebar Footer -->
       <div class="sidebar-footer">
         <div class="sidebar-info">
           <p>📦 Inventaire</p>
           <span>{{ today | date:'d MMM yyyy' }}</span>
         </div>
       </div>
-
     </aside>
 
-    <!-- CONTENT -->
     <main class="content">
 
-      <!-- DASHBOARD VIEW -->
       <div *ngIf="vueActuelle === 'dashboard'" class="view dashboard-view">
         <div class="view-header">
           <div>
@@ -166,160 +107,112 @@
             <p>Vue d'ensemble de votre inventaire</p>
           </div>
           <div class="view-actions">
-            <button class="btn-icon-small" title="Télécharger">
-              <i class="bi bi-download"></i>
-            </button>
-            <button class="btn-icon-small" (click)="chargerStatistiques()" title="Actualiser">
-              <i class="bi bi-arrow-clockwise"></i>
-            </button>
+            <button class="btn-icon-small" title="Télécharger"><i class="bi bi-download"></i></button>
+            <button class="btn-icon-small" (click)="chargerStatistiques()" title="Actualiser"><i class="bi bi-arrow-clockwise"></i></button>
           </div>
         </div>
 
-        <!-- KPI Cards -->
         <div class="kpi-grid">
           <div class="kpi-card primary" (click)="changerVue('articles')">
-            <div class="kpi-header">
-              <span class="kpi-label">Total Articles</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+            <div class="kpi-header"><span class="kpi-label">Total Articles</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ stats.totalArticles }}</h3>
             <p class="kpi-desc">Tous les articles</p>
             <div class="kpi-indicator"></div>
           </div>
 
-          <div class="kpi-card success">
-            <div class="kpi-header">
-              <span class="kpi-label">Valeur Totale</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+          <div *ngIf="currentUser.role === 'Administrateur'" class="kpi-card success">
+            <div class="kpi-header"><span class="kpi-label">Valeur Totale</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ (stats.valeurTotale | number:'1.0-0') }} €</h3>
             <p class="kpi-desc">Inventaire financier</p>
             <div class="kpi-indicator"></div>
           </div>
 
           <div class="kpi-card warning" (click)="changerVue('articles')">
-            <div class="kpi-header">
-              <span class="kpi-label">Stock Faible</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+            <div class="kpi-header"><span class="kpi-label">Stock Faible</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ stats.stockFaible }}</h3>
             <p class="kpi-desc">Sous seuil minimum</p>
             <div class="kpi-indicator"></div>
           </div>
 
           <div class="kpi-card danger" (click)="changerVue('articles')">
-            <div class="kpi-header">
-              <span class="kpi-label">Stock Critique</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+            <div class="kpi-header"><span class="kpi-label">Stock Critique</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ stats.stockCritique }}</h3>
             <p class="kpi-desc">Urgent à renouveler</p>
             <div class="kpi-indicator"></div>
           </div>
 
           <div class="kpi-card info" (click)="changerVue('alertes')">
-            <div class="kpi-header">
-              <span class="kpi-label">Alertes Actives</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+            <div class="kpi-header"><span class="kpi-label">Alertes Actives</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ stats.alertesNonTraitees }}</h3>
             <p class="kpi-desc">À traiter</p>
             <div class="kpi-indicator"></div>
           </div>
 
           <div class="kpi-card critical" (click)="changerVue('demandes-gestionnaire')">
-            <div class="kpi-header">
-              <span class="kpi-label">Demandes</span>
-              <i class="bi bi-chevron-right"></i>
-            </div>
+            <div class="kpi-header"><span class="kpi-label">Demandes</span><i class="bi bi-chevron-right"></i></div>
             <h3 class="kpi-value">{{ stats.demandesEnAttente }}</h3>
             <p class="kpi-desc">À valider</p>
             <div class="kpi-indicator"></div>
           </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="quick-actions-section">
           <h3>Actions Rapides</h3>
           <div class="quick-actions">
             <button (click)="changerVue('creer-article')" class="btn btn-primary">
-              <i class="bi bi-plus-lg"></i>
-              <span>Ajouter Article</span>
+              <i class="bi bi-plus-lg"></i> <span>Ajouter Article</span>
             </button>
             <button (click)="changerVue('mouvements')" class="btn btn-secondary">
-              <i class="bi bi-arrow-left-right"></i>
-              <span>Mouvement</span>
+              <i class="bi bi-arrow-left-right"></i> <span>Mouvement</span>
             </button>
             <button (click)="changerVue('creer-demande')" class="btn btn-secondary">
-              <i class="bi bi-file-earmark-plus"></i>
-              <span>Nouvelle Demande</span>
+              <i class="bi bi-file-earmark-plus"></i> <span>Nouvelle Demande</span>
             </button>
             <button (click)="changerVue('alertes')" class="btn btn-warning">
-              <i class="bi bi-exclamation-triangle"></i>
-              <span>Alertes</span>
+              <i class="bi bi-exclamation-triangle"></i> <span>Alertes</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ARTICLES VIEW -->
       <div *ngIf="vueActuelle === 'articles'" class="view">
-        <div class="view-header">
-          <h2>📦 Gestion des Articles</h2>
-        </div>
+        <div class="view-header"><h2>📦 Gestion des Articles</h2></div>
         <app-article-list></app-article-list>
       </div>
 
-      <!-- CREER ARTICLE VIEW -->
       <div *ngIf="vueActuelle === 'creer-article'" class="view">
-        <div class="view-header">
-          <h2>➕ Créer un Nouvel Article</h2>
-        </div>
+        <div class="view-header"><h2>➕ Créer un Nouvel Article</h2></div>
         <app-article-form></app-article-form>
       </div>
 
-      <!-- MOUVEMENTS VIEW -->
       <div *ngIf="vueActuelle === 'mouvements'" class="view">
-        <div class="view-header">
-          <h2>🔄 Mouvements de Stock</h2>
-        </div>
+        <div class="view-header"><h2>🔄 Mouvements de Stock</h2></div>
         <app-mouvements></app-mouvements>
       </div>
 
-      <!-- DEMANDES GESTIONNAIRE VIEW -->
       <div *ngIf="vueActuelle === 'demandes-gestionnaire'" class="view">
         <div class="view-header">
           <h2>👤 Demandes à Valider</h2>
           <p>Validez les demandes de matériel avant validation admin</p>
         </div>
+        <app-demandematriel></app-demandematriel> 
       </div>
 
-      <!-- CREER DEMANDE VIEW -->
       <div *ngIf="vueActuelle === 'creer-demande'" class="view">
-        <div class="view-header">
-          <h2>📝 Créer une Demande</h2>
-        </div>
+        <div class="view-header"><h2>📝 Créer une Demande</h2></div>
         <app-demandematriel></app-demandematriel>
       </div>
 
-      <!-- ALERTES VIEW -->
       <div *ngIf="vueActuelle === 'alertes'" class="view">
-        <div class="view-header">
-          <h2>⚠️ Alertes de Stock</h2>
-        </div>
+        <div class="view-header"><h2>⚠️ Alertes de Stock</h2></div>
         <app-alertes></app-alertes>
       </div>
 
-      <!-- STATISTIQUES VIEW -->
-      <div *ngIf="vueActuelle === 'statistiques'" class="view">
-        <div class="view-header">
-          <h2>📊 Statistiques Détaillées</h2>
-        </div>
+      <div *ngIf="vueActuelle === 'statistiques' && currentUser.role === 'Administrateur'" class="view">
+        <div class="view-header"><h2>📊 Statistiques Détaillées</h2></div>
         <app-statistiques></app-statistiques>
       </div>
 
     </main>
-
   </div>
-
 </div>

@@ -9,6 +9,7 @@ import { StatistiquesComponent } from '../statistiques/statistiques.component';
 import { DemandematrielComponent } from '../demandematriel/demandematriel.component';
 import { InventoryService } from '../services/inventory.service';
 import { DemandematrielServiceService } from '../services/demandematriel-service.service';
+import { ArticleDetailComponent } from "../article-detail/article-detail.component";
 
 
 @Component({
@@ -22,8 +23,9 @@ import { DemandematrielServiceService } from '../services/demandematriel-service
     MouvementsComponent,
     AlertesComponent,
     StatistiquesComponent,
-    DemandematrielComponent
-  ],
+    DemandematrielComponent,
+    ArticleDetailComponent
+],
   templateUrl: './gestionnaire-stock.component.html',
   styleUrl: './gestionnaire-stock.component.css'
 })

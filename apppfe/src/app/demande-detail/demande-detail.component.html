@@ -1,0 +1,151 @@
+<div *ngIf="visible" class="detail-overlay" (click)="onFermer()">
+  <div class="detail-modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="detail-header">
+      <h2>📋 Détails de la Demande</h2>
+      <button class="close-btn" (click)="onFermer()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="detail-content" *ngIf="demande">
+      <!-- Article Section -->
+      <section class="detail-section">
+        <h3><i class="bi bi-box"></i> Informations Article</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Désignation</span>
+            <span class="value">{{ demande.article?.designation }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Type Article</span>
+            <span class="value">{{ demande.article?.typeArticle }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Catégorie</span>
+            <span class="value">{{ demande.article?.categorie }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Référence</span>
+            <span class="value">{{ demande.article?.reference }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Stock Actuel</span>
+            <span class="value stock" [class.low-stock]="demande.article?.quantiteEnStock < demande.article?.seuilMinimum">
+              {{ demande.article?.quantiteEnStock }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Prix Unitaire</span>
+            <span class="value">{{ demande.article?.prixUnitaire | currency }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Demande Section -->
+      <section class="detail-section">
+        <h3><i class="bi bi-file-text"></i> Informations Demande</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Quantité Demandée</span>
+            <span class="value">{{ demande.quantiteDemandee }} unité(s)</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Type de Demande</span>
+            <span class="value">{{ demande.type }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Statut</span>
+            <span [class]="'badge-status status-' + demande.statut">{{ demande.statut }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Référence Ticket</span>
+            <span class="value">{{ demande.referenceTicket || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <!-- Justification Full -->
+        <div class="justification-box">
+          <h4>Justification</h4>
+          <p>{{ demande.justification }}</p>
+        </div>
+      </section>
+
+      <!-- Demandeur Section -->
+      <section class="detail-section">
+        <h3><i class="bi bi-person-badge"></i> Informations Demandeur</h3>
+        <div class="detail-grid">
+          <div class="detail-item full-width">
+            <span class="label">Nom Complet</span>
+            <span class="value">{{ demande.utilisateurDemandeur?.nom }} {{ demande.utilisateurDemandeur?.prenom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Email</span>
+            <span class="value email-link">{{ demande.utilisateurDemandeur?.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Téléphone</span>
+            <span class="value phone-link">{{ demande.utilisateurDemandeur?.telephone }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Rôle</span>
+            <span class="value role-tag">{{ demande.utilisateurDemandeur?.role }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Département</span>
+            <span class="value dept-tag">{{ demande.utilisateurDemandeur?.departement }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dates Section -->
+      <section class="detail-section">
+        <h3><i class="bi bi-calendar-event"></i> Chronologie</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker creation"></div>
+            <div class="timeline-content">
+              <span class="timeline-label">Demande Créée</span>
+              <span class="timeline-date">{{ demande.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+
+          <div class="timeline-item" *ngIf="demande.utilisateurGestionnaire">
+            <div class="timeline-marker validation"></div>
+            <div class="timeline-content">
+              <span class="timeline-label">Validation Gestionnaire</span>
+              <span class="timeline-date">{{ demande.dateValidationGestionnaire | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span class="timeline-user">Par: {{ demande.utilisateurGestionnaire?.nom }} {{ demande.utilisateurGestionnaire?.prenom }}</span>
+            </div>
+          </div>
+
+          <div class="timeline-item" *ngIf="demande.utilisateurAdmin">
+            <div class="timeline-marker admin"></div>
+            <div class="timeline-content">
+              <span class="timeline-label">Validation Admin</span>
+              <span class="timeline-date">{{ demande.dateValidationAdmin | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span class="timeline-user">Par: {{ demande.utilisateurAdmin?.nom }} {{ demande.utilisateurAdmin?.prenom }}</span>
+            </div>
+          </div>
+
+          <div class="timeline-item rejection" *ngIf="demande.motifRejet">
+            <div class="timeline-marker rejection"></div>
+            <div class="timeline-content">
+              <span class="timeline-label">❌ Demande Rejetée</span>
+              <span class="timeline-date">{{ demande.dateRejet | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <p class="rejection-reason">{{ demande.motifRejet }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="detail-footer">
+      <button class="btn btn-secondary" (click)="onFermer()">
+        <i class="bi bi-x-circle"></i> Fermer
+      </button>
+    </div>
+  </div>
+</div>

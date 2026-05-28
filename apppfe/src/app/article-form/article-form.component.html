@@ -1,17 +1,24 @@
 <div class="article-form-container">
 
+  <!-- En-tête -->
   <div class="form-header">
     <h2>➕ Créer un Nouvel Article</h2>
     <p>Ajouter un équipement ou consommable à votre inventaire</p>
   </div>
 
-  <!-- Messages -->
+  <!-- Messages d'alerte -->
   <div *ngIf="messageSucces" class="alert alert-success">
     <i class="bi bi-check-circle-fill"></i>
     {{ messageSucces }}
   </div>
-  
-  <div *ngIf="articleCree" class="qr-code-container" style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #0d6efd;">
+
+  <div *ngIf="messageErreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ messageErreur }}
+  </div>
+
+  <!-- QR Code généré -->
+  <div *ngIf="articleCree" class="qr-code-container">
     <h4>🏷️ Étiquette générée</h4>
     
     <qrcode 
@@ -21,53 +28,87 @@
       [elementType]="'img'">
     </qrcode>
     
-    <p style="font-size: 1.2rem; margin-top: 10px;"><strong>{{ articleCree.reference }}</strong></p>
+    <p>{{ articleCree.reference }}</p>
     
     <button type="button" class="btn btn-primary" (click)="imprimerEtiquette()">
       <i class="bi bi-printer"></i> Imprimer l'étiquette
     </button>
   </div>
 
-  <div *ngIf="messageErreur" class="alert alert-danger">
-    <i class="bi bi-exclamation-circle-fill"></i>
-    {{ messageErreur }}
-  </div>
-
   <!-- Formulaire -->
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="article-form">
 
+    <!-- Informations de base -->
     <div class="form-section">
       <h3>📋 Informations de base</h3>
 
-      <!-- Référence -->
+      <!-- Catégorie -->
+      <div class="form-group">
+        <label for="categorie">
+          <i class="bi bi-grid-3x3-gap"></i> Catégorie informatique *
+        </label>
+        <select 
+          id="categorie"
+          formControlName="categorie"
+          [class.is-invalid]="isFieldInvalid('categorie')">
+          <option value="" disabled>-- Sélectionner une catégorie --</option>
+          <option *ngFor="let cat of categoriesInformatiques" [value]="cat.code">
+            {{ cat.icone }} {{ cat.label }}
+          </option>
+        </select>
+        <small class="error" *ngIf="isFieldInvalid('categorie')">
+          {{ getFieldError('categorie') }}
+        </small>
+      </div>
+
+      <!-- Référence (auto-générée) -->
       <div class="form-group">
         <label for="reference">
           <i class="bi bi-tag"></i> Référence *
+          <span class="badge bg-info">Auto</span>
         </label>
         <input 
           type="text" 
           id="reference"
           formControlName="reference"
-          placeholder="EX: ARTICLE-001"
-          [class.is-invalid]="isFieldInvalid('reference')">
-        <small class="error" *ngIf="isFieldInvalid('reference')">
-          {{ getFieldError('reference') }}
-        </small>
+          readonly
+          class="form-control-static">
+        <small class="text-muted">Générée automatiquement selon la catégorie</small>
       </div>
 
       <!-- Désignation -->
       <div class="form-group">
         <label for="designation">
-          <i class="bi bi-text-left"></i> Désignation *
+          <i class="bi bi-cpu"></i> Désignation de l'article *
+        </label>
+        <select 
+          id="designation"
+          formControlName="designation"
+          [class.is-invalid]="isFieldInvalid('designation')">
+          <option value="" disabled>-- Choisir le modèle --</option>
+          <option *ngFor="let des of getDesignations()" [value]="des">
+            {{ des }}
+          </option>
+          <option value="AUTRE">--- Autre (Saisir manuellement) ---</option>
+        </select>
+        <small class="error" *ngIf="isFieldInvalid('designation')">
+          {{ getFieldError('designation') }}
+        </small>
+      </div>
+
+      <!-- Désignation personnalisée -->
+      <div class="form-group" *ngIf="form.get('designation')?.value === 'AUTRE'">
+        <label for="designationPersonnalisee">
+          <i class="bi bi-pencil-square"></i> Précisez la désignation *
         </label>
         <input 
           type="text" 
-          id="designation"
-          formControlName="designation"
-          placeholder="Nom de l'article"
-          [class.is-invalid]="isFieldInvalid('designation')">
-        <small class="error" *ngIf="isFieldInvalid('designation')">
-          {{ getFieldError('designation') }}
+          id="designationPersonnalisee"
+          formControlName="designationPersonnalisee"
+          placeholder="Ex: Station de travail spécifique IA"
+          [class.is-invalid]="isFieldInvalid('designationPersonnalisee')">
+        <small class="error" *ngIf="isFieldInvalid('designationPersonnalisee')">
+          {{ getFieldError('designationPersonnalisee') }}
         </small>
       </div>
 
@@ -79,37 +120,62 @@
         <textarea 
           id="description"
           formControlName="description"
-          placeholder="Description complète"
-          rows="4"></textarea>
+          placeholder="Description complète du produit"
+          rows="3"></textarea>
       </div>
 
-      <!-- Code-barres -->
-     <div class="form-group">
-        <label for="codeBarres">
-          <i class="bi bi-barcode"></i> Code-barres
-        </label>
-        <div class="input-group" style="display: flex; gap: 10px;">
-          <input 
-            type="text" 
-            id="codeBarres"
-            #codeBarresInput
-            formControlName="codeBarres"
-            placeholder="Cliquez ici ou sur le bouton puis scannez"
-            style="flex: 1;">
-          
-          <button type="button" class="btn btn-outline-secondary" (click)="codeBarresInput.focus()" title="Préparer le lecteur">
-            <i class="bi bi-upc-scan"></i> Scanner
-          </button>
-        </div>
-      </div>
+ <!-- Code-barres AUTO-GÉNÉRÉ AVEC BOUTON -->
+<div class="form-group">
+  <label for="codeQR">
+    <i class="bi bi-qr-code"></i> Code QR
+    <span class="badge bg-success text-white" style="font-size: 0.75rem;">Auto</span>
+  </label>
+  
+  <div class="input-group" style="display: flex; gap: 10px; align-items: flex-start;">
+    <div style="flex: 1;">
+      <input 
+        type="text" 
+        id="codeQR"
+        formControlName="codeBarres" 
+        readonly
+        class="form-control"
+        placeholder="Généré automatiquement"
+        style="background-color: #e9ecef; cursor: not-allowed; width: 100%;">
     </div>
-      
+    
+    <button 
+      type="button" 
+      class="btn btn-success" 
+      (click)="genererCodeQR()"
+      [disabled]="!form.get('reference')?.value || chargement"
+      title="Générer un nouveau code QR">
+      <i class="bi bi-arrow-repeat"></i> Générer
+    </button>
 
+    <button 
+      type="button" 
+      class="btn btn-outline-secondary" 
+      (click)="copierCodeBarres()"
+      *ngIf="form.get('codeBarres')?.value"
+      title="Copier la valeur">
+      <i class="bi bi-clipboard"></i> Copier
+    </button>
+  </div>
+  
+  <small class="text-muted d-block mt-2">
+    <i class="bi bi-info-circle"></i> 
+    Généré automatiquement ou cliquez sur "Générer" pour un nouveau code QR
+  </small>
+
+  <div *ngIf="form.get('codeBarres')?.value" class="mt-3 text-center">
+    <qrcode [qrdata]="form.get('codeBarres')?.value" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
+  </div>
+</div>
+    </div>
+    <!-- Classification -->
     <div class="form-section">
       <h3>⚙️ Classification</h3>
-
       <div class="form-row">
-        <!-- Type Article -->
         <div class="form-group">
           <label for="typeArticle">
             <i class="bi bi-boxes"></i> Type d'article *
@@ -124,7 +190,6 @@
           </select>
         </div>
 
-        <!-- Statut -->
         <div class="form-group">
           <label for="statut">
             <i class="bi bi-check-circle"></i> Statut *
@@ -141,11 +206,10 @@
       </div>
     </div>
 
+    <!-- Informations financières -->
     <div class="form-section">
       <h3>💰 Informations financières</h3>
-
       <div class="form-row">
-        <!-- Prix Unitaire -->
         <div class="form-group">
           <label for="prixUnitaire">
             <i class="bi bi-cash-coin"></i> Prix unitaire (€) *
@@ -162,7 +226,6 @@
           </small>
         </div>
 
-        <!-- Fournisseur -->
         <div class="form-group">
           <label for="fournisseur">
             <i class="bi bi-building"></i> Fournisseur
@@ -176,11 +239,10 @@
       </div>
     </div>
 
+    <!-- Gestion des stocks -->
     <div class="form-section">
       <h3>📦 Gestion des stocks</h3>
-
       <div class="form-row">
-        <!-- Quantité -->
         <div class="form-group">
           <label for="quantiteEnStock">
             <i class="bi bi-boxes"></i> Quantité en stock *
@@ -190,13 +252,13 @@
             id="quantiteEnStock"
             formControlName="quantiteEnStock"
             placeholder="0"
+            min="0"
             [class.is-invalid]="isFieldInvalid('quantiteEnStock')">
           <small class="error" *ngIf="isFieldInvalid('quantiteEnStock')">
             {{ getFieldError('quantiteEnStock') }}
           </small>
         </div>
 
-        <!-- Seuil Minimum -->
         <div class="form-group">
           <label for="seuilMinimum">
             <i class="bi bi-exclamation-triangle"></i> Seuil minimum *
@@ -206,10 +268,10 @@
             id="seuilMinimum"
             formControlName="seuilMinimum"
             placeholder="5"
+            min="1"
             [class.is-invalid]="isFieldInvalid('seuilMinimum')">
         </div>
 
-        <!-- Seuil Critique -->
         <div class="form-group">
           <label for="seuilCritique">
             <i class="bi bi-fire"></i> Seuil critique *
@@ -219,16 +281,16 @@
             id="seuilCritique"
             formControlName="seuilCritique"
             placeholder="2"
+            min="0"
             [class.is-invalid]="isFieldInvalid('seuilCritique')">
         </div>
       </div>
     </div>
 
+    <!-- Dates importantes -->
     <div class="form-section">
       <h3>📅 Dates importantes</h3>
-
       <div class="form-row">
-        <!-- Date d'achat -->
         <div class="form-group">
           <label for="dateAchat">
             <i class="bi bi-calendar"></i> Date d'achat
@@ -239,10 +301,9 @@
             formControlName="dateAchat">
         </div>
 
-        <!-- Date de garantie -->
         <div class="form-group">
           <label for="dateGarantie">
-            <i class="bi bi-shield-check"></i> Date de garantie
+            <i class="bi bi-shield-check"></i> Date de fin de garantie
           </label>
           <input 
             type="date" 
@@ -254,7 +315,7 @@
 
     <!-- Actions -->
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="chargement">
+      <button type="submit" class="btn btn-primary" [disabled]="chargement || form.invalid">
         <i class="bi bi-check-lg"></i>
         {{ chargement ? 'Création en cours...' : 'Créer l\'article' }}
       </button>

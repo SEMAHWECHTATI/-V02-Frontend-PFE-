@@ -12,11 +12,12 @@ import { CreateTicketPageComponent } from "../create-ticket-page/create-ticket-p
 import { UtilisateurService } from '../services/utilisateur.service';
 import { DemandeService } from '../services/demande.service';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
+import { DemandematrielComponent } from "../demandematriel/demandematriel.component";
 
 @Component({
   selector: 'app-interface-administrateur',
   standalone: true,  
-  imports: [CommonModule, RouterModule, UtilisateurComponent, GererDemandeInscriComponent, EnumerationComponent, CreateCategorieComponent, ListeTicketsComponent, CreateGroupeComponent,CreateTicketPageComponent, TicketDetailComponent],
+  imports: [CommonModule, RouterModule, UtilisateurComponent, GererDemandeInscriComponent, EnumerationComponent, CreateCategorieComponent, ListeTicketsComponent, CreateGroupeComponent, CreateTicketPageComponent, TicketDetailComponent, DemandematrielComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })
@@ -32,6 +33,7 @@ export class InterfaceAdministrateurComponent implements OnInit {
   user: Utilisateur[] = [];
   nombreDemandesEnAttente: number = 0;
   currentUser: any = null;
+menuInventaireOuvert: boolean = false;
   
   constructor(
     private router: Router, 

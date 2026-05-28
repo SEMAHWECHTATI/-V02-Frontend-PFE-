@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class DemandematrielServiceService {
 
-  private apiUrl = 'http://localhost:8070/api/inventory/demandes-materiel';
+  private apiUrl = 'http://localhost:8070/api/demandes-materiel';
 
   constructor(private http: HttpClient) { }
 
@@ -16,8 +16,19 @@ export class DemandematrielServiceService {
    */
   creerDemande(demande: any, utilisateurId: number): Observable<any> {
     console.log('📝 Création demande');
+    
+    // Convertir les valeurs en types corrects
+    const demandeFormatee = {
+      articleId: Number(demande.articleId), // Convertir en nombre
+      quantiteDemandee: Number(demande.quantiteDemandee),
+      type: demande.type,
+      justification: demande.justification,
+      referenceTicket: demande.referenceTicket || null
+    };
+    
+    console.log('📦 Données formatées:', demandeFormatee);
     let params = new HttpParams().set('utilisateurId', utilisateurId.toString());
-    return this.http.post(this.apiUrl, demande, { params });
+    return this.http.post(this.apiUrl, demandeFormatee, { params });
   }
 
   /**
@@ -73,4 +84,10 @@ export class DemandematrielServiceService {
     let params = new HttpParams().set('utilisateurId', utilisateurId.toString());
     return this.http.get(`${this.apiUrl}/mes-demandes`, { params });
   }
+
+ getAllDemandeMAt(): Observable<any[]> {
+
+  return this.http.get<any[]>(`${this.apiUrl}/demandes`);
+
+}
 }

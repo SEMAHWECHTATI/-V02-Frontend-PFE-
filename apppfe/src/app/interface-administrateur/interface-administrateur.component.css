@@ -231,7 +231,7 @@ background:linear-gradient(135deg,#0f172a,#1e3a8a);
 .bande-container {
   width: 100%;
   overflow: hidden; /* Cache le texte quand il sort du cadre */
-  background: #3e414a;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
   color: white;
   padding: 10px 0;
   white-space: nowrap; /* Empêche le texte de revenir à la ligne */
