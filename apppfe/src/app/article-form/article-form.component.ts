@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { InventoryService } from '../services/inventory.service';
 import { Article, StatutArticle, StatutArticleLabels, TypeArticle, TypeArticleLabels, Categorie, ApiResponse } from '../Model/article';
 import { QRCodeModule } from 'angularx-qrcode';
+import { FournisseurService } from '../services/fournisseur.service';
+import { Fournisseur } from '../Model/Entity';
 
 @Component({
   selector: 'app-article-form',
@@ -16,6 +18,7 @@ export class ArticleFormComponent implements OnInit {
   @Output() creationReussie = new EventEmitter<void>();
 
   private inventoryService = inject(InventoryService);
+  private fournisseurService = inject(FournisseurService);
   private fb = inject(FormBuilder);
 
   readonly categoriesInformatiques: Categorie[] = [
@@ -77,6 +80,8 @@ export class ArticleFormComponent implements OnInit {
   messageSucces = '';
   messageErreur = '';
   articleCree: Article | null = null;
+  fournisseurs: Fournisseur[] = [];
+  fournisseurSelectionne: string = ''; // On stockera ici le nom sélectionné
 
   readonly typeArticles = Object.values(TypeArticle);
   readonly typeArticleLabels = TypeArticleLabels;
@@ -86,6 +91,19 @@ export class ArticleFormComponent implements OnInit {
   ngOnInit(): void {
     this.initializeForm();
     this.setupFormListeners();
+    this.chargerFournisseurs();
+  }
+
+  chargerFournisseurs(): void {
+    this.fournisseurService.getAllFournisseurs().subscribe({
+      next: (data) => {
+        this.fournisseurs = data;
+        console.log('✅ Fournisseurs chargés avec succès', this.fournisseurs);
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors du chargement des fournisseurs', err);
+      }
+    });
   }
 
   /**

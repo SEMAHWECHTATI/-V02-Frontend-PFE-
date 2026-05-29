@@ -1,0 +1,151 @@
+<div class="fournisseur-container">
+
+  <div class="header-section">
+    <h2>🚚 Gestion des Fournisseurs</h2>
+    <p>Ajoutez et gérez les fournisseurs de votre matériel informatique</p>
+  </div>
+
+  <div *ngIf="messageSucces" class="alert alert-success">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ messageSucces }}
+  </div>
+
+  <div *ngIf="messageErreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    {{ messageErreur }}
+  </div>
+
+  <div class="content-grid">
+    
+    <div class="form-card">
+      <h3>{{ modeEdition ? '✏️ Modifier le Fournisseur' : '➕ Nouveau Fournisseur' }}</h3>
+      
+     <form [formGroup]="fournisseurForm" (ngSubmit)="soumettreFormulaire()">
+        
+        <div class="form-group">
+          <label for="nom"><i class="bi bi-building"></i> Nom du fournisseur *</label>
+          <input 
+            type="text" 
+            id="nom" 
+            class="form-control" 
+            formControlName="nom" 
+            placeholder="Ex: Dell Technologies"
+            [class.is-invalid]="isFieldInvalid('nom')">
+          <small class="error-text" *ngIf="isFieldInvalid('nom')">
+            Le nom est requis (minimum 2 caractères).
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="email"><i class="bi bi-envelope"></i> Adresse Email *</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-control" 
+            formControlName="email" 
+            placeholder="contact@fournisseur.com"
+            [class.is-invalid]="isFieldInvalid('email')">
+          <small class="error-text" *ngIf="isFieldInvalid('email')">
+            Veuillez entrer une adresse email valide.
+          </small>
+        </div>
+           <div class="form-group">
+          <label for="contact"><i class="bi bi-person"></i> Contact *</label>
+          <input 
+            type="text" 
+            id="contact" 
+            class="form-control" 
+            formControlName="contact" 
+            placeholder="Ex: John Doe"
+            [class.is-invalid]="isFieldInvalid('contact')">
+          <small class="error-text" *ngIf="isFieldInvalid('contact')">
+            Le contact est requis (minimum 2 caractères).
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="telephone"><i class="bi bi-telephone"></i> Téléphone *</label>
+          <input 
+            type="text" 
+            id="telephone" 
+            class="form-control" 
+            formControlName="telephone" 
+            placeholder="+33 1 23 45 67 89"
+            [class.is-invalid]="isFieldInvalid('telephone')">
+          <small class="error-text" *ngIf="isFieldInvalid('telephone')">
+            Veuillez entrer un numéro de téléphone valide.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="adresse"><i class="bi bi-geo-alt"></i> Adresse postale</label>
+          <textarea 
+            id="adresse" 
+            class="form-control" 
+            formControlName="adresse" 
+            rows="3" 
+            placeholder="Adresse complète du fournisseur"></textarea>
+        </div>
+
+       <div class="d-flex gap-2 mt-3">
+  <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="chargement || fournisseurForm.invalid">
+    <i class="bi bi-save"></i> 
+    {{ chargement ? 'Enregistrement...' : (modeEdition ? 'Mettre à jour' : 'Enregistrer') }}
+  </button>
+  
+  <button *ngIf="modeEdition" type="button" class="btn btn-secondary" (click)="annulerEdition()">
+    <i class="bi bi-x-circle"></i> Annuler
+  </button>
+</div>
+      </form>
+    </div>
+
+    <div class="list-card">
+      <h3>📋 Liste des Fournisseurs</h3>
+      
+      <div *ngIf="chargement && fournisseurs.length === 0" class="text-center p-4 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Chargement des données...
+      </div>
+
+      <div *ngIf="!chargement && fournisseurs.length === 0" class="empty-state">
+        <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+        <p>Aucun fournisseur enregistré pour le moment.</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="fournisseurs.length > 0">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nom</th>
+              <th>Contact</th>
+              <th>Adresse</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let f of fournisseurs">
+              <td class="fw-bold">{{ f.nom }}</td>
+              <td>
+                <div><i class="bi bi-envelope text-primary"></i> {{ f.email }}</div>
+                <div><i class="bi bi-person text-info"></i> {{ f.contact }}</div>
+                <div><i class="bi bi-telephone text-success"></i> {{ f.telephone }}</div>
+              </td>
+              <td><small class="text-muted">{{ f.adresse || 'Non renseignée' }}</small></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-2" (click)="editerFournisseur(f)" title="Modifier">
+                     <i class="bi bi-pencil"></i>
+                                    </button>
+  
+                     <button class="btn btn-sm btn-outline-danger" (click)="supprimerFournisseur(f.id)" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -13,11 +13,24 @@ import { UtilisateurService } from '../services/utilisateur.service';
 import { DemandeService } from '../services/demande.service';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
 import { DemandematrielComponent } from "../demandematriel/demandematriel.component";
+import { GestionnaireStockComponent } from '../gestionnaire-stock/gestionnaire-stock.component';
+import { EspaceDemandeurComponent } from "../espace-demandeur/espace-demandeur.component";
 
 @Component({
   selector: 'app-interface-administrateur',
   standalone: true,  
-  imports: [CommonModule, RouterModule, UtilisateurComponent, GererDemandeInscriComponent, EnumerationComponent, CreateCategorieComponent, ListeTicketsComponent, CreateGroupeComponent, CreateTicketPageComponent, TicketDetailComponent, DemandematrielComponent],
+  imports: [CommonModule,
+    RouterModule,
+    UtilisateurComponent,
+    GererDemandeInscriComponent,
+    EnumerationComponent,
+    CreateCategorieComponent,
+    ListeTicketsComponent,
+    CreateGroupeComponent,
+    CreateTicketPageComponent,
+    TicketDetailComponent,
+    DemandematrielComponent,
+    GestionnaireStockComponent, EspaceDemandeurComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })

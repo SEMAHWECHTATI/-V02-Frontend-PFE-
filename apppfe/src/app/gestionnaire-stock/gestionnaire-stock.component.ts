@@ -10,6 +10,8 @@ import { DemandematrielComponent } from '../demandematriel/demandematriel.compon
 import { InventoryService } from '../services/inventory.service';
 import { DemandematrielServiceService } from '../services/demandematriel-service.service';
 import { ArticleDetailComponent } from "../article-detail/article-detail.component";
+import { FournisseurComponent } from '../fournisseur/fournisseur.component';
+import { LocalisationComponent } from '../localisation/localisation.component';
 
 
 @Component({
@@ -24,7 +26,9 @@ import { ArticleDetailComponent } from "../article-detail/article-detail.compone
     AlertesComponent,
     StatistiquesComponent,
     DemandematrielComponent,
-    ArticleDetailComponent
+    ArticleDetailComponent,
+    FournisseurComponent,
+    LocalisationComponent
 ],
   templateUrl: './gestionnaire-stock.component.html',
   styleUrl: './gestionnaire-stock.component.css'

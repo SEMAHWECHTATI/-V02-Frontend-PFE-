@@ -126,6 +126,7 @@
                             </span>
                         </a>
                     </li>
+                       
 
                     <hr class="w-100 text-secondary my-2" *ngIf="currentUser?.role === 'Administrateur'">
 
@@ -155,6 +156,24 @@
                            [class.active]="vueActuelle === 'parametres'" 
                            (click)="changerVue('parametres')" style="cursor: pointer;">
                             <span class="ms-1 d-none d-sm-inline"><i class="bi bi-gear-fill me-2 text-secondary"></i> Configuration Système</span>
+                        </a>
+                    </li>
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'gestionstock'" 
+                           (click)="changerVue('gestionstock')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline">
+                                <i class="bi bi-box-seam-fill text-danger"></i> Espace Gestionnare de Stock
+                            </span>
+                        </a>
+                    </li>
+                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link px-0 align-middle text-light" 
+                           [class.active]="vueActuelle === 'demandeurespace'" 
+                           (click)="changerVue('demandeurespace')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline">
+                                <i class="bi bi-person-fill text-primary"></i> Espace Demandeur
+                            </span>
                         </a>
                     </li>
                 </ul>
@@ -340,6 +359,7 @@
             <div *ngIf="vueActuelle === 'ticket-detail'">
                 <app-ticket-detail></app-ticket-detail>
             </div>
+            
             <div *ngIf="vueActuelle === 'mesInterventions'">
                 <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Affichage des interventions...</div>
             </div>
@@ -369,6 +389,13 @@
             </div>
             <div *ngIf="vueActuelle === 'parametres'">
                 <div class="alert alert-secondary"><i class="bi bi-gear-fill me-2"></i>Configuration des seuils, domaines d'intervention et paramètres DevOps.</div>
+            </div>
+
+            <div *ngIf="vueActuelle === 'gestionstock'">
+                <app-gestionnaire-stock></app-gestionnaire-stock>
+            </div>
+            <div *ngIf="vueActuelle === 'demandeurespace'">
+                <app-espace-demandeur></app-espace-demandeur>
             </div>
 
         </div>

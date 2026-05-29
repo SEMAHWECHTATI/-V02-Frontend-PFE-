@@ -88,6 +88,14 @@
           <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
           <span class="menu-label">Statistiques</span>
         </a>
+         <a class="menu-item" (click)="changerVue('fournisseurs')" [class.active]="vueActuelle === 'fournisseurs'">
+          <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
+          <span class="menu-label">Fournisseur</span>
+        </a>
+        <a class="menu-item" (click)="changerVue('localisations')" [class.active]="vueActuelle === 'localisations'">
+          <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
+          <span class="menu-label">Localisation</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -184,6 +192,15 @@
         <div class="view-header"><h2>➕ Créer un Nouvel Article</h2></div>
         <app-article-form></app-article-form>
       </div>
+      <div *ngIf="vueActuelle === 'fournisseurs'" class="view">
+        <div class="view-header"><h2> Créer un Nouveau Fournisseur</h2></div>
+        <app-fournisseur></app-fournisseur>
+      </div>
+      <div *ngIf="vueActuelle === 'localisations'" class="view">
+        <div class="view-header"><h2> Créer un Nouveau Lieu</h2></div>
+        <app-localisation></app-localisation>
+      </div>
+      
 
       <div *ngIf="vueActuelle === 'mouvements'" class="view">
         <div class="view-header"><h2>🔄 Mouvements de Stock</h2></div>

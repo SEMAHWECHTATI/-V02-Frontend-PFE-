@@ -1,0 +1,123 @@
+<div class="container py-4">
+  <h2 class="mb-4 text-primary">📍 Gestion des Localisations</h2>
+
+  <div *ngIf="messageSucces" class="alert alert-success shadow-sm">{{ messageSucces }}</div>
+  <div *ngIf="messageErreur" class="alert alert-danger shadow-sm">{{ messageErreur }}</div>
+
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white">
+          <h4 class="mb-0 text-primary">
+            {{ modeEdition ? '✏️ Modifier Localisation' : '➕ Nouvelle Localisation' }}
+          </h4>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="locForm" (ngSubmit)="soumettreFormulaire()">
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="nom" placeholder="Ex: Salle Serveur 1">
+              <div *ngIf="locForm.get('nom')?.invalid && locForm.get('nom')?.touched" class="text-danger small mt-1">
+                Le nom est obligatoire (max 100 char).
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Bâtiment</label>
+              <input type="text" class="form-control" formControlName="batiment">
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Étage</label>
+                <input type="text" class="form-control" formControlName="etage">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Bureau</label>
+                <input type="text" class="form-control" formControlName="bureau">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Armoire / Rack</label>
+              <input type="text" class="form-control" formControlName="armoire">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" formControlName="description" rows="2"></textarea>
+            </div>
+
+            <div class="form-check form-switch mb-4">
+              <input class="form-check-input" type="checkbox" formControlName="active" id="activeSwitch">
+              <label class="form-check-label" for="activeSwitch">Localisation Active</label>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="locForm.invalid || chargement">
+                <i class="bi" [ngClass]="chargement ? 'bi-hourglass-split' : 'bi-save'"></i> 
+                {{ chargement ? 'En cours...' : (modeEdition ? 'Mettre à jour' : 'Enregistrer') }}
+              </button>
+              
+              <button *ngIf="modeEdition" type="button" class="btn btn-secondary" (click)="annulerEdition()">
+                <i class="bi bi-x-circle"></i> Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+              <thead class="table-light text-primary">
+                <tr>
+                  <th>Nom</th>
+                  <th>Bâtiment / Étage</th>
+                  <th>Bureau / Armoire</th>
+                  <th>Statut</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="localisations.length === 0">
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    Aucune localisation trouvée.
+                  </td>
+                </tr>
+                <tr *ngFor="let loc of localisations">
+                  <td class="fw-bold">{{ loc.nom }}</td>
+                  <td>
+                    <span *ngIf="loc.batiment"><i class="bi bi-building"></i> {{ loc.batiment }}</span><br>
+                    <span *ngIf="loc.etage" class="small text-muted">Étage: {{ loc.etage }}</span>
+                  </td>
+                  <td>
+                    <span *ngIf="loc.bureau">Bur: {{ loc.bureau }}</span><br>
+                    <span *ngIf="loc.armoire" class="small text-muted">Arm: {{ loc.armoire }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="loc.active ? 'bg-success' : 'bg-danger'">
+                      {{ loc.active ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-2" (click)="editerLocalisation(loc)" title="Modifier">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="supprimerLocalisation(loc.id)" title="Supprimer">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

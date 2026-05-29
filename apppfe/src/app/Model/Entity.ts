@@ -2,7 +2,27 @@ import { ActionAudit, departementService, GroupeTechnicien, Priorite, RoleUtilis
 
 // Models
 
+export interface Fournisseur {
+  id?: number; // Optionnel car absent lors de la création
+  nom: string;
+  contact?: string;
+  email?: string;
+  telephone?: string;
+  adresse?: string;
+}
 
+export interface Localisation {
+  id?: number;
+  nom: string;
+  description?: string;
+  batiment?: string;
+  etage?: string;
+  bureau?: string;
+  armoire?: string;
+  active: boolean;
+  dateCreation?: string;
+  dateModification?: string;
+}
 export interface DemandeInscription {
   id: number;
   nom: string;
