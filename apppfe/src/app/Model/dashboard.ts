@@ -1,27 +1,30 @@
-interface KPIIntervention {
-  period: 'day' | 'week' | 'month';
-  count: number;
-  avgResolutionTime: number;
-  closureRate: number;
-  slaCompliance: number;
-  distribution: {
-    byDomain: Record<string, number>;
-    byRequester: Record<string, number>;
-    byTechnician: Record<string, number>;
+export interface KPIInterventionDTO {
+  totalInterventions: number;
+  tempsMoyenResolution: number; // En heures
+  tauxCloture: number;         // En pourcentage
+  interventionsEnRetardSLA: number;
+  interventionsParPeriode: {
+    jour: number;
+    semaine: number;
+    mois: number;
   };
+  repartitionParDomaine: Record<string, number>;   // Clé : Nom Catégorie, Valeur : Count
+  repartitionParDemandeur: Record<string, number>; // Clé : Nom + Prénom, Valeur : Count
+  tempsMoyenParDomaine: Record<string, number>;    // Clé : Nom Catégorie, Valeur : Moyenne
+  tempsMoyenParTechnicien: Record<string, number>; // Clé : Email, Valeur : Moyenne
 }
 
-interface KPIInventory {
-  stockRotation: number;
-  availabilityRate: number;
-  totalAssetValue: number;
-  outOfStock: Item[];
-  utilizationRate: number;
+export interface KPIInventoryDTO {
+  rotationStock: number;
+  tauxDisponibilite: number;
+  valeurTotalePatrimoineIT: number;
+  articlesEnRupture: number;
+  tauxUtilisationMateriel: number;
 }
 
-interface KPIPerformance {
-  interventionsByTechnician: Record<string, number>;
-  topDomains: Array<{domain: string; count: number}>;
-  avgCostPerIntervention: number;
-  satisfactionScore: number;
+export interface KPIPerformanceDTO {
+  interventionsParTechnicien: Record<string, number>; // Clé : Email, Valeur : Count
+  domaineLePlusDemande: string;
+  coutMoyenIntervention: number;
+  scoreSatisfactionMoyen: number;
 }

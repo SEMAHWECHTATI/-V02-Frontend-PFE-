@@ -16,6 +16,14 @@
                         <a class="nav-link align-middle px-0 text-white" 
                            [class.active]="vueActuelle === 'accueil'" 
                            (click)="changerVue('accueil')" style="cursor: pointer;">
+                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Acceuil</span>
+                        </a>
+                    </li>
+
+                     <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+                        <a class="nav-link align-middle px-0 text-white" 
+                           [class.active]="vueActuelle === 'stat'" 
+                           (click)="changerVue('stat')" style="cursor: pointer;">
                             <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
                         </a>
                     </li>
@@ -384,6 +392,11 @@
             </div>
                    <div *ngIf="vueActuelle === 'parametres'">
                     <app-parametre></app-parametre>                   
+                
+            </div>
+
+             <div *ngIf="vueActuelle === 'stat'">
+              <app-dashboard>   </app-dashboard>
                 
             </div>
 

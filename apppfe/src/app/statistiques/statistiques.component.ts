@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common'; // ✅ Ajout de isPlatformBrowser
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { InventoryService } from '../services/inventory.service';
 import { Subject } from 'rxjs';
@@ -25,7 +25,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
   @ViewChild('barChartRef') barChart?: BaseChartDirective;
   
   private inventoryService = inject(InventoryService);
-    private equipmentService = inject(EquipementService); // ✅ Ajouter
+  private equipmentService = inject(EquipementService); 
 
   private destroy$ = new Subject<void>();
 
@@ -33,6 +33,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
   chargement: boolean = false;
   erreur: string | null = null;
   activeTab: 'overview' | 'articles' | 'equipments' | 'trends' = 'overview';
+  
   // ===== STATISTICS =====
   stats = {
     totalArticles: 0,
@@ -42,7 +43,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     stockCritique: 0,
     tauxDisponibilite: 0
   };
-    equipmentStats = {
+  equipmentStats = {
     totalEquipements: 0,
     actifs: 0,
     enReparation: 0,
@@ -50,7 +51,6 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     tauxActivite: 0
   };
 
-  
   // ===== ARTICLES LIST =====
   articles: any[] = [];
   articlesFiltered: any[] = [];
@@ -64,12 +64,12 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     statut: new FormControl('tous')
   });
 
-  statusOptions = [
-    { value: 'tous', label: 'Tous les statuts' },
-    { value: 'ok', label: 'En stock ✓' },
-    { value: 'faible', label: 'Stock faible ⚠️' },
-    { value: 'critique', label: 'Stock critique 🔴' }
-  ];
+ statusOptions = [
+  { value: 'all', label: 'Tous les statuts' },
+  { value: 'ACTIF', label: 'Actif' },
+  { value: 'EN_REPARATION', label: 'En réparation' },
+  { value: 'A_RECYCLER', label: 'À recycler' }
+];
 
   // ===== LINE CHART (Évolution Financière) =====
   public lineChartType: ChartType = 'line';
@@ -97,7 +97,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
 
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: false, // ✅ Conserve l'alignement sur les conteneurs CSS fixes
     interaction: {
       mode: 'index' as const,
       intersect: false
@@ -162,7 +162,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
 
   public pieChartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: false, // ✅ Empêche l'agrandissement incontrôlé sur le PDF
     plugins: {
       legend: {
         display: true,
@@ -292,6 +292,9 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     }
   };
 
+  // ✅ Injection explicite de PLATFORM_ID dans le constructeur
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngOnInit(): void {
     this.initialiserDonnees();
     this.configurerFiltres();
@@ -302,24 +305,15 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * 🔄 Initialiser toutes les données au chargement
-   */
-  initialiserDonnees(): void {
-    this.chargement = true;
-    this.chargerStatistiques();
-    this.chargerArticles();
-    this.chargerDonneesGraphiques();
-    this.appliquerFiltres();
-     this.chargerStatsEquipements();
-  }
-
-  /**
-   * 📊 Charger les statistiques globales
-   */
+initialiserDonnees(): void {
+  this.chargement = true;
+  this.chargerStatistiques();
+  this.chargerArticles(); // C'est cette méthode qui déclenchera les filtres une fois les données reçues
+  this.chargerDonneesGraphiques();
+  this.chargerStatsEquipements();
+}
   chargerStatistiques(): void {
     console.log('📊 Chargement des statistiques...');
-
     this.inventoryService
       .getInventoryStatistics()
       .pipe(takeUntil(this.destroy$))
@@ -336,7 +330,6 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
               res.nombreArticlesCritique ?? 0
             )
           };
-          
           this.mettreAJourPieChart();
           console.log('✅ Statistiques chargées:', this.stats);
         },
@@ -347,7 +340,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
       });
   }
 
-   chargerStatsEquipements(): void {
+  chargerStatsEquipements(): void {
     console.log('📦 Chargement des statistiques equipements...');
     this.equipmentService
       .getEquipmentStatistics()
@@ -371,42 +364,38 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
       });
   }
 
+chargerArticles(): void {
+  console.log('📋 Chargement des articles...');
+  this.inventoryService
+    .getAllArticles()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (res: any) => {
+        // Sécurité : Si res est null/undefined, on force un tableau vide
+        this.articles = res || [];
+        this.articlesFiltered = [...this.articles];
+        console.log('✅ Articles charges:', this.articles.length);
+        
+        // 🔥 On applique les filtres seulement maintenant !
+        this.appliquerFiltres();
+      },
+      error: (err) => {
+        console.error('❌ Erreur articles:', err);
+        this.articles = [];
+        this.articlesFiltered = [];
+      }
+    });
+}
 
-  /**
-   * 📋 Charger la liste des articles
-   */
-  chargerArticles(): void {
-    console.log('📋 Chargement des articles...');
-
-    this.inventoryService
-      .getAllArticles()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res: any) => {
-          this.articles = res || [];
-          this.articlesFiltered = this.articles;
-          console.log('✅ Articles charges:', this.articles.length);
-        },
-        error: (err) => {
-          console.error('❌ Erreur articles:', err);
-          this.articles = [];
-        }
-      });
-  }
-
-    getEquipmentHealth(): 'good' | 'warning' | 'critical' {
+  getEquipmentHealth(): 'good' | 'warning' | 'critical' {
     const healthPercentage = this.equipmentStats.tauxActivite;
     if (healthPercentage >= 80) return 'good';
     if (healthPercentage >= 60) return 'warning';
     return 'critical';
   }
-  /**
-   * 📈 Charger les données des graphiques
-   */
+
   chargerDonneesGraphiques(): void {
     console.log('📈 Chargement des donnees graphiques...');
-
-    // Bar Chart - Top 10 Articles
     this.inventoryService
       .getValueByType()
       .pipe(takeUntil(this.destroy$))
@@ -419,14 +408,12 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
 
             this.barChartData.labels = sortedEntries.map((item: any) => item[0]);
             this.barChartData.datasets[0].data = sortedEntries.map((item: any) => item[1]);
-            
             console.log('✅ Top 10 Articles charges');
           }
         },
         error: (err) => console.error('❌ Erreur top articles:', err)
       });
 
-    // Line Chart - Évolution financière
     this.inventoryService
       .getEvolutionFinanciere('', '')
       .pipe(takeUntil(this.destroy$))
@@ -443,21 +430,14 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     this.chargement = false;
   }
 
-  /**
-   * 🔄 Mettre à jour le pie chart
-   */
   private mettreAJourPieChart(): void {
     const total = this.stats.totalArticles;
     const faible = this.stats.stockFaible;
     const critique = this.stats.stockCritique;
     const ok = Math.max(0, total - (faible + critique));
-
     this.pieChartData.datasets[0].data = [ok, faible, critique];
   }
 
-  /**
-   * ⏱️ Configurer les filtres
-   */
   configurerFiltres(): void {
     this.filterForm.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -466,20 +446,20 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * 🔍 Appliquer tous les filtres
-   */
   appliquerFiltres(): void {
-    const { dateDebut, dateFin, typeArticle, statut } = this.filterForm.value;
 
+    // 🛡️ Garde de sécurité anti-crash
+  if (!this.articles || !Array.isArray(this.articles)) {
+    this.articlesFiltered = [];
+    return;
+  }
+    const { dateDebut, dateFin, typeArticle, statut } = this.filterForm.value;
     let filtered = [...this.articles];
 
-    // Filtre par statut
     if (statut && statut !== 'tous') {
       filtered = filtered.filter(article => {
         const seuil = article.seuilAlerte || 0;
         const quantite = article.quantite || 0;
-        
         if (statut === 'ok') return quantite > seuil;
         if (statut === 'faible') return quantite <= seuil && quantite > 0;
         if (statut === 'critique') return quantite === 0;
@@ -487,14 +467,12 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Filtre par type
     if (typeArticle) {
       filtered = filtered.filter(article => 
         article.type?.toLowerCase().includes(typeArticle.toLowerCase())
       );
     }
 
-    // Filtre par date (si les articles ont une dateAjout)
     if (dateDebut) {
       const debut = new Date(dateDebut);
       filtered = filtered.filter(article => {
@@ -516,39 +494,24 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     console.log(`🔍 ${filtered.length} articles filtres`);
   }
 
-  /**
-   * 📌 Sélectionner un article pour les détails
-   */
   selectionnerArticle(article: any): void {
     this.selectedArticle = article;
   }
 
-  /**
-   * 🔄 Actualiser les données
-   */
   actualiserDonnees(): void {
     this.initialiserDonnees();
   }
 
-  /**
-   * 🧮 Calculer le taux de disponibilité
-   */
   private calculateTauxDisponibilite(total: number, critique: number): number {
     if (total === 0) return 0;
     return Math.round(((total - critique) / total) * 100);
   }
 
-  /**
-   * 🧮 Calculer un pourcentage
-   */
   calculatePercentage(value: number, total: number): number {
     if (total === 0) return 0;
     return Math.round((value / total) * 100);
   }
 
-  /**
-   * 🎯 Obtenir l'état de santé du stock
-   */
   getStockHealth(): 'good' | 'warning' | 'critical' {
     const healthPercentage = this.stats.tauxDisponibilite;
     if (healthPercentage >= 80) return 'good';
@@ -556,9 +519,6 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     return 'critical';
   }
 
-  /**
-   * 📝 Obtenir le message de santé
-   */
   getHealthMessage(): string {
     const health = this.getStockHealth();
     const messages: Record<string, string> = {
@@ -569,9 +529,6 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     return messages[health];
   }
 
-  /**
-   * 🎨 Obtenir la couleur du badge santé
-   */
   getHealthBadgeClass(): string {
     const health = this.getStockHealth();
     const classes: Record<string, string> = {
@@ -580,5 +537,45 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
       critical: 'badge-danger'
     };
     return classes[health];
+  }
+
+  // =======================================================================
+  // 📄 FONCTION EXPORT PDF SÉCURISÉE (Pas d'importation globale)
+  // =======================================================================
+  async exportPDF() {
+    // Évite le crash d'évaluation au niveau du SSR Node
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Sélection de l'enveloppe globale à capturer
+    const element = document.querySelector('.dashboard-container');
+
+    if (element) {
+      // Importation dynamique asynchrone uniquement côté navigateur
+      const html2pdf = (await import('html2pdf.js')) as any;
+
+      const options = {
+        margin:       [10, 10, 10, 10], 
+        filename:     'Rapport_Statistiques_Parc.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+          scale: 2,           // Améliore la netteté des canvas Chart.js
+          useCORS: true,      
+          logging: false 
+        },
+        jsPDF:        { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'landscape' // Format Paysage horizontal adapté aux graphiques
+        },
+        pagebreak: { 
+          mode: ['css', 'legacy'],
+          before: '[data-html2pdf-pagebreak="always"]' // Respecte les balises de saut de page
+        }
+      };
+
+      html2pdf.default().set(options).from(element).save();
+    } else {
+      console.error("Le conteneur '.stats-container' est introuvable.");
+    }
   }
 }

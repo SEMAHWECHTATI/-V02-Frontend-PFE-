@@ -1,0 +1,145 @@
+.dashboard-container { padding: 24px; font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; }
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.export-actions button { padding: 10px 16px; margin-left: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-excel { background-color: #10b981; color: white; }
+.btn-pdf { background-color: #4b5563; color: white; }
+
+/* Barre de filtres */
+.filter-bar { background: white; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.filter-bar select { padding: 8px; margin-left: 12px; border-radius: 4px; border: 1px solid #cbd5e1; }
+
+/* Grille des KPIs */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.card { padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+.bg-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.bg-green { background: linear-gradient(135deg, #10b981, #047857); }
+.bg-yellow { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.bg-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.card h3 { margin: 0; font-size: 14px; opacity: 0.9; text-transform: uppercase; }
+.card .value { font-size: 28px; font-weight: bold; margin: 10px 0 0 0; }
+
+/* Grille des Graphiques */
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px; }
+.chart-box, .table-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.chart-box h4, .table-box h4 { margin-top: 0; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+
+/* Tableaux */
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+th { background-color: #f8fafc; color: #64748b; }
+.badge { background-color: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+.alert-info { margin-top: 16px; padding: 12px; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px; }
+
+/* 🔥 GESTION DE L'EXPORT PDF / IMPRESSION (Cache les éléments inutiles au PDF) */
+/* Ce bloc cible uniquement le rendu lors de la génération du PDF */
+/* --- Styles pour l'écran normal --- */
+.charts-report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+/* Alignement de la nouvelle sous-grille d'inventaire */
+.inventory-sub-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.sub-card {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.sub-icon {
+  font-size: 1.5rem;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.sub-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.sub-value {
+  font-size: 1.1rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Prise en compte de cette sous-grille pour le PDF */
+@media print {
+  .inventory-sub-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .sub-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+}
+
+/* --- STYLE PROFESSIONNEL POUR L'EXPORT PDF --- */
+@media print {
+  .dashboard-container {
+    width: 100% !important;
+    background: #f8fafc !important;
+  }
+
+  /* Force l'alignement horizontal strict des 3 graphiques */
+  .charts-report-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
+    width: 100% !important;
+  }
+
+  /* Empêche les graphiques de se marcher dessus (Maximum 31% par bloc) */
+  .chart-card {
+    flex: 1 !important;
+    width: 31% !important;
+    max-width: 31% !important;
+    min-width: 31% !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Redimensionne proprement les canvas de Chart.js pour l'A4 Paysage */
+  .chart-wrapper {
+    height: 200px !important; 
+  }
+
+  /* Style du tableau en page 2 */
+  .table-card {
+    width: 100% !important;
+    background: #ffffff !important;
+    padding: 20px !important;
+  }
+}
