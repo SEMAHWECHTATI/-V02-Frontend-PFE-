@@ -25,6 +25,12 @@ export enum Severite {
   CRITIQUE = 'CRITIQUE'
 }
 
+export interface DashboardFinance {
+  valeurGlobale: number;
+  totalStocksFaibles: number;
+  totalRuptures: number;
+}
+
 export enum StatutAlerte {
   NOUVELLE = 'NOUVELLE',
   LUE = 'LUE',

@@ -14,6 +14,7 @@ export interface Mouvement {
   referenceTicket?: string;
 }
 
+
 export enum TypeMouvement {
   ENTREE = 'ENTREE',
   SORTIE = 'SORTIE',

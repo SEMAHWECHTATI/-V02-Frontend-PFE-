@@ -28,13 +28,31 @@
       <hr class="my-4 text-muted">
 
       <div class="mb-3">
-        <label for="nouveauMotDePasse" class="form-label fw-semibold">Nouveau mot de passe</label>
-        <div class="input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
-          <input type="password" id="nouveauMotDePasse" class="form-control" name="nouveauMotDePasse"
-                 [(ngModel)]="nouveauMotDePasse" placeholder="Saisissez le nouveau mot de passe" required>
-        </div>
-      </div>
+  <label for="nouveauMotDePasse" class="form-label fw-semibold">Nouveau mot de passe</label>
+  <div class="input-group">
+    <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+    <input type="password" id="nouveauMotDePasse" class="form-control" name="nouveauMotDePasse"
+           [(ngModel)]="nouveauMotDePasse" placeholder="Saisissez le nouveau mot de passe" required>
+  </div>
+
+  <div class="mt-2 small" *ngIf="nouveauMotDePasse">
+    <p class="mb-1 fw-bold text-muted">Le mot de passe doit contenir :</p>
+    <ul class="list-unstyled ps-2">
+      <li [ngClass]="hasLength(nouveauMotDePasse) ? 'text-success' : 'text-danger'">
+        <i class="bi" [ngClass]="hasLength(nouveauMotDePasse) ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+        Au moins 8 caractères
+      </li>
+      <li [ngClass]="hasUppercase(nouveauMotDePasse) ? 'text-success' : 'text-danger'">
+        <i class="bi" [ngClass]="hasUppercase(nouveauMotDePasse) ? 'text-success' : 'text-danger'"></i>
+        Au moins une majuscule
+      </li>
+      <li [ngClass]="hasNumber(nouveauMotDePasse) ? 'text-success' : 'text-danger'">
+        <i class="bi" [ngClass]="hasNumber(nouveauMotDePasse) ? 'text-success' : 'text-danger'"></i>
+        Au moins un chiffre
+      </li>
+    </ul>
+  </div>
+</div>
 
       <div class="mb-4">
         <label for="confirmerMotDePasse" class="form-label fw-semibold">Confirmer le mot de passe</label>

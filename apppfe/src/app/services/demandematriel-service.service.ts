@@ -90,4 +90,12 @@ export class DemandematrielServiceService {
   return this.http.get<any[]>(`${this.apiUrl}/demandes`);
 
 }
+
+/**
+   * 📋 Détails d'une demande spécifique
+   */
+  getDemandeDetail(demandeId: number): Observable<any> {
+    console.log('📋 Récupération détails demande:', demandeId);
+    return this.http.get(`${this.apiUrl}/${demandeId}`);
+  }
 }

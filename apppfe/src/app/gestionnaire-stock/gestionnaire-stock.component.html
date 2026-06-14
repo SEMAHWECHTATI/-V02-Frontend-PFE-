@@ -7,7 +7,7 @@
           <i class="bi bi-box2-heart"></i>
         </div>
         <div class="logo-text">
-          <h1>GITI-Inventory</h1>
+          <h1>GITI-KPI</h1>
           <p class="subtitle">Gestion Inventaire IT</p>
         </div>
       </div>
@@ -25,7 +25,7 @@
             <span class="user-role">{{ currentUser.role === 'Administrateur' ? 'Administrateur' : 'Gestionnaire' }}</span>
           </div>
           <button class="btn-logout" (click)="deconnexion()" title="Déconnexion">
-            <i class="bi bi-box-arrow-right"></i>
+            <i class="bi bi-escape text-danger"></i>
           </button>
         </div>
       </div>
@@ -44,7 +44,7 @@
 
       <nav class="menu">
         <a class="menu-item" (click)="changerVue('dashboard')" [class.active]="vueActuelle === 'dashboard'">
-          <div class="menu-icon"><i class="bi bi-speedometer2"></i></div>
+          <div class="menu-icon"><i class="bi bi-speedometer2 text-success"></i></div>
           <span class="menu-label">Dashboard</span>
           <span *ngIf="stats.alertesNonTraitees > 0" class="menu-badge">{{ stats.alertesNonTraitees }}</span>
         </a>
@@ -73,6 +73,16 @@
           <span *ngIf="stats.demandesEnAttente > 0" class="menu-badge warning">{{ stats.demandesEnAttente }}</span>
         </a>
 
+        <a class="menu-item" (click)="changerVue('creer-emplacement-equipement')" [class.active]="vueActuelle === 'creer-emplacement-equipement'">
+          <div class="menu-icon"><i class="bi bi-inbox"></i></div>
+          <span class="menu-label">Créer Emplacement Équipement</span>
+        </a>
+
+        <a class="menu-item" (click)="changerVue('emplacementequipement')" [class.active]="vueActuelle === 'emplacementequipement'">
+          <div class="menu-icon"><i class="bi bi-inbox"></i></div>
+          <span class="menu-label">Emplacement Équipement</span>
+        </a>
+
         <a class="menu-item" (click)="changerVue('creer-demande')" [class.active]="vueActuelle === 'creer-demande'">
           <div class="menu-icon"><i class="bi bi-file-earmark-plus"></i></div>
           <span class="menu-label">Créer Demande</span>
@@ -84,17 +94,34 @@
           <span *ngIf="stats.alertesCritiques > 0" class="menu-badge critical">{{ stats.alertesCritiques }}</span>
         </a>
 
+        <a class="menu-item" (click)="changerVue('stastique')" [class.active]="vueActuelle === 'stastique'">
+          <div class="menu-icon"><i class="bi bi-pin-map text-primary"></i></div>
+          <span class="menu-label">Statistiques GITI</span>
+        </a>
+
         <a *ngIf="currentUser.role === 'Administrateur'" class="menu-item" (click)="changerVue('statistiques')" [class.active]="vueActuelle === 'statistiques'">
           <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
-          <span class="menu-label">Statistiques</span>
+          <span class="menu-label">Statistiques Admin</span>
         </a>
-         <a class="menu-item" (click)="changerVue('fournisseurs')" [class.active]="vueActuelle === 'fournisseurs'">
-          <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
+
+        <a class="menu-item" (click)="changerVue('fournisseurs')" [class.active]="vueActuelle === 'fournisseurs'">
+          <div class="menu-icon"><i class="bi bi-truck"></i></div>
           <span class="menu-label">Fournisseur</span>
         </a>
+
         <a class="menu-item" (click)="changerVue('localisations')" [class.active]="vueActuelle === 'localisations'">
-          <div class="menu-icon"><i class="bi bi-graph-up"></i></div>
+          <div class="menu-icon"><i class="bi bi-geo-alt"></i></div>
           <span class="menu-label">Localisation</span>
+        </a>
+
+        <a class="menu-item" (click)="changerVue('stocks')" [class.active]="vueActuelle === 'stocks'">
+          <div class="menu-icon"><i class="bi bi-layers"></i></div>
+          <span class="menu-label">Stocks</span>
+        </a>
+
+        <a class="menu-item"  (click)="changerVue('stockslist')" [class.active]="vueActuelle === 'stockslist'">
+          <div class="menu-icon"><i class="bi bi-list-ul"></i></div>
+          <span class="menu-label">Stocks Liste</span>
         </a>
       </nav>
 
@@ -181,6 +208,67 @@
             </button>
           </div>
         </div>
+
+        <div class="row g-3 mb-4 mt-3">
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white border-start border-primary border-4 rounded-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-uppercase text-muted small fw-bold tracking-wider mb-1">Valeur Globale du Parc</h6>
+                  <h3 class="fw-bold text-dark mb-0">{{ statsFinancieres.valeurGlobale | number:'1.2-2' }} TND</h3>
+                </div>
+                <div class="p-3 bg-light text-primary rounded-circle">
+                  <i class="bi bi-currency-dollar h4 mb-0"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                <i class="bi bi-info-circle me-1"></i> Évaluation automatisée via la méthode du CUMP.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white border-start border-warning border-4 rounded-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-uppercase text-muted small fw-bold tracking-wider mb-1">Flux en Alerte Minimum</h6>
+                  <h3 class="fw-bold text-warning mb-0">{{ statsFinancieres.totalStocksFaibles }} Référence(s)</h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background-color: #fffbeb; color: #d97706;">
+                  <i class="bi bi-exclamation-triangle-fill h4 mb-0"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-warning extra-small fw-medium">
+                <i class="bi bi-shield-exclamation me-1"></i> Seuil de sécurité franchi à la baisse.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white border-start border-danger border-4 rounded-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-uppercase text-muted small fw-bold tracking-wider mb-1">Ruptures Consommées</h6>
+                  <h3 class="fw-bold text-danger mb-0">{{ statsFinancieres.totalRuptures }} Alerte(s)</h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background-color: #fef2f2; color: #dc2626;">
+                  <i class="bi bi-lightning-charge-fill h4 mb-0"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-danger extra-small fw-bold">
+                <i class="bi bi-x-octagon me-1"></i> Action ou réapprovisionnement d'urgence exigé.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="vueActuelle === 'stastique'" class="view">
+        <div class="view-header">
+          <h2>📊 Statistiques de l'Inventaire IT</h2>
+          <p>Analyse des données et indicateurs de performance</p>
+        </div>
+        <app-statistiques></app-statistiques>
       </div>
 
       <div *ngIf="vueActuelle === 'articles'" class="view">
@@ -192,25 +280,36 @@
         <div class="view-header"><h2>➕ Créer un Nouvel Article</h2></div>
         <app-article-form></app-article-form>
       </div>
+
       <div *ngIf="vueActuelle === 'fournisseurs'" class="view">
-        <div class="view-header"><h2> Créer un Nouveau Fournisseur</h2></div>
+        <div class="view-header"><h2>🏭 Créer un Nouveau Fournisseur</h2></div>
         <app-fournisseur></app-fournisseur>
       </div>
+
       <div *ngIf="vueActuelle === 'localisations'" class="view">
-        <div class="view-header"><h2> Créer un Nouveau Lieu</h2></div>
+        <div class="view-header"><h2>📍 Créer un Nouveau Lieu</h2></div>
         <app-localisation></app-localisation>
       </div>
-      
 
       <div *ngIf="vueActuelle === 'mouvements'" class="view">
         <div class="view-header"><h2>🔄 Mouvements de Stock</h2></div>
         <app-mouvements></app-mouvements>
       </div>
 
+      <div *ngIf="vueActuelle === 'stocks'" class="view">
+        <div class="view-header"><h2>📦 Gestion globale des Stocks</h2></div>
+        <app-stock-management></app-stock-management>
+      </div>
+
+      <div *ngIf="vueActuelle === 'stockslist'" class="view">
+        <div class="view-header"><h2>📋 Liste de Contrôle des Stocks</h2></div>
+        <app-stock-list></app-stock-list>
+      </div>
+
       <div *ngIf="vueActuelle === 'demandes-gestionnaire'" class="view">
         <div class="view-header">
           <h2>👤 Demandes à Valider</h2>
-          <p>Validez les demandes de matériel avant validation admin</p>
+          <p>Valisez les demandes de matériel avant validation admin</p>
         </div>
         <app-demandematriel></app-demandematriel> 
       </div>
@@ -226,8 +325,18 @@
       </div>
 
       <div *ngIf="vueActuelle === 'statistiques' && currentUser.role === 'Administrateur'" class="view">
-        <div class="view-header"><h2>📊 Statistiques Détaillées</h2></div>
+        <div class="view-header"><h2>📊 Statistiques Détaillées (Admin)</h2></div>
         <app-statistiques></app-statistiques>
+      </div>
+
+      <div class="view" *ngIf="vueActuelle === 'emplacementequipement'">
+        <div class="view-header"><h2>📍 Emplacement des Équipements</h2></div>
+        <app-detaille-equipement></app-detaille-equipement>
+      </div>
+
+      <div class="view" *ngIf="vueActuelle === 'creer-emplacement-equipement'">
+        <div class="view-header"><h2>➕ Créer un Nouvel Emplacement d'Équipement</h2></div>
+        <app-ajouter-equipement></app-ajouter-equipement>
       </div>
 
     </main>

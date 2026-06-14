@@ -1,128 +1,572 @@
-<div class="statistiques-container">
+<!-- ===== MAIN CONTAINER ===== -->
+<div class="dashboard-container">
 
-  <div class="statistiques-header">
-    <h2>📊 Statistiques Inventaire</h2>
-    <p>Vue d'ensemble complète de votre inventaire IT</p>
+  <!-- ===== HEADER & FILTERS ===== -->
+  <div class="dashboard-header">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>Tableau de Bord - Inventaire IT</h1>
+        <p class="subtitle">Vue d'ensemble complete et analyse detaillee de votre stock</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-icon" (click)="actualiserDonnees()" title="Actualiser">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button class="btn btn-icon" title="Exporter">
+          <i class="bi bi-download"></i>
+        </button>
+        <button class="btn btn-icon" title="Parametres">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== FILTER PANEL ===== -->
+    <div class="filter-panel">
+      <form [formGroup]="filterForm" class="filter-form">
+        
+        <!-- Date Range Filter -->
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-calendar"></i> Date Debut
+          </label>
+          <input 
+            type="date" 
+            class="filter-input" 
+            formControlName="dateDebut"
+            placeholder="Selectionner une date"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-calendar"></i> Date Fin
+          </label>
+          <input 
+            type="date" 
+            class="filter-input" 
+            formControlName="dateFin"
+            placeholder="Selectionner une date"
+          >
+        </div>
+
+        <!-- Type Article Filter -->
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-tag"></i> Type d'Article
+          </label>
+          <input 
+            type="text" 
+            class="filter-input" 
+            formControlName="typeArticle"
+            placeholder="Filtrer par type..."
+          >
+        </div>
+
+        <!-- Status Filter -->
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-funnel"></i> Statut
+          </label>
+          <select class="filter-select" formControlName="statut">
+            <option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Reset Button -->
+        <button type="button" class="btn btn-outline" (click)="filterForm.reset()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reinitialiser
+        </button>
+      </form>
+    </div>
   </div>
 
-  <div *ngIf="!chargement" class="stats-content">
-
-    <!-- Cartes principales -->
-    <div class="main-stats">
-      <div class="stat-card primary">
-        <div class="stat-icon">
-          <i class="bi bi-box2-heart"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Total Articles</h3>
-          <p class="stat-value">{{ stats.totalArticles }}</p>
-          <small>Nombre d'articles en inventaire</small>
-        </div>
-      </div>
-
-      <div class="stat-card success">
-        <div class="stat-icon">
-          <i class="bi bi-cash-coin"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Valeur Totale</h3>
-          <p class="stat-value">{{ stats.valeurTotale | number:'1.2-2' }} €</p>
-          <small>Valeur financière inventaire</small>
-        </div>
-      </div>
-
-      <div class="stat-card info">
-        <div class="stat-icon">
-          <i class="bi bi-boxes"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Quantité Totale</h3>
-          <p class="stat-value">{{ stats.quantiteTotale }}</p>
-          <small>Nombre d'unités en stock</small>
-        </div>
-      </div>
-
-      <div class="stat-card warning">
-        <div class="stat-icon">
-          <i class="bi bi-exclamation-triangle"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Stock Faible</h3>
-          <p class="stat-value">{{ stats.stockFaible }}</p>
-          <small>{{ calculatePercentage(stats.stockFaible, stats.totalArticles) }}% du total</small>
-        </div>
-      </div>
-
-      <div class="stat-card danger">
-        <div class="stat-icon">
-          <i class="bi bi-fire"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Stock Critique</h3>
-          <p class="stat-value">{{ stats.stockCritique }}</p>
-          <small>{{ calculatePercentage(stats.stockCritique, stats.totalArticles) }}% du total</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Graphiques et rapports -->
-    <div class="charts-section">
-      <div class="chart-card">
-        <h3>📈 Répartition du Stock</h3>
-        <div class="chart-placeholder">
-          <p>Graphique en secteurs (À intégrer avec ng2-charts)</p>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h3>📊 Valeur par Type</h3>
-        <div class="chart-placeholder">
-          <p>Graphique en barres (À intégrer avec ng2-charts)</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tableau récapitulatif -->
-    <div class="summary-table">
-      <h3>📋 Récapitulatif</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td>Articles en stock</td>
-            <td class="value">{{ stats.totalArticles }}</td>
-          </tr>
-          <tr>
-            <td>Quantité totale</td>
-            <td class="value">{{ stats.quantiteTotale }} unités</td>
-          </tr>
-          <tr>
-            <td>Valeur d'inventaire</td>
-            <td class="value highlight">{{ stats.valeurTotale | number:'1.2-2' }} €</td>
-          </tr>
-          <tr>
-            <td>Articles stock faible</td>
-            <td class="value warning">{{ stats.stockFaible }}</td>
-          </tr>
-          <tr>
-            <td>Articles stock critique</td>
-            <td class="value danger">{{ stats.stockCritique }}</td>
-          </tr>
-          <tr>
-            <td>Taux de disponibilité</td>
-            <td class="value">
-              {{ (((stats.totalArticles - stats.stockCritique) / stats.totalArticles) * 100) | number:'1.0-0' }}%
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+  <!-- ===== ERROR MESSAGE ===== -->
+  <div *ngIf="erreur" class="alert alert-danger alert-dismissible fade show">
+    <i class="bi bi-exclamation-triangle"></i>
+    <span>{{ erreur }}</span>
+    <button type="button" class="btn-close" (click)="erreur = null"></button>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="chargement" class="loading">
-    <div class="spinner"></div>
-    <p>Calcul des statistiques...</p>
+  <!-- ===== LOADING STATE ===== -->
+  <div *ngIf="chargement" class="loading-overlay">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Chargement du tableau de bord...</p>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div *ngIf="!chargement" class="dashboard-content">
+
+    <!-- ===== KPI CARDS SECTION ===== -->
+    <section class="kpi-section">
+      <h2 class="section-title">Indicateurs Cles</h2>
+      <div class="kpi-grid">
+
+        <!-- Total Articles -->
+        <div class="kpi-card kpi-primary">
+          <div class="kpi-icon">
+            <i class="bi bi-box2-heart"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Total Articles</span>
+            <h3 class="kpi-value">{{ stats.totalArticles }}</h3>
+            <p class="kpi-change">Articles en inventaire</p>
+          </div>
+          <div class="kpi-chart-mini"></div>
+        </div>
+
+        <!-- EQUIPEMENTS STATS ✅ NOUVEAU -->
+    <div class="kpi-card kpi-info">
+      <div class="kpi-icon"><i class="bi bi-cpu"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Total Equipements</span>
+        <h3 class="kpi-value">{{ equipmentStats.totalEquipements }}</h3>
+      </div>
+    </div>
+
+        <!-- Total Value -->
+        <div class="kpi-card kpi-success">
+          <div class="kpi-icon">
+            <i class="bi bi-cash-coin"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Valeur Totale</span>
+            <h3 class="kpi-value">{{ (stats.valeurTotale | number:'1.0-0') }} EUR</h3>
+            <p class="kpi-change">Valeur financiere</p>
+          </div>
+          <div class="kpi-trend trend-up"></div>
+        </div>
+
+        <!-- Total Quantity -->
+        <div class="kpi-card kpi-info">
+          <div class="kpi-icon">
+            <i class="bi bi-boxes"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Quantite Totale</span>
+            <h3 class="kpi-value">{{ stats.quantiteTotale }}</h3>
+            <p class="kpi-change">Unites en stock</p>
+          </div>
+          <div class="kpi-chart-mini"></div>
+        </div>
+
+        <!-- Availability Rate -->
+        <div class="kpi-card kpi-availability">
+          <div class="kpi-icon">
+            <i class="bi bi-percent"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Disponibilite</span>
+            <h3 class="kpi-value">{{ stats.tauxDisponibilite }}%</h3>
+            <p class="kpi-change" [ngClass]="'health-' + getStockHealth()">
+              {{ getHealthMessage() }}
+            </p>
+          </div>
+          <div class="kpi-badge" [ngClass]="getHealthBadgeClass()">
+            {{ stats.tauxDisponibilite }}%
+          </div>
+        </div>
+
+        <!-- Low Stock -->
+        <div class="kpi-card kpi-warning">
+          <div class="kpi-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Stock Faible</span>
+            <h3 class="kpi-value">{{ stats.stockFaible }}</h3>
+            <p class="kpi-change">{{ calculatePercentage(stats.stockFaible, stats.totalArticles) }}% du total</p>
+          </div>
+          <div class="kpi-chart-mini"></div>
+        </div>
+
+        <!-- Critical Stock -->
+        <div class="kpi-card kpi-danger">
+          <div class="kpi-icon">
+            <i class="bi bi-fire"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Stock Critique</span>
+            <h3 class="kpi-value">{{ stats.stockCritique }}</h3>
+            <p class="kpi-change">{{ calculatePercentage(stats.stockCritique, stats.totalArticles) }}% du total</p>
+          </div>
+          <div class="kpi-trend trend-down"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== TABS SECTION ===== -->
+    <div class="tabs-section">
+      <div class="tabs-nav">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'overview'"
+          (click)="activeTab = 'overview'"
+        >
+          <i class="bi bi-speedometer2"></i> Vue d'ensemble
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'articles'"
+          (click)="activeTab = 'articles'"
+        >
+          <i class="bi bi-list-check"></i> Articles ({{ articlesFiltered.length }})
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'equipments'" (click)="activeTab = 'equipments'">
+      <i class="bi bi-cpu"></i> Equipements
+    </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'trends'"
+          (click)="activeTab = 'trends'"
+        >
+          <i class="bi bi-graph-up"></i> Tendances
+        </button>
+      </div>
+
+      
+  <!-- TAB: EQUIPMENTS ✅ NOUVEAU -->
+  <div class="tab-content" *ngIf="activeTab === 'equipments'">
+    <div class="charts-grid">
+
+      <!-- EQUIPMENTS STATUS DISTRIBUTION -->
+      <div class="chart-wrapper full-width">
+        <div class="chart-header">
+          <h3 class="chart-title">Distribution des Equipements par Statut</h3>
+          <span class="chart-badge">Vue globale</span>
+        </div>
+        <div class="stat-summary">
+          <div class="summary-item">
+            <span class="status-badge status-ACTIF">ACTIF</span>
+            <strong>{{ equipmentStats.actifs }}</strong>
+            <small>{{ calculatePercentage(equipmentStats.actifs, equipmentStats.totalEquipements) }}%</small>
+          </div>
+          <div class="summary-item">
+            <span class="status-badge status-EN_REPARATION">EN REPARATION</span>
+            <strong>{{ equipmentStats.enReparation }}</strong>
+            <small>{{ calculatePercentage(equipmentStats.enReparation, equipmentStats.totalEquipements) }}%</small>
+          </div>
+          <div class="summary-item">
+            <span class="status-badge status-A_RECYCLER">A RECYCLER</span>
+            <strong>{{ equipmentStats.aRecycler }}</strong>
+            <small>{{ calculatePercentage(equipmentStats.aRecycler, equipmentStats.totalEquipements) }}%</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEALTH INDICATOR -->
+      <div class="chart-wrapper">
+        <div class="chart-header">
+          <h3 class="chart-title">Sante du Parc</h3>
+        </div>
+        <div class="health-indicator" [ngClass]="'health-' + getEquipmentHealth()">
+          <div class="health-circle">
+            <span class="health-value">{{ equipmentStats.tauxActivite }}%</span>
+            <span class="health-label">Actifs</span>
+          </div>
+          <div class="health-message">
+            <p *ngIf="getEquipmentHealth() === 'good'" class="health-good">
+              Parc en excellent etat
+            </p>
+            <p *ngIf="getEquipmentHealth() === 'warning'" class="health-warning">
+              Attention a la maintenance
+            </p>
+            <p *ngIf="getEquipmentHealth() === 'critical'" class="health-critical">
+              Action requise
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+        
+      
+    
+
+      <!-- ===== TAB: OVERVIEW ===== -->
+      <div class="tab-content" *ngIf="activeTab === 'overview'">
+        <div class="charts-grid">
+
+          <!-- Line Chart - Evolution Financiere -->
+          <div class="chart-wrapper">
+            <div class="chart-header">
+              <h3 class="chart-title">Evolution Financiere</h3>
+              <span class="chart-badge">30 derniers jours</span>
+            </div>
+            <div class="chart-container">
+              <canvas 
+                baseChart 
+                #lineChartRef
+                [data]="lineChartData" 
+                [options]="lineChartOptions" 
+                [type]="lineChartType">
+              </canvas>
+            </div>
+          </div>
+
+          <!-- Pie Chart - Distribution -->
+          <div class="chart-wrapper">
+            <div class="chart-header">
+              <h3 class="chart-title">Distribution du Stock</h3>
+              <span class="chart-badge">Par statut</span>
+            </div>
+            <div class="chart-container pie-container">
+              <canvas 
+                baseChart 
+                #pieChartRef
+                [data]="pieChartData" 
+                [options]="pieChartOptions" 
+                [type]="pieChartType">
+              </canvas>
+            </div>
+          </div>
+
+          <!-- Bar Chart - Top 10 Articles -->
+          <div class="chart-wrapper full-width">
+            <div class="chart-header">
+              <h3 class="chart-title">Top 10 Articles par Valeur</h3>
+              <span class="chart-badge">Ranked</span>
+            </div>
+            <div class="chart-container bar-container">
+              <canvas 
+                baseChart 
+                #barChartRef
+                [data]="barChartData" 
+                [options]="barChartOptions" 
+                [type]="barChartType">
+              </canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== TAB: ARTICLES ===== -->
+      <div class="tab-content" *ngIf="activeTab === 'articles'">
+        
+        <div class="articles-section">
+          <div class="articles-header">
+            <h3>Liste des Articles ({{ articlesFiltered.length }} resultats)</h3>
+            <div class="articles-actions">
+              <button class="btn btn-sm btn-outline">
+                <i class="bi bi-download"></i> Exporter
+              </button>
+            </div>
+          </div>
+
+          <!-- Articles Table -->
+          <div class="table-responsive">
+            <table class="articles-table">
+              <thead>
+                <tr>
+                  <th>
+                    <i class="bi bi-hash"></i> Reference
+                  </th>
+                  <th>
+                    <i class="bi bi-tag"></i> Designation
+                  </th>
+                  <th>
+                    <i class="bi bi-folder"></i> Type
+                  </th>
+                  <th class="text-center">
+                    <i class="bi bi-boxes"></i> Quantite
+                  </th>
+                  <th class="text-center">
+                    <i class="bi bi-exclamation-triangle"></i> Seuil
+                  </th>
+                  <th class="text-right">
+                    <i class="bi bi-cash-coin"></i> Valeur Unitaire
+                  </th>
+                  <th class="text-center">
+                    <i class="bi bi-info-circle"></i> Statut
+                  </th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let article of articlesFiltered" [class.selected]="selectedArticle?.id === article.id">
+                  <td class="code-cell">{{ article.code || '-' }}</td>
+                  <td class="name-cell">{{ article.designation || '-' }}</td>
+                  <td>{{ article.type || '-' }}</td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ article.quantite || 0 }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="text-muted">{{ article.seuilAlerte || 0 }}</span>
+                  </td>
+                  <td class="text-right">
+                    <strong>{{ (article.prixUnitaire | number:'1.2-2') || '0' }} EUR</strong>
+                  </td>
+                  <td class="text-center">
+                    <span 
+                      class="status-badge"
+                      [ngClass]="{
+                        'status-ok': (article.quantite || 0) > (article.seuilAlerte || 0),
+                        'status-warning': (article.quantite || 0) <= (article.seuilAlerte || 0) && (article.quantite || 0) > 0,
+                        'status-critical': (article.quantite || 0) === 0
+                      }"
+                    >
+                      <i [ngClass]="{
+                        'bi bi-check-circle': (article.quantite || 0) > (article.seuilAlerte || 0),
+                        'bi bi-exclamation-circle': (article.quantite || 0) <= (article.seuilAlerte || 0) && (article.quantite || 0) > 0,
+                        'bi bi-x-circle': (article.quantite || 0) === 0
+                      }"></i>
+                      {{ (article.quantite || 0) > (article.seuilAlerte || 0) ? 'OK' : (article.quantite || 0) > 0 ? 'Faible' : 'Critique' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button 
+                      class="btn btn-sm btn-icon" 
+                      (click)="selectionnerArticle(article)"
+                      title="Details"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="articlesFiltered.length === 0" class="no-data">
+                  <td colspan="8" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox"></i> Aucun article trouve
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Article Details Panel -->
+          <div class="details-panel" *ngIf="selectedArticle">
+            <div class="details-header">
+              <h4>Details de l'Article</h4>
+              <button class="btn btn-icon" (click)="selectedArticle = null">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+            <div class="details-body">
+              <div class="detail-row">
+                <span class="detail-label">Reference:</span>
+                <span class="detail-value">{{ selectedArticle.code }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Designation:</span>
+                <span class="detail-value">{{ selectedArticle.designation }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Type:</span>
+                <span class="detail-value">{{ selectedArticle.type }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Quantite:</span>
+                <span class="detail-value">{{ selectedArticle.quantite }} unites</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Seuil d'alerte:</span>
+                <span class="detail-value">{{ selectedArticle.seuilAlerte }} unites</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Prix Unitaire:</span>
+                <span class="detail-value">{{ (selectedArticle.prixUnitaire | number:'1.2-2') }} EUR</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Valeur Totale:</span>
+                <span class="detail-value highlight">
+                  {{ ((selectedArticle.quantite || 0) * (selectedArticle.prixUnitaire || 0) | number:'1.2-2') }} EUR
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Fournisseur:</span>
+                <span class="detail-value">{{ selectedArticle.fournisseur || '-' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Localisation:</span>
+                <span class="detail-value">{{ selectedArticle.localisation || '-' }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== TAB: TRENDS ===== -->
+      <div class="tab-content" *ngIf="activeTab === 'trends'">
+        
+        <div class="charts-grid">
+
+          <!-- Summary Cards -->
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="summary-icon success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+              <div class="summary-info">
+                <h4>Articles en Stock</h4>
+                <p class="summary-value">{{ stats.totalArticles - stats.stockCritique }}</p>
+                <small>{{ calculatePercentage(stats.totalArticles - stats.stockCritique, stats.totalArticles) }}% du stock</small>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-icon warning">
+                <i class="bi bi-exclamation-circle"></i>
+              </div>
+              <div class="summary-info">
+                <h4>Stock Faible</h4>
+                <p class="summary-value">{{ stats.stockFaible }}</p>
+                <small>A renouveler prochainement</small>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-icon danger">
+                <i class="bi bi-fire"></i>
+              </div>
+              <div class="summary-info">
+                <h4>Stock Critique</h4>
+                <p class="summary-value">{{ stats.stockCritique }}</p>
+                <small>Action urgente requise</small>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-icon info">
+                <i class="bi bi-graph-up"></i>
+              </div>
+              <div class="summary-info">
+                <h4>Valeur Moyenne</h4>
+                <p class="summary-value">{{ (stats.valeurTotale / (stats.totalArticles || 1) | number:'1.2-2') }} EUR</p>
+                <small>Par article</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Type Distribution Chart -->
+          <div class="chart-wrapper full-width">
+            <div class="chart-header">
+              <h3 class="chart-title">Distribution par Type d'Article</h3>
+              <span class="chart-badge">Quantites</span>
+            </div>
+            <div class="chart-container">
+              <canvas 
+                baseChart
+                [data]="typeChartData" 
+                [options]="typeChartOptions" 
+                [type]="'bar'">
+              </canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
 </div>

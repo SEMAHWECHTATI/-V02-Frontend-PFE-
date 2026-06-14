@@ -1,97 +1,221 @@
 <div class="article-list-container">
 
+  <!-- ===== HEADER ===== -->
   <div class="list-header">
-    <h2>📦 Gestion des Articles</h2>
-    <p>Liste complète de tous les articles de l'inventaire</p>
+    <div class="header-top">
+      <div>
+        <h2>Gestion des Articles</h2>
+        <p>Liste complete de tous les articles de l'inventaire</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="rafraichir()" title="Rafraichir">
+          <i class="bi bi-arrow-clockwise"></i> Rafraichir
+        </button>
+        <button class="btn btn-secondary" (click)="exporterCSV()" title="Exporter">
+          <i class="bi bi-download"></i> Exporter CSV
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- Search & Filter -->
-  <div class="search-filter">
+  <!-- ===== STATS CARDS ===== -->
+  <div class="stats-cards" *ngIf="articles.length > 0">
+    <div class="stat-card total">
+      <div class="stat-icon"><i class="bi bi-box2"></i></div>
+      <div class="stat-body">
+        <span class="stat-label">Total Articles</span>
+        <h4 class="stat-value">{{ stats.total }}</h4>
+      </div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-body">
+        <span class="stat-label">Actifs</span>
+        <h4 class="stat-value">{{ stats.actifs }}</h4>
+      </div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="stat-body">
+        <span class="stat-label">Stock Faible</span>
+        <h4 class="stat-value">{{ stats.stockFaible }}</h4>
+      </div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon"><i class="bi bi-fire"></i></div>
+      <div class="stat-body">
+        <span class="stat-label">Critique</span>
+        <h4 class="stat-value">{{ stats.stockCritique }}</h4>
+      </div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+      <div class="stat-body">
+        <span class="stat-label">Valeur Totale</span>
+        <h4 class="stat-value">{{ (stats.valeurTotale | number:'1.0-0') }} EUR</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ERROR MESSAGE ===== -->
+  <div *ngIf="erreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i>
+    <span>{{ erreur }}</span>
+  </div>
+
+  <!-- ===== SEARCH & FILTER ===== -->
+  <div class="search-filter-section">
     <div class="search-box">
       <i class="bi bi-search"></i>
       <input 
         type="text" 
-        placeholder="Rechercher un article..."
+        placeholder="Chercher par reference, designation, code..."
         [(ngModel)]="searchKeyword"
-        (keyup)="rechercher()">
+        (keyup)="rechercher()"
+        class="search-input">
     </div>
 
-    <select [(ngModel)]="filtre" (change)="appliquerFiltre()" class="filter-select">
-      <option value="tous">Tous les articles</option>
-      <option value="faible">Stock faible</option>
-      <option value="critique">Stock critique</option>
+    <select [(ngModel)]="filtre" (change)="appliquerFiltres()" class="filter-select">
+      <option *ngFor="let opt of filtreOptions" [value]="opt.value">
+        {{ opt.label }}
+      </option>
     </select>
+
+    <button class="btn btn-outline" (click)="reinitialiserFiltres()" title="Reinitialiser">
+      <i class="bi bi-arrow-counterclockwise"></i> Reinitialiser
+    </button>
   </div>
 
-  <!-- Articles Table -->
-  <div class="articles-table-wrapper" *ngIf="!chargement">
-    <table class="articles-table">
-      <thead>
-        <tr>
-          <th>QR Code</th>
-          <th>Référence</th>
-          <th>Désignation</th>
-          <th>Type</th>
-          <th>Quantité</th>
-          <th>Prix Unit.</th>
-          <th>Valeur</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let article of filteredArticles" [class]="'status-' + article.statut">
-          <td><strong>{{ article.codeBarres }}</strong></td>
-          <td><strong>{{ article.reference }}</strong></td>
-          <td>{{ article.designation }}</td>
-          <td><small>{{ article.typeArticle }}</small></td>
-          <td>
-            <span [class]="article.quantiteEnStock <= article.seuilCritique ? 'critical' : article.quantiteEnStock <= article.seuilMinimum ? 'warning' : 'normal'">
-              {{ article.quantiteEnStock }}
-            </span>
-          </td>
-          <td>{{ article.prixUnitaire | number:'1.2-2' }} €</td>
-          <td><strong>{{ article.valeurTotal | number:'1.2-2' }} €</strong></td>
-          <td>
-            <span class="status-badge" [ngClass]="'status-' + article.statut">
-              {{ article.statut }}
-            </span>
-          </td>
-          <td>
-            <button class="btn-icon" title="Voir détails">
-              
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="btn-icon edit" title="Modifier">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn-icon delete" 
-        title="Archiver" 
-        (click)="article.id && archiver(article.id)"
-        [disabled]="!article.id">
-  <i class="bi bi-trash"></i>
-</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="table-footer">
-      <p>Total: {{ filteredArticles.length }} article(s)</p>
-    </div>
-  </div>
-
-  <!-- Loading -->
+  <!-- ===== LOADING STATE ===== -->
   <div *ngIf="chargement" class="loading">
     <div class="spinner"></div>
     <p>Chargement des articles...</p>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!chargement && filteredArticles.length === 0" class="empty-state">
+  <!-- ===== ARTICLES TABLE ===== -->
+  <div class="articles-table-wrapper" *ngIf="!chargement && filteredArticles.length > 0">
+    <table class="articles-table">
+      <thead>
+        <tr>
+          <th class="sortable" (click)="changerTri('reference')">
+            <div class="th-content">
+              <span>Reference</span>
+              <i *ngIf="triParColonne === 'reference'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
+          <th class="sortable" (click)="changerTri('designation')">
+            <div class="th-content">
+              <span>Designation</span>
+              <i *ngIf="triParColonne === 'designation'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
+          <th>Code Barres</th>
+          <th>Type</th>
+          <th class="sortable" (click)="changerTri('quantite')">
+            <div class="th-content">
+              <span>Quantite</span>
+              <i *ngIf="triParColonne === 'quantite'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
+          <th class="sortable" (click)="changerTri('prix')">
+            <div class="th-content">
+              <span>Prix Unit.</span>
+              <i *ngIf="triParColonne === 'prix'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
+          <th class="sortable" (click)="changerTri('valeur')">
+            <div class="th-content">
+              <span>Valeur</span>
+              <i *ngIf="triParColonne === 'valeur'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let article of filteredArticles" [ngClass]="'status-' + getStockStatus(article)">
+          <td class="code-cell">
+            <strong>{{ article.reference || '-' }}</strong>
+          </td>
+          <td class="name-cell">{{ article.designation || '-' }}</td>
+          <td>
+            <span class="barcode">{{ article.codeBarres || '-' }}</span>
+          </td>
+          <td><small>{{ article.typeArticle || '-' }}</small></td>
+          <td class="text-center">
+            <span [ngClass]="'qty-' + getStockStatus(article)">
+              {{ article.quantiteEnStock || 0 }}
+            </span>
+          </td>
+          <td class="text-right">{{ (article.prixUnitaire | number:'1.2-2') || '0' }} EUR</td>
+          <td class="text-right">
+            <strong>{{ ((article.quantiteEnStock || 0) * (article.prixUnitaire || 0) | number:'1.2-2') }} EUR</strong>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + (article.statut || 'UNKNOWN')">
+              {{ article.statut || 'N/A' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-icon view" title="Voir details">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn-icon edit" title="Modifier">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button 
+              class="btn-icon delete" 
+              title="Archiver" 
+              (click)="archiver(article.id)"
+              [disabled]="!article.id">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ===== TABLE FOOTER (PAGINATION) ===== -->
+    <div class="table-footer">
+      <div class="footer-left">
+        <p>Affichage {{ (pageActuelle - 1) * itemsParPage + 1 }} a {{ Math.min(pageActuelle * itemsParPage, filteredArticles.length) }} sur {{ filteredArticles.length }} article(s)</p>
+      </div>
+      <div class="footer-right">
+        <button 
+          class="btn btn-sm btn-outline" 
+          (click)="pagePrec()"
+          [disabled]="pageActuelle === 1">
+          <i class="bi bi-chevron-left"></i> Precedent
+        </button>
+        <span class="pagination-info">Page {{ pageActuelle }} / {{ totalPages }}</span>
+        <button 
+          class="btn btn-sm btn-outline" 
+          (click)="pageSuiv()"
+          [disabled]="pageActuelle === totalPages">
+          Suivant <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EMPTY STATE ===== -->
+  <div *ngIf="!chargement && filteredArticles.length === 0 && articles.length > 0" class="empty-state">
+    <i class="bi bi-search"></i>
+    <h3>Aucun article ne correspond</h3>
+    <p>Essayez d'affiner votre recherche ou vos filtres</p>
+  </div>
+
+  <!-- ===== NO ARTICLES ===== -->
+  <div *ngIf="!chargement && articles.length === 0" class="empty-state">
     <i class="bi bi-inbox"></i>
     <h3>Aucun article</h3>
-    <p>Créez votre premier article pour commencer</p>
+    <p>Creez votre premier article pour commencer</p>
   </div>
 
 </div>

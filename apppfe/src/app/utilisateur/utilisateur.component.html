@@ -145,6 +145,9 @@
               <button class="btn btn-warning" title="Modifier" (click)="ouvrirFormulaireEdition()">
                   <i class="bi bi-pencil-fill"></i> Modifier les accès
               </button>
+               <button class="btn btn-primary" (click)="reinitialiserMotDePasse(utilisateurSelectionne.email)" title="Réinitialiser le mot de passe">
+                  <i class="bi bi-key"></i> Réinitialiser le mot de passe
+              </button>
               <button class="btn btn-danger" (click)="supprimer(utilisateurSelectionne.id)" title="Supprimer">
                   <i class="bi bi-trash"></i> Supprimer l'utilisateur
               </button>

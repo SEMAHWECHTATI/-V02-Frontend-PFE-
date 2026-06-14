@@ -59,31 +59,37 @@
                                     <span class="d-none d-sm-inline">Liste des tickets</span>
                                 </a>
                             </li>
-                            <li class="w-100">
+                            <!-- <li class="w-100">
                                 <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesInterventions'" (click)="changerVue('mesInterventions')" style="cursor: pointer;">
                                     <i class="bi bi-clock-history me-2 text-secondary"></i> 
                                     <span class="d-none d-sm-inline">Mes interventions</span>
                                 </a>
-                            </li>
+                            </li> -->
                             <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
                                 <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'enumerations'" (click)="changerVue('enumerations')" style="cursor: pointer;">
                                     <i class="bi bi-gear-fill me-2 text-danger"></i> 
                                     <span class="d-none d-sm-inline">Référentiel (Énumérations)</span>
                                 </a>
                             </li>
-                            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                             <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'sla-dashboard'" (click)="changerVue('sla-dashboard')" style="cursor: pointer;">
+                                    <i class="bi bi-gear-fill me-2 text-danger"></i> 
+                                    <span class="d-none d-sm-inline">Dashboard SLA</span>
+                                </a>
+                            </li>
+                            <!-- <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
                                 <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'ticket-detail'" (click)="changerVue('ticket-detail')" style="cursor: pointer;">
                                     <i class="bi bi-gear-fill me-2 text-danger"></i> 
                                     <span class="d-none d-sm-inline">Détail du ticket</span>
                                 </a>
-                            </li>
+                            </li> -->
                         </ul>
                     </li>
                     
                     <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
                         <a (click)="menuInventaireOuvert = !menuInventaireOuvert" 
                            class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
-                           [class.active]="vueActuelle === 'demandermatriel' || vueActuelle === 'liste-demandematiel' || vueActuelle === 'mesdemandes'"
+                           [class.active]="vueActuelle === 'demandermatriel' || vueActuelle === 'liste-demandematiel' || vueActuelle === 'mesdemandes' || vueActuelle === 'piececonsomme'"
                            style="cursor: pointer;">
                             <div>
                                 <i class="bi bi-archive me-2 text-success"></i> 
@@ -111,6 +117,12 @@
                                 <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesdemandes'" (click)="changerVue('mesdemandes')" style="cursor: pointer;">
                                     <i class="bi bi-clock-history me-2 text-secondary"></i> 
                                     <span class="d-none d-sm-inline">Mes demandes de matériel</span>
+                                </a>
+                            </li>
+                              <li class="w-100">
+                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'piececonsomme'" (click)="changerVue('piececonsomme')" style="cursor: pointer;">
+                                    <i class="bi bi-clock-history me-2 text-secondary"></i> 
+                                    <span class="d-none d-sm-inline">Pièces consommées</span>
                                 </a>
                             </li>
                         </ul>
@@ -209,6 +221,7 @@
                             <li><a (click)="changerVue('create-groupe')">Créer groupe</a></li>
                             <li><a (click)="changerVue('liste-tickets')">Liste tickets</a></li>
                             <li><a (click)="changerVue('mesInterventions')">Mes interventions</a></li>
+                            <li><a (click)="changerVue('sla-dashboard')">Dashboard SLA</a></li>
                         </ul>
                     </li>
                     
@@ -221,6 +234,8 @@
                             <li><a (click)="changerVue('demandermatriel')">Créer une demande matériel</a></li>
                             <li><a (click)="changerVue('liste-demandematiel')">Liste des demandes matériel</a></li>
                             <li><a (click)="changerVue('mesdemandes')">Mes demandes matériel</a></li>
+                             <li><a (click)="changerVue('mesdemandes')">Pièces consommées</a></li>
+
                         </ul>
                     </li>
                     <li *ngIf="currentUser?.role === 'Administrateur'">
@@ -340,6 +355,8 @@
                     </div>
                 </div>
             </div>
+            
+                 
             <div *ngIf="vueActuelle === 'demandermatriel'">
                 <app-demandematriel></app-demandematriel>
             </div>
@@ -359,6 +376,17 @@
             <div *ngIf="vueActuelle === 'ticket-detail'">
                 <app-ticket-detail></app-ticket-detail>
             </div>
+            <div *ngIf="vueActuelle === 'piececonsomme'">
+             <app-consommation-rapport></app-consommation-rapport>
+            </div>
+            <div *ngIf="vueActuelle === 'sla-dashboard'">
+                <app-sla-dashboard></app-sla-dashboard>
+            </div>
+                   <div *ngIf="vueActuelle === 'parametres'">
+                    <app-parametre></app-parametre>                   
+                
+            </div>
+
             
             <div *ngIf="vueActuelle === 'mesInterventions'">
                 <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Affichage des interventions...</div>
@@ -369,8 +397,9 @@
             <div *ngIf="vueActuelle === 'demandermatriel'">
                 <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Formulaire de demande de matériel...</div>
             </div>
-            <div *ngIf="vueActuelle === 'liste-demandematiel'">
-                <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Liste globale des demandes de matériel...</div>
+              <div *ngIf="vueActuelle === 'liste-demandematiel'">
+                    <app-demandes-list></app-demandes-list>                 
+                
             </div>
             <div *ngIf="vueActuelle === 'mesdemandes'">
                 <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Liste de vos demandes de matériel...</div>

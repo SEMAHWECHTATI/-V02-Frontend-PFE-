@@ -1,0 +1,76 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📊 Rapports & Alertes de Stock Physique</h2>
+    <span class="badge bg-danger p-2" *ngIf="stocksFaibles.length > 0">
+      {{ stocksFaibles.length }} alerte(s) en cours
+    </span>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success border-0 shadow-sm">
+    {{ successMessage }}
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-danger text-white">
+      <h5 class="mb-0">⚠️ Liste de Réapprovisionnement Nécessaire</h5>
+    </div>
+    
+    <div class="table-responsive" *ngIf="!loading; else spinner">
+      <table class="table table-hover align-middle mb-0" *ngIf="stocksFaibles.length > 0; else emptyState">
+        <thead class="table-light">
+          <tr>
+            <th>Article / Réf</th>
+            <th>Code-barres</th>
+            <th class="text-center">Seuils (Min / Crit)</th>
+            <th class="text-center" style="width: 200px;">Quantité Actuelle</th>
+            <th class="text-end">Prix Unitaire</th>
+            <th class="text-end">Valeur Ligne</th>
+            <th class="text-center">État</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of stocksFaibles">
+            <td>
+              <strong>{{ stock.articleDesignation }}</strong><br>
+              <small class="text-muted">Réf: {{ stock.articleReference }}</small>
+            </td>
+            <td><code>{{ stock.codeBarresArticle }}</code></td>
+            <td class="text-center">
+              <span class="badge bg-secondary">{{ stock.quantiteMinimum }}</span> / 
+              <span class="badge bg-dark">{{ stock.quantiteCritique }}</span>
+            </td>
+            
+            <td class="text-center">
+              <div class="input-group input-group-sm justify-content-center">
+                <button class="btn btn-outline-secondary" type="button" (click)="modifierQuantite(stock, -1)">-</button>
+                <span class="input-group-text bg-white px-3 fw-bold">{{ stock.quantiteEnStock }}</span>
+                <button class="btn btn-outline-secondary" type="button" (click)="modifierQuantite(stock, 1)">+</button>
+              </div>
+            </td>
+            
+            <td class="text-end">{{ stock.prixUnitaire | currency:'EUR' }}</td>
+            <td class="text-end fw-bold">{{ stock.valeurTotale | currency:'EUR' }}</td>
+            
+            <td class="text-center">
+              <span *ngIf="stock.estCritique" class="badge bg-danger animate-pulse">CRITIQUE</span>
+              <span *ngIf="!stock.estCritique && stock.estFaible" class="badge bg-warning text-dark">FAIBLE</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #spinner>
+  <div class="text-center my-5">
+    <div class="spinner-border text-danger" role="status"></div>
+  </div>
+</ng-template>
+
+<ng-template #emptyState>
+  <div class="text-center my-5 py-4">
+    <i class="bi bi-check-circle text-success fs-1"></i>
+    <p class="text-muted mt-2 fs-5">✅ Excellent ! Aucun article n'est sous le seuil d'alerte minimum.</p>
+  </div>
+</ng-template>

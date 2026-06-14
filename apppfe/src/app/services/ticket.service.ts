@@ -31,6 +31,36 @@ export class TicketService {
 
   constructor(private http: HttpClient) { }
 
+  /**
+ * 📄 Exporter un ticket en PDF
+ */
+exportTicketPDF(idTicket: number): Observable<Blob> {
+  return this.http.get(
+    `${this.ticketUrl}/${idTicket}/export/pdf`,
+    { responseType: 'blob' }
+  );
+}
+
+// Appelé par le composant du Dashboard SLA
+  getSlaStats(): Observable<any> {
+    return this.http.get<any>(`${this.ticketUrl}/sla/statistics`);
+  }
+
+  // Appelé si vous voulez afficher un tableau des tickets en retard
+  getTicketsEnRetard(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.ticketUrl}/sla/depasses`);
+  }
+
+/**
+ * 📊 Exporter un ticket en Excel
+ */
+exportTicketExcel(idTicket: number): Observable<Blob> {
+  return this.http.get(
+    `${this.ticketUrl}/${idTicket}/export/excel`,
+    { responseType: 'blob' }
+  );
+}
+
   /* 🎫 Créer un ticket
    * POST /api/tickets/creer/{categorieId}
    */

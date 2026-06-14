@@ -11,12 +11,26 @@ import { AuthServiceService } from '../services/auth-service.service';
   templateUrl: './changer-mdp.component.html',
   styleUrl: './changer-mdp.component.css'
 })
+
+
+
 export class ChangerMdpComponent {
  email: string = '';
   nouveauMotDePasse: string = '';
   confirmerMotDePasse: string = '';
   erreur: string = '';
   chargement: boolean = false;
+
+  // Par défaut, le mot de passe est masqué
+  masquerMotDePasse: boolean = true;
+
+  
+
+// Fonctions de vérification rapides pour le HTML
+hasLength(pwd: string): boolean { return pwd ? pwd.length >= 8 : false; }
+hasUppercase(pwd: string): boolean { return /[A-Z]/.test(pwd); }
+hasLowercase(pwd: string): boolean { return /[a-z]/.test(pwd); }
+hasNumber(pwd: string): boolean { return /\d/.test(pwd); }
 
   constructor(
     private authent: AuthServiceService,

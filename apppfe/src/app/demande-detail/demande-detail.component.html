@@ -1,151 +1,184 @@
 <div *ngIf="visible" class="detail-overlay" (click)="onFermer()">
   <div class="detail-modal" (click)="$event.stopPropagation()">
-    <!-- Header -->
+    
     <div class="detail-header">
-      <h2>📋 Détails de la Demande</h2>
+      <h2>📋 Détails de la Demande ({{ demande?.reference || 'N/A' }})</h2>
       <button class="close-btn" (click)="onFermer()">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
-    <!-- Content -->
     <div class="detail-content" *ngIf="demande">
-      <!-- Article Section -->
+      
       <section class="detail-section">
         <h3><i class="bi bi-box"></i> Informations Article</h3>
         <div class="detail-grid">
-          <div class="detail-item">
+          <div class="detail-item full-width">
             <span class="label">Désignation</span>
-            <span class="value">{{ demande.article?.designation }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Type Article</span>
-            <span class="value">{{ demande.article?.typeArticle }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Catégorie</span>
-            <span class="value">{{ demande.article?.categorie }}</span>
+            <span class="value" style="font-weight: 600; color: #212529;">
+              {{ demande.articleDesignation || 'N/A' }}
+            </span>
           </div>
           <div class="detail-item">
             <span class="label">Référence</span>
-            <span class="value">{{ demande.article?.reference }}</span>
+            <span class="value"><span class="badge bg-secondary">{{ demande.articleReference || 'N/A' }}</span></span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Type Article</span>
+            <span class="value">{{ demande.articleTypeArticle || 'N/A' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Catégorie</span>
+            <span class="value">{{ demande.articleCategorie || 'N/A' }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Stock Actuel</span>
-            <span class="value stock" [class.low-stock]="demande.article?.quantiteEnStock < demande.article?.seuilMinimum">
-              {{ demande.article?.quantiteEnStock }}
+            <span class="value stock" [ngClass]="{'text-danger': (demande.articleQuantiteEnStock || 0) <= (demande.articleSeuilMinimum || 0)}">
+              {{ demande.articleQuantiteEnStock !== null ? demande.articleQuantiteEnStock : 0 }} unité(s)
             </span>
           </div>
           <div class="detail-item">
             <span class="label">Prix Unitaire</span>
-            <span class="value">{{ demande.article?.prixUnitaire | currency }}</span>
+            <span class="value">
+              {{ demande.articlePrixUnitaire !== null ? (demande.articlePrixUnitaire | currency: 'EUR' : 'symbol' : '1.2-2') : 'N/A' }}
+            </span>
           </div>
         </div>
       </section>
 
-      <!-- Demande Section -->
       <section class="detail-section">
         <h3><i class="bi bi-file-text"></i> Informations Demande</h3>
         <div class="detail-grid">
           <div class="detail-item">
             <span class="label">Quantité Demandée</span>
-            <span class="value">{{ demande.quantiteDemandee }} unité(s)</span>
+            <span class="value" style="font-weight: bold; color: #0d6efd;">
+              {{ demande.quantiteDemandee || 0 }} unité(s)
+            </span>
           </div>
           <div class="detail-item">
             <span class="label">Type de Demande</span>
-            <span class="value">{{ demande.type }}</span>
+            <span class="value">{{ demande.type || 'N/A' }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Statut</span>
-            <span [class]="'badge-status status-' + demande.statut">{{ demande.statut }}</span>
+            <span [class]="'badge-status status-' + (demande.statut || 'unknown')">{{ demande.statut || 'N/A' }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Référence Ticket</span>
-            <span class="value">{{ demande.referenceTicket || 'N/A' }}</span>
+            <span class="value">{{ demande.referenceTicket || 'Aucun lien ticket' }}</span>
           </div>
         </div>
 
-        <!-- Justification Full -->
-        <div class="justification-box">
-          <h4>Justification</h4>
-          <p>{{ demande.justification }}</p>
+        <div class="justification-box" style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-left: 4px solid #ffc107; border-radius: 4px;">
+          <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #495057;">Justification</h4>
+          <p style="margin: 0; color: #6c757d;">{{ demande.justification || 'Aucune justification fournie' }}</p>
         </div>
       </section>
 
-      <!-- Demandeur Section -->
-      <section class="detail-section">
+      <section class="detail-section" *ngIf="demande.utilisateurDemandeur">
         <h3><i class="bi bi-person-badge"></i> Informations Demandeur</h3>
         <div class="detail-grid">
           <div class="detail-item full-width">
             <span class="label">Nom Complet</span>
-            <span class="value">{{ demande.utilisateurDemandeur?.nom }} {{ demande.utilisateurDemandeur?.prenom }}</span>
+            <span class="value" style="text-transform: uppercase; font-weight: 500;">
+              {{ demande.utilisateurDemandeur.nom }} {{ demande.utilisateurDemandeur.prenom }}
+            </span>
           </div>
           <div class="detail-item">
             <span class="label">Email</span>
-            <span class="value email-link">{{ demande.utilisateurDemandeur?.email }}</span>
+            <span class="value email-link" style="color: #0d6efd;">{{ demande.utilisateurDemandeur.email || 'N/A' }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Téléphone</span>
-            <span class="value phone-link">{{ demande.utilisateurDemandeur?.telephone }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Rôle</span>
-            <span class="value role-tag">{{ demande.utilisateurDemandeur?.role }}</span>
+            <span class="value phone-link">{{ demande.utilisateurDemandeur.telephone || 'N/A' }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Département</span>
-            <span class="value dept-tag">{{ demande.utilisateurDemandeur?.departement }}</span>
+            <span class="value dept-tag" style="background: #e9ecef; padding: 2px 8px; border-radius: 4px;">
+              {{ demande.utilisateurDemandeur.departement || 'N/A' }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Rôle</span>
+            <span class="value role-tag">{{ demande.utilisateurDemandeur.roleDemande || 'N/A' }}</span>
           </div>
         </div>
       </section>
 
-      <!-- Dates Section -->
       <section class="detail-section">
         <h3><i class="bi bi-calendar-event"></i> Chronologie</h3>
-        <div class="timeline">
-          <div class="timeline-item">
-            <div class="timeline-marker creation"></div>
+        <div class="timeline" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+          
+          <div class="timeline-item" *ngIf="demande.dateCreation">
             <div class="timeline-content">
-              <span class="timeline-label">Demande Créée</span>
+              <span class="timeline-label" style="font-weight: bold;">
+                <i class="bi bi-plus-circle-fill text-primary"></i> Demande Créée : 
+              </span>
               <span class="timeline-date">{{ demande.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</span>
             </div>
           </div>
 
-          <div class="timeline-item" *ngIf="demande.utilisateurGestionnaire">
-            <div class="timeline-marker validation"></div>
+          <div class="timeline-item" *ngIf="demande.dateValidationGestionnaire">
             <div class="timeline-content">
-              <span class="timeline-label">Validation Gestionnaire</span>
+              <span class="timeline-label" style="font-weight: bold;">
+                <i class="bi bi-check-circle-fill text-warning"></i> Validée par le Gestionnaire : 
+              </span>
               <span class="timeline-date">{{ demande.dateValidationGestionnaire | date: 'dd/MM/yyyy HH:mm' }}</span>
-              <span class="timeline-user">Par: {{ demande.utilisateurGestionnaire?.nom }} {{ demande.utilisateurGestionnaire?.prenom }}</span>
+              <small class="text-muted" *ngIf="demande.utilisateurGestionnaireNom">
+                (Par : {{ demande.utilisateurGestionnairePrenom }} {{ demande.utilisateurGestionnaireNom }})
+              </small>
             </div>
           </div>
 
-          <div class="timeline-item" *ngIf="demande.utilisateurAdmin">
-            <div class="timeline-marker admin"></div>
+          <div class="timeline-item" *ngIf="demande.dateValidationAdmin">
             <div class="timeline-content">
-              <span class="timeline-label">Validation Admin</span>
+              <span class="timeline-label" style="font-weight: bold;">
+                <i class="bi bi-check-all text-success"></i> Approuvée & Stock Consommé : 
+              </span>
               <span class="timeline-date">{{ demande.dateValidationAdmin | date: 'dd/MM/yyyy HH:mm' }}</span>
-              <span class="timeline-user">Par: {{ demande.utilisateurAdmin?.nom }} {{ demande.utilisateurAdmin?.prenom }}</span>
+              <small class="text-muted" *ngIf="demande.utilisateurAdminNom">
+                (Par : {{ demande.utilisateurAdminPrenom }} {{ demande.utilisateurAdminNom }})
+              </small>
             </div>
           </div>
 
-          <div class="timeline-item rejection" *ngIf="demande.motifRejet">
-            <div class="timeline-marker rejection"></div>
-            <div class="timeline-content">
-              <span class="timeline-label">❌ Demande Rejetée</span>
-              <span class="timeline-date">{{ demande.dateRejet | date: 'dd/MM/yyyy HH:mm' }}</span>
-              <p class="rejection-reason">{{ demande.motifRejet }}</p>
+          <div class="timeline-item" *ngIf="demande.motifRejet">
+            <div class="timeline-content" style="background-color: #fff5f5; padding: 10px; border-radius: 6px; border: 1px solid #ffe3e3;">
+              <span class="timeline-label" style="font-weight: bold; color: #dc3545;">
+                <i class="bi bi-x-circle-fill"></i> Demande Rejetée
+              </span>
+              <span class="timeline-date" *ngIf="demande.dateModification">le {{ demande.dateModification | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <p class="rejection-reason" style="margin: 5px 0 0 0; font-style: italic; color: #b02a37;">
+                <strong>Motif :</strong> {{ demande.motifRejet }}
+              </p>
             </div>
           </div>
+
         </div>
       </section>
     </div>
 
-    <!-- Footer -->
-    <div class="detail-footer">
+    <div class="detail-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px; border-top: 1px solid #dee2e6;">
+      
+      <button 
+        *ngIf="roleUtilisateurConecte === 'Gestionnaire_Stock' && demande?.statut === 'EN_ATTENTE'"
+        class="btn btn-success" 
+        (click)="declencherValidationGestionnaire()">
+        <i class="bi bi-check-circle-fill"></i> Valider par gestionnaire
+      </button>
+
+      <button 
+        *ngIf="(roleUtilisateurConecte === 'Admin' || roleUtilisateurConecte === 'Administrateur') && demande?.statut === 'EN_ATTENTE'"
+        class="btn btn-primary" 
+        (click)="declencherValidationAdmin()">
+        <i class="bi bi-shield-check"></i> Approbation Finale Admin
+      </button>
+
       <button class="btn btn-secondary" (click)="onFermer()">
         <i class="bi bi-x-circle"></i> Fermer
       </button>
+
     </div>
   </div>
 </div>
+  

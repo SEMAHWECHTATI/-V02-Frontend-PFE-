@@ -1,243 +1,235 @@
-.mouvements-container {
-  max-width: 900px;
-  margin: 0 auto;
+/* --- Variables globales & Thématique Professionnelle --- */
+.inventory-dashboard {
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #333e48;
 }
 
-.mouvements-header {
-  margin-bottom: 30px;
+/* --- Cartes Formelles --- */
+.corporate-card {
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8 !important;
 }
-
-.mouvements-header h2 {
-  font-size: 24px;
-  font-weight: 700;
+.corporate-title {
+  font-size: 1.15rem;
+  font-weight: 600;
   color: #1e293b;
-  margin-bottom: 8px;
+}
+.corporate-subtitle {
+  font-size: 0.85rem;
 }
 
-.mouvements-header p {
+/* --- Segmented Control (Sélecteur d'Opération épuré) --- */
+.segmented-control {
+  background-color: #f1f5f9 !important;
+}
+.segmented-btn {
+  border: none !important;
   color: #64748b;
-  font-size: 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  transition: all 0.2s ease-in-out;
+}
+.segmented-btn:hover {
+  color: #1e293b;
+}
+.segmented-btn.active {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
 }
 
-.alert {
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  animation: slideDown 0.3s ease;
+/* --- Éléments de Formulaire --- */
+.label-formal {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.input-formal, .select-formal, .textarea-formal {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease;
+}
+.input-formal:focus, .select-formal:focus, .textarea-formal:focus {
+  border-color: #0284c7;
+  box-shadow: none;
+}
+.optional-text {
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  font-style: italic;
+  color: #94a3b8;
+}
+.context-panel {
+  border-color: #e2e8f0 !important;
+  background-color: #f8fafc !important;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* --- Boutons Corporates --- */
+.btn-corporate-primary {
+  background-color: #0f172a;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.btn-corporate-primary:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+.btn-corporate-light {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+.btn-corporate-light:hover {
+  background-color: #f1f5f9;
+}
+.btn-dark-formal {
+  background-color: #475569;
+  color: #ffffff;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+}
+.btn-dark-formal:hover {
+  background-color: #334155;
 }
 
-.alert-success {
-  background: #f0fdf4;
-  border-left: 4px solid #10b981;
-  color: #166534;
+/* --- Tableaux Formalisés d'entreprise --- */
+.table-container {
+  max-height: 280px;
+  overflow-y: auto;
+  border-color: #e2e8f0 !important;
 }
-
-.alert-danger {
-  background: #fff5f5;
-  border-left: 4px solid #ef4444;
-  color: #991b1b;
+.table-formal {
+  font-size: 0.85rem;
 }
-
-.mouvements-form {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.form-section {
-  margin-bottom: 30px;
-  padding-bottom: 30px;
+.table-formal thead th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
   border-bottom: 1px solid #e2e8f0;
 }
-
-.form-section:last-child {
-  border-bottom: none;
+.table-formal tbody td {
+  padding: 10px 12px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+.table-formal tbody tr:hover {
+  background-color: #f8fafc;
 }
 
-.form-section h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.movement-types {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-}
-
-.type-btn {
-  padding: 15px;
-  border: 2px solid #e2e8f0;
-  border-left: 4px solid;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
-  font-size: 14px;
+/* --- Badges & Statuts --- */
+.badge-formal {
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.badge-entree {
+  background-color: #e2fbf0 !important;
+  color: #11784b !important;
+}
+.badge-sortie {
+  background-color: #fff0f0 !important;
+  color: #cb2d2d !important;
+}
+.badge-transfert {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+}
+.link-action {
+  font-size: 0.8rem;
+  color: #0284c7;
+  text-decoration: none;
+}
+.link-action:hover {
+  text-decoration: underline;
 }
 
-.type-btn:hover {
+/* --- Alertes personnalisées --- */
+.custom-alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  border-left: 4px solid transparent;
+}
+.alert-success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-left-color: #16a34a;
+}
+.alert-danger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-left-color: #dc2626;
+}
+
+/* --- Style pour la colonne Acheminement et placeholders --- */
+.italic-placeholder {
+  font-style: italic;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+/* Fixation des largeurs de tableau d'audit pour éviter les sauts de ligne laids */
+.table-formal {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.table-formal td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Boutons Supérieurs de Changement de Vue --- */
+.nav-panel-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #334155;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-panel-btn:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
+  color: #0f172a;
 }
 
-.type-btn.active {
-  background: #f8fafc;
-  border-color: #4f46e5;
-  color: #4f46e5;
+.nav-panel-btn.active {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  color: #ffffff !important;
 }
 
-.type-btn i {
-  font-size: 24px;
+.nav-panel-btn.active .text-muted {
+  /* Assure que le sous-texte reste lisible sur fond sombre lorsque le bouton est actif */
+  color: #94a3b8 !important; 
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.form-group label i {
-  color: #4f46e5;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 10px 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.3s;
-  background: #f8fafc;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #4f46e5;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-.form-group input.is-invalid,
-.form-group select.is-invalid,
-.form-group textarea.is-invalid {
-  border-color: #ef4444;
-  background: #fff5f5;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
-  font-size: 14px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
-  flex: 1;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #cbd5e1;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-  .mouvements-form {
-    padding: 20px;
-  }
-
-  .movement-types {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-    justify-content: center;
-  }
+.extra-small {
+  font-size: 0.78rem;
 }

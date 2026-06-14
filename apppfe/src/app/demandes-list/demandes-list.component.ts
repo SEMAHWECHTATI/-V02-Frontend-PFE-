@@ -37,23 +37,7 @@ export class DemandesListComponent {
   onAfficherDetails(demande: any) {
     this.afficherDetails.emit(demande);
   }
-  getStatusClass(statut: string): string {
-  switch (statut) {
+  
 
-    case 'EN_ATTENTE':
-      return 'status-warning';
 
-    case 'VALIDE_GESTIONNAIRE':
-      return 'status-success';
-
-    case 'CONSOMME':
-      return 'status-primary';
-
-    case 'REJETE':
-      return 'status-danger';
-
-    default:
-      return 'status-secondary';
-  }
-}
 }

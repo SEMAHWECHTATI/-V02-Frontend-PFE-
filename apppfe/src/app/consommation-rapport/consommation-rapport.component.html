@@ -1,0 +1,101 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-1 text-dark fw-bold">📊 Journal des Consommations de Pièces</h3>
+      <p class="text-muted mb-0">Rapport complet destiné aux managers et gestionnaires de stocks.</p>
+    </div>
+    <button class="btn btn-outline-primary" (click)="chargerRapportConsommations()" [disabled]="isLoading">
+      <i class="bi bi-arrow-clockwise"></i> Rafraîchir
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mb-4 d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div>{{ errorMessage }}</div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4 bg-white">
+    <div class="card-body py-3">
+      <div class="row">
+        <div class="col-md-6 col-lg-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" 
+                   class="form-control bg-light border-start-0 ps-0" 
+                   placeholder="Filtrer par Ticket, Article ou Technicien..."
+                   [(ngModel)]="searchTerm"
+                   (input)="appliquerFiltre()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="text-muted mt-2">Génération du rapport en cours...</p>
+  </div>
+
+  <div class="card shadow-sm border-0" *ngIf="!isLoading">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 text-nowrap">
+        <thead class="table-light text-uppercase fs-7 fw-bold text-muted">
+          <tr>
+            <th class="ps-4">Date de consommation</th>
+            <th>N° Référence Ticket</th>
+            <th>Désignation de la pièce</th>
+            <th class="text-center">Quantité Consommée</th>
+            <th>Technicien Responsable</th>
+            <th>Commentaire d'utilisation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let conso of consommationsFiltrees">
+            <td class="ps-4 text-muted fw-medium">
+              {{ conso.dateConsommation | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            
+            <td>
+              <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1.5 fw-semibold">
+                <i class="bi bi-ticket-perforated-fill me-1"></i> {{ conso.referenceTicket }}
+              </span>
+            </td>
+            
+            <td>
+              <div class="d-flex flex-column">
+                <span class="text-dark fw-bold">{{ conso.article?.designation || 'Pièce inconnue' }}</span>
+                <small class="text-muted fs-7">Réf: {{ conso.article?.reference || 'N/A' }}</small>
+              </div>
+            </td>
+            
+            <td class="text-center">
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-bold">
+                - {{ conso.quantite }}
+              </span>
+            </td>
+            
+            <td>
+              <span class="fw-medium text-dark">
+                <i class="bi bi-person-badge text-muted me-1"></i>
+                {{ conso.responsable?.prenom }} {{ conso.responsable?.nom }}
+              </span>
+            </td>
+            
+            <td class="text-wrap max-width-comment text-muted italic fs-7">
+              {{ conso.commentaire }}
+            </td>
+          </tr>
+
+          <tr *ngIf="consommationsFiltrees.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2 text-neutral-400"></i>
+              Aucun mouvement de stock ou consommation ne correspond à votre recherche.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

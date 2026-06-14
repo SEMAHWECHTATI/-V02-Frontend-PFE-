@@ -3,6 +3,7 @@ import { Utilisateur } from '../Model/Entity';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UtilisateurService } from '../services/utilisateur.service';
+import { AuthServiceService } from '../services/auth-service.service';
 
 @Component({
   selector: 'app-utilisateur',
@@ -25,11 +26,22 @@ export class UtilisateurComponent implements OnInit{
   texteRecherche: string = '';
   dateRecherche: string = '';
 
-  constructor(private utilisateurService: UtilisateurService) {}
+  constructor(
+    private utilisateurService: UtilisateurService,
+    private authservice: AuthServiceService
+
+  ) {}
 
   ngOnInit(): void {
     this.chargerUtilisateurs();
   }
+
+  reinitialiserMotDePasse(arg0:  string): void {
+this.authservice.demanderReinitialisation(arg0).subscribe({
+  next: (response) => {
+    alert(response.message);}
+});
+}
 
   chargerUtilisateurs(): void {
     this.chargement = true;

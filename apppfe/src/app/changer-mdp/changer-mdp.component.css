@@ -1,39 +1,185 @@
-/* Bordures par défaut des champs */
-.input-group-text, .form-control {
-  border: 1px solid #ced4da;
-  transition: all 0.2s ease-in-out;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
 }
 
-/* Retire l'ombre bleue classique de Bootstrap au focus */
-.form-control:focus {
-  box-shadow: none;
-  border-color: #0d6efd; /* Couleur primary */
+/* ===== PAGE ===== */
+
+.bg-light{
+  min-height:100vh;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a) !important;
+  padding:20px;
 }
 
-/* Illumine l'icône et la bordure gauche quand on clique dans le champ */
-.form-control:focus + .input-group-text,
-.input-group:focus-within .input-group-text,
-.input-group:focus-within .form-control {
-  border-color: #0d6efd;
+/* ===== CARD ===== */
+
+.card{
+  background:#fff;
+  border:none !important;
+  border-radius:24px !important;
+  padding:40px !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.15) !important;
+  animation:fadeIn .4s ease;
 }
 
-/* Change la couleur de l'icône Bootstrap au focus */
-.input-group:focus-within .bi {
-  color: #0d6efd !important;
+/* ===== ANIMATION ===== */
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translateY(15px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
-/* Animation et effet 3D sur le bouton de soumission */
-.btn-primary {
-  transition: all 0.3s ease;
+/* ===== TITRE ===== */
+
+h3{
+  font-size:30px;
+  font-weight:700;
+  color:#2563eb !important;
 }
 
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+.text-muted{
+  color:#64748b !important;
+  font-size:14px;
 }
 
-/* Désactive l'animation si le bouton est en état de chargement/désactivé */
-.btn-primary:disabled {
-  transform: none;
-  box-shadow: none;
+/* ===== LABEL ===== */
+
+.form-label{
+  font-size:14px;
+  font-weight:600 !important;
+  color:#334155;
+  margin-bottom:8px;
+}
+
+/* ===== INPUT GROUP ===== */
+
+.input-group{
+  border:1px solid #dbeafe;
+  border-radius:14px;
+  overflow:hidden;
+  background:#f8fafc;
+  transition:.3s;
+}
+
+.input-group:focus-within{
+  border-color:#2563eb;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(37,99,235,.1);
+}
+
+.input-group-text{
+  border:none !important;
+  background:transparent !important;
+  color:#64748b !important;
+  padding-left:15px;
+  padding-right:10px;
+  font-size:18px;
+}
+
+.form-control{
+  border:none !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  padding:14px 12px !important;
+  font-size:14px;
+}
+
+.form-control::placeholder{
+  color:#94a3b8;
+}
+
+/* ===== INPUT INVALID ===== */
+
+.form-control.ng-invalid.ng-touched{
+  border:none !important;
+}
+
+.input-group:has(.ng-invalid.ng-touched){
+  border-color:#ef4444;
+  box-shadow:0 0 0 4px rgba(239,68,68,.08);
+}
+
+/* ===== SEPARATEUR ===== */
+
+hr{
+  opacity:.15;
+}
+
+/* ===== BUTTON ===== */
+
+.btn-primary{
+  border:none !important;
+  border-radius:14px !important;
+  padding:14px !important;
+  font-size:15px;
+  font-weight:600;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  transition:.3s;
+}
+
+.btn-primary:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:0 12px 25px rgba(37,99,235,.25);
+}
+
+.btn-primary:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
+/* ===== ALERTES ===== */
+
+.alert{
+  border:none !important;
+  border-radius:14px !important;
+  padding:14px 16px !important;
+  font-size:14px;
+  font-weight:500;
+}
+
+.alert-danger{
+  background:#fee2e2 !important;
+  color:#b91c1c !important;
+}
+
+.alert-success{
+  background:#dcfce7 !important;
+  color:#166534 !important;
+}
+
+/* ===== SPINNER ===== */
+
+.spinner-border{
+  width:1rem;
+  height:1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media(max-width:576px){
+
+  .card{
+    padding:25px !important;
+    border-radius:18px !important;
+  }
+
+  h3{
+    font-size:24px;
+  }
+
+  .form-control{
+    font-size:13px;
+  }
+
 }

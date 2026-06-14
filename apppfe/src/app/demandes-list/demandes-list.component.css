@@ -1,56 +1,94 @@
+/* --- TABLEAU STYLE MODERNE & BORDURES SOIGNÉES --- */
 .custom-table {
+  border-collapse: separate; /* Obligatoire pour conserver le border-radius sur un tableau */
+  border-spacing: 0;
   border-radius: 16px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0; /* Bordure extérieure fine globale */
 }
 
 .custom-table thead {
-  background: linear-gradient(135deg, #1e293b, #334155);
-  color: white;
+  border-bottom: 3px solid #0f172a; /* Ligne très sombre et épaisse (3px) */
 }
 
 .custom-table th {
+   padding: 16px;
+  vertical-align: middle;
+  color: #334155;
+  /* Crée la séparation claire entre chaque colonne */
+  border-right: 1px solid #e2e8f0; 
+  /* Crée la séparation claire entre chaque ligne */
+  border-bottom: 1px solid #e2e8f0; 
+}
+/* 🧱 LES BORDURES DE GRILLE (Entre les lignes et les colonnes) */
+.custom-table td {
   padding: 16px;
-  font-weight: 600;
-  border: none;
+  vertical-align: middle;
+  color: #334155;
+  /* Crée la séparation claire entre chaque colonne */
+  border-right: 1px solid #e2e8f0; 
+  /* Crée la séparation claire entre chaque ligne */
+  border-bottom: 1px solid #e2e8f0; 
+}
+
+/* Ligne de séparation fine et élégante entre les lignes de données */
+.custom-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .custom-table td {
   padding: 16px;
   vertical-align: middle;
+  color: #334155;
 }
 
 .table-row {
-  transition: 0.3s;
+  transition: background-color 0.2s ease;
 }
 
 .table-row:hover {
-  background: #f8fafc;
+  background-color: #f8fafc !important; /* Force l'effet au survol proprement */
 }
 
+/* --- NETTOYAGE ET HARMONISATION DES BADGES --- */
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 30px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
   font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
 }
 
-.status-enAttente {
-  background: #fef3c7;
-  color: #92400e;
+/* États personnalisés en secours si pas de classes Bootstrap globales */
+.status-warning {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fde68a;
 }
 
-.status-validee {
-  background: #dcfce7;
-  color: #166534;
+.status-info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
-.status-rejetee {
-  background: #fee2e2;
-  color: #991b1b;
+.status-success {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
+.status-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* --- ANIMATIONS ET DETAILS --- */
 .details-row {
   background: #f8fafc;
 }
@@ -107,44 +145,14 @@
 .btn-outline-primary {
   border-radius: 10px;
 }
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
-}
-
-.status-warning {
-  background-color: #f1c40f; /* jaune */
-}
-
-.status-success {
-  background-color: #2ecc71; /* vert */
-}
-
-.status-danger {
-  background-color: #e74c3c; /* rouge */
-}
-
-.status-primary {
-  background-color: #3498db; /* bleu */
-}
-
-.status-secondary {
-  background-color: #95a5a6; /* gris */
-}
 
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(-8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
-
-  
 }

@@ -42,6 +42,41 @@
             <i class="bi bi-x-circle"></i> Rejeter la solution
           </button>
         </ng-container>
+<!-- Bouton Export -->
+<button class="btn btn-outline-secondary" 
+        (click)="ouvrirModalExport()">
+  <i class="bi bi-download"></i> Exporter
+</button>
+
+<!-- Modal Export -->
+<div *ngIf="showExportModal" class="modal-overlay" (click)="showExportModal = false">
+  <div class="modal-content" (click)="$event.stopPropagation()" style="max-width: 400px;">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi bi-download text-primary"></i> Exporter le ticket
+      </h5>
+      <button type="button" class="btn-close" (click)="showExportModal = false"></button>
+    </div>
+    
+    <div class="modal-body">
+      <p class="text-muted mb-4">Sélectionnez le format d'export :</p>
+      
+      <div class="d-grid gap-3">
+        <button class="btn btn-lg btn-outline-danger" 
+                (click)="exporterEnPDF(); showExportModal = false"
+                [disabled]="actionInProgress">
+          <i class="bi bi-file-pdf"></i> Exporter en PDF
+        </button>
+        
+        <button class="btn btn-lg btn-outline-success" 
+                (click)="exporterEnExcel(); showExportModal = false"
+                [disabled]="actionInProgress">
+          <i class="bi bi-file-earmark-spreadsheet"></i> Exporter en Excel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
         <button *ngIf="isAdmin()" 
                 class="btn btn-danger" 

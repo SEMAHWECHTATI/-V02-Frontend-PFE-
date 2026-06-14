@@ -12,6 +12,14 @@ import { DemandematrielServiceService } from '../services/demandematriel-service
 import { ArticleDetailComponent } from "../article-detail/article-detail.component";
 import { FournisseurComponent } from '../fournisseur/fournisseur.component';
 import { LocalisationComponent } from '../localisation/localisation.component';
+import { StockManagementComponent } from "../stock-management/stock-management.component";
+import { StockListComponent } from "../stock-list/stock-list.component";
+import { TicketDetailComponent } from "../ticket-detail/ticket-detail.component";
+import { ListeTicketsComponent } from "../liste-tickets/liste-tickets.component";
+import { DetailleEquipementComponent } from "../detaille-equipement/detaille-equipement.component";
+import { AjouterEquipementComponent } from "../ajouter-equipement/ajouter-equipement.component";
+import { DashboardFinance } from '../Model/alerte';
+import { FinanceService } from '../services/finance.service';
 
 
 @Component({
@@ -28,7 +36,13 @@ import { LocalisationComponent } from '../localisation/localisation.component';
     DemandematrielComponent,
     ArticleDetailComponent,
     FournisseurComponent,
-    LocalisationComponent
+    LocalisationComponent,
+    StockManagementComponent,
+    StockListComponent,
+    TicketDetailComponent,
+    ListeTicketsComponent,
+    DetailleEquipementComponent,
+    AjouterEquipementComponent
 ],
   templateUrl: './gestionnaire-stock.component.html',
   styleUrl: './gestionnaire-stock.component.css'
@@ -37,10 +51,13 @@ export class GestionnaireStockComponent implements OnInit {
 
   private inventoryService = inject(InventoryService);
   private demandeService = inject(DemandematrielServiceService);
+  private financeService = inject(FinanceService);
 
   vueActuelle: string = 'dashboard';
   currentUser: any = {};
   today: Date = new Date();
+  filtreSelectionne: string = 'Tous';
+  statsFinancieres!: DashboardFinance;
 
   stats = {
     totalArticles: 0,
@@ -52,11 +69,38 @@ export class GestionnaireStockComponent implements OnInit {
     demandesEnAttente: 0
   };
 
+    // ✅ On ajoute 'nouveau' pour les notifications
+  statMat = {
+    total: 0,
+    enCours: 0,
+    resolus: 0,
+    enAttente: 0,
+    nouveaux: 0
+  };
+
+   voirTicketsFiltres(statut: string) {
+    this.filtreSelectionne = statut;
+    this.vueActuelle = 'listedemandes'; // On bascule sur la vue de la liste
+  }
+
   ngOnInit(): void {
     console.log('🚀 Initialisation GestionnaireStock');
     this.chargerUtilisateur();
     this.chargerStatistiques();
+    this.chargerDonneesDashboard();
   }
+
+  chargerDonneesDashboard(): void {
+  this.financeService.getDashboardStats().subscribe({
+    next: (data) => this.statsFinancieres = data,
+    error: (err) => console.error("Erreur KPI Finances", err)
+  });
+}
+
+// 💡 À appeler à l'intérieur de votre méthode onSubmit() après un succès !
+onSuccesTransaction(): void {
+  this.chargerDonneesDashboard(); // Recharge instantanément le bandeau financier !
+}
 
   /**
    * 👤 Charger utilisateur
@@ -116,6 +160,12 @@ export class GestionnaireStockComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  dossierOuvert: string | null = null;
+
+toggleFolder(folder: string): void {
+  this.dossierOuvert =
+    this.dossierOuvert === folder ? null : folder;
+}
   /**
    * 🔀 Toggle sidebar (mobile)
    */

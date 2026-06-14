@@ -1,0 +1,114 @@
+<div class="container-fluid py-4" *ngIf="!isLoading && stats">
+  
+  <div class="mb-4">
+    <h3 class="fw-bold text-dark">📊 Suivi de la Performance des SLA</h3>
+    <p class="text-muted">Indicateurs de respect des délais de prise en charge et de résolution.</p>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 bg-white p-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted fs-7 text-uppercase fw-bold">Taux de Respect Global</span>
+            <h2 class="fw-bold my-2" [ngClass]="stats.tauxReussiteGlobal >= 80 ? 'text-success' : 'text-danger'">
+              {{ stats.tauxReussiteGlobal }}%
+            </h2>
+            <small class="text-muted">Sur {{ stats.totalTicketsAvecSla }} tickets qualifiés</small>
+          </div>
+          <div class="p-3 rounded bg-light">
+            <i class="bi bi-speedometer2 fs-3 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 bg-white p-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted fs-7 text-uppercase fw-bold">SLA Respectés</span>
+            <h2 class="fw-bold text-success my-2">{{ stats.slaGlobauxRespectes }}</h2>
+            <span class="badge bg-success-subtle text-success">Dans les temps ✅</span>
+          </div>
+          <div class="p-3 rounded bg-success-subtle">
+            <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 bg-white p-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted fs-7 text-uppercase fw-bold">SLA Dépassés</span>
+            <h2 class="fw-bold text-danger my-2">{{ stats.slaGlobauxDepasses }}</h2>
+            <span class="badge bg-danger-subtle text-danger">En retard 🚨</span>
+          </div>
+          <div class="p-3 rounded bg-danger-subtle">
+            <i class="bi bi-exclamation-triangle-fill fs-3 text-danger"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-4 bg-white">
+        <h5 class="fw-bold mb-3"><i class="bi bi-clock-play text-primary me-2"></i> Réactivité (Prise en charge)</h5>
+        <p class="text-muted small">Mesure le temps mis par un technicien pour passer un ticket à l'état "En Cours".</p>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Respecté : <strong>{{ stats.reussitePriseEnCharge }}</strong></span>
+          <span>Dépassé : <strong class="text-danger">{{ stats.echecPriseEnCharge }}</strong></span>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-primary" role="progressbar" 
+               [style.width.%]="(stats.reussitePriseEnCharge / (stats.reussitePriseEnCharge + stats.echecPriseEnCharge)) * 100"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-4 bg-white">
+        <h5 class="fw-bold mb-3"><i class="bi bi-wrench-adjustable text-success me-2"></i> Efficacité (Résolution totale)</h5>
+        <p class="text-muted small">Mesure le temps total mis entre la création et la résolution complète de la panne.</p>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Respecté : <strong>{{ stats.reussiteResolution }}</strong></span>
+          <span>Dépassé : <strong class="text-danger">{{ stats.echecResolution }}</strong></span>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-success" role="progressbar" 
+               [style.width.%]="(stats.reussiteResolution / (stats.reussiteResolution + stats.echecResolution)) * 100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="card shadow-sm border-0 p-4 bg-white mt-4">
+    <h5 class="fw-bold mb-4"><i class="bi bi-filter-square text-dark me-2"></i> Taux de réussite par niveau de Priorité</h5>
+    <div class="row">
+      <div class="col-md-3 text-center" *ngFor="let item of stats.tauxReussiteParPriorite | keyvalue">
+        <div class="border rounded p-3 bg-light">
+          <span class="fw-bold text-secondary text-uppercase d-block mb-2">{{ item.key }}</span>
+          
+          <div class="fs-4 fw-bold text-dark">{{ asNumber(item.value) | number:'1.0-1' }}%</div>
+          
+          <div class="progress mt-2" style="height: 6px;">
+            <div class="progress-bar" 
+                 [ngClass]="asNumber(item.value) >= 80 ? 'bg-success' : 'bg-warning'" 
+                 [style.width.%]="item.value">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="text-center py-5" *ngIf="isLoading">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p class="text-muted mt-2">Calcul des indicateurs de performance...</p>
+</div>

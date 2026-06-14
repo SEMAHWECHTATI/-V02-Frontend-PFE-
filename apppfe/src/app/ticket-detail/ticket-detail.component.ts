@@ -56,6 +56,87 @@ export class TicketDetailComponent implements OnInit, OnChanges {
     private articleservice: InventoryService
   ) {}
 
+  // ===== EXPORT TICKET =====
+
+/**
+ * 📄 EXPORTER EN PDF
+ */
+exporterEnPDF(): void {
+  console.log('📄 Export PDF du ticket:', this.ticket.reference);
+  
+  if (!this.ticket || !this.ticket.idTicket) {
+    this.errorMessage = '❌ Ticket non chargé. Impossible d\'exporter.';
+    return;
+  }
+
+  this.actionInProgress = true;
+  this.errorMessage = '';
+
+  this.ticketservice.exportTicketPDF(this.ticket.idTicket).subscribe({
+    next: (blob: Blob) => {
+      // Créer un URL temporaire pour le blob
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Ticket_${this.ticket.reference}_${new Date().toISOString().split('T')[0]}.pdf`;
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.actionInProgress = false;
+      this.successMessage = `✅ Ticket ${this.ticket.reference} exporté en PDF`;
+      console.log('✅ PDF exporté avec succès');
+    },
+    error: (err) => {
+      console.error('❌ Erreur export PDF:', err);
+      this.actionInProgress = false;
+      this.errorMessage = 'Erreur lors de l\'export PDF du ticket';
+    }
+  });
+}
+
+/**
+ * 📊 EXPORTER EN EXCEL
+ */
+exporterEnExcel(): void {
+  console.log('📊 Export Excel du ticket:', this.ticket.reference);
+
+  if (!this.ticket || !this.ticket.idTicket) {
+    this.errorMessage = '❌ Ticket non chargé. Impossible d\'exporter.';
+    return;
+  }
+
+  this.actionInProgress = true;
+  this.errorMessage = '';
+
+  this.ticketservice.exportTicketExcel(this.ticket.idTicket).subscribe({
+    next: (blob: Blob) => {
+      // Créer un URL temporaire pour le blob
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Ticket_${this.ticket.reference}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.actionInProgress = false;
+      this.successMessage = `✅ Ticket ${this.ticket.reference} exporté en Excel`;
+      console.log('✅ Excel exporté avec succès');
+    },
+    error: (err) => {
+      console.error('❌ Erreur export Excel:', err);
+      this.actionInProgress = false;
+      this.errorMessage = 'Erreur lors de l\'export Excel du ticket';
+    }
+  });
+}
   ngOnInit(): void {
     console.log('🎫 Initialisation TicketDetailComponent');
     this.chargerUtilisateur();
@@ -302,100 +383,112 @@ export class TicketDetailComponent implements OnInit, OnChanges {
   }
 
 /**
-   * 🔍 OUVRIR LA MODAL DE RÉSOLUTION
-   */
-  ouvrirModalResolution(): void {
-    console.log('🔍 Ouverture modal résolution');
-    this.tempsIntervention = 0;
-    this.tempsCalculeAuto = false;
-    this.noteResolution = '';
-    
-    // ✅ Initialise le tableau avec une ligne vide par défaut au lieu d'un tableau vide
-    this.piecesConsommees = [
-      { categorieId: undefined, articleId: undefined, quantite: 1 }
-    ]; 
-    
-    this.showResolveModal = true;
-    this.errorMessage = '';
+ * 🔍 OUVRIR LA MODAL DE RÉSOLUTION
+ */
+ouvrirModalResolution(): void {
+  console.log('🔍 Ouverture modal résolution');
+  this.tempsIntervention = 0;
+  this.tempsCalculeAuto = false;
+  this.noteResolution = '';
+  
+  // ✅ On initialise le tableau complètement vide au départ
+  // Si le technicien a besoin d'une pièce, il cliquera sur "Ajouter une pièce"
+  this.piecesConsommees = []; 
+  
+  this.showResolveModal = true;
+  this.errorMessage = '';
+}
+
+/**
+ * ✅ RÉSOUDRE LE TICKET + ENREGISTRER LES PIÈCES
+ */
+resoudreTicket(): void {
+  console.log('✅ Tentative de résolution du ticket');
+
+  // 0. Validation du ticket
+  if (!this.ticket || !this.ticket.idTicket) {
+    this.errorMessage = '⚠️ Erreur: Ticket non chargé correctement. Veuillez rafraîchir la page.';
+    console.error('❌ Ticket non valide:', this.ticket);
+    return;
   }
 
-  /**
-   * ✅ RÉSOUDRE LE TICKET
-   */
-  /**
-   * ✅ RÉSOUDRE LE TICKET + ENREGISTRER LES PIÈCES
-   */
-  resoudreTicket(): void {
-    console.log('✅ Tentative de résolution du ticket');
+  // 1. Validations de base
+  if (!this.noteResolution || !this.noteResolution.trim()) {
+    this.errorMessage = '⚠️ Veuillez ajouter une note de résolution';
+    return;
+  }
 
-    // 0. Validation du ticket
-    if (!this.ticket || !this.ticket.idTicket) {
-      this.errorMessage = '⚠️ Erreur: Ticket non chargé correctement. Veuillez rafraîchir la page.';
-      console.error('❌ Ticket non valide:', this.ticket);
-      return;
-    }
+  if (this.tempsIntervention <= 0) {
+    this.errorMessage = '⚠️ Veuillez saisir un temps d\'intervention valide';
+    return;
+  }
 
-    // 1. Validations de base
-    if (!this.noteResolution.trim()) {
-      this.errorMessage = '⚠️ Veuillez ajouter une note de résolution';
-      return;
-    }
+  // 2. Validation des pièces consommées (Uniquement si des pièces ont été ajoutées)
+  if (this.piecesConsommees.length > 0 && !this.validerPieces()) {
+    this.errorMessage = '⚠️ Veuillez vérifier les pièces saisies (article sélectionné et quantité > 0)';
+    return;
+  }
 
-    if (this.tempsIntervention <= 0) {
-      this.errorMessage = '⚠️ Veuillez saisir un temps d\'intervention valide';
-      return;
-    }
+  this.actionInProgress = true;
+  this.errorMessage = '';
 
-    // 2. Validation des pièces consommées (si le technicien en a ajouté)
-    if (this.piecesConsommees.length > 0 && !this.validerPieces()) {
-      this.errorMessage = '⚠️ Veuillez vérifier les pièces saisies (article sélectionné et quantité > 0)';
-      return;
-    }
+  const noteFinale = `${this.noteResolution}\n\n⏱️ Temps d'intervention : ${this.tempsIntervention} minute(s).`;
 
-    this.actionInProgress = true;
-    this.errorMessage = '';
+  // 3. Appel API pour passer le ticket à l'état Résolu
+  this.ticketservice.resoudreTicket(
+    this.ticket.idTicket,
+    this.currentUser.id,
+    noteFinale,
+    this.tempsIntervention
+  ).subscribe({
+    next: (res) => {
+      console.log('✅ Ticket marqué comme résolu sur le serveur');
+      
+      const response = res as any;
+      if (response && response.ticket) {
+        this.ticket = response.ticket;
+      } else {
+        this.ticket = res;
+      }
+      
+      this.ticket.statut = 'Resolu';
+      this.ticket.noteResolution = noteFinale;
+      
+      console.log('✅ Ticket mis à jour localement - ID:', this.ticket.idTicket);
 
-    const noteFinale = `${this.noteResolution}\n\n⏱️ Temps d'intervention : ${this.tempsIntervention} minute(s).`;
-
-    // 3. Appel API pour passer le ticket à l'état Résolu
-    this.ticketservice.resoudreTicket(
-      this.ticket.idTicket,
-      this.currentUser.id,
-      noteFinale,
-      this.tempsIntervention
-    ).subscribe({
-      next: (res) => {
-        console.log('✅ Ticket marqué comme résolu sur le serveur');
-        
-        // Mettre à jour l'état local du ticket - extraire de la réponse wrappée
-        const response = res as any;
-        if (response.ticket) {
-          this.ticket = response.ticket;
-        } else {
-          this.ticket = res;
-        }
-        
-        this.ticket.statut = 'Resolu';
-        this.ticket.noteResolution = noteFinale;
-        
-        console.log('✅ Ticket mis à jour localement - ID:', this.ticket.idTicket);
-
-        // 4. Enregistrement des pièces consommées en base de données
+      // 4. Enregistrement des pièces uniquement s'il y en a de valides
+      if (this.piecesConsommees.length > 0) {
         this.enregistrerLesPiecesDuTicket();
-
-        // Nettoyage et fermeture du modal
+      } else {
+        // Si aucune pièce n'est utilisée, on finalise proprement ici
         this.showResolveModal = false;
         this.actionInProgress = false;
-        this.successMessage = '✅ Ticket résolu et pièces de rechange décomptées !';
+        this.successMessage = '✅ Ticket résolu avec succès !';
         localStorage.removeItem(`ticket_start_${this.ticket.idTicket}`);
-      },
-      error: (err) => {
-        console.error('❌ Erreur résolution ticket:', err);
-        this.errorMessage = 'Erreur lors de la résolution du ticket';
-        this.actionInProgress = false;
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('❌ Erreur résolution ticket:', err);
+      this.errorMessage = 'Erreur lors de la résolution du ticket sur le serveur';
+      this.actionInProgress = false;
+    }
+  });
+}
+
+/**
+ * ⚙️ Validation: S'assure que chaque ligne ajoutée dispose d'un article valide et d'une quantité > 0
+ */
+// validerPieces(): boolean {
+//   // Si le tableau est vide, c'est valide (les pièces sont optionnelles)
+//   if (this.piecesConsommees.length === 0) return true;
+
+//   return this.piecesConsommees.every(piece => 
+//     piece.categorieId !== undefined && 
+//     piece.articleId !== undefined && 
+//     piece.quantite && 
+//     piece.quantite > 0
+//   );
+// }
 
   /**
    * 🛠️ Envoie chaque pièce enregistrée dans le tableau vers le Backend
@@ -805,4 +898,21 @@ export class TicketDetailComponent implements OnInit, OnChanges {
       this.chargerTicketDetails(this.ticket.idTicket);
     }
   }
+
+  showExportModal: boolean = false; // Ajouter cette ligne
+
+  // ... autres méthodes ...
+
+  /**
+   * 🔓 OUVRIR LA MODAL D'EXPORT
+   */
+  ouvrirModalExport(): void {
+    console.log('🔓 Ouverture modal export');
+    this.showExportModal = true;
+  }
+
+  /**
+   * 📄 EXPORTER EN PDF
+   */
+ 
 }

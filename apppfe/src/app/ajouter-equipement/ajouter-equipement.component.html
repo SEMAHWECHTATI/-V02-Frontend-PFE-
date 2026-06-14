@@ -1,0 +1,90 @@
+
+<div *ngIf="showAlertSuccess" class="alert alert-success alert-dismissible fade show shadow-sm my-3" role="alert">
+  <h4 class="alert-heading">🎉 Ajout terminé avec succès !</h4>
+  <p>L'équipement a bien été enregistré dans l'inventaire.</p>
+  <p class="mb-0"><strong>Code-barres automatique :</strong> {{ codeBarresGenere }}</p>
+  <hr>
+  <div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-success btn-sm" (click)="fermerAlerteSucces()">OK</button>
+  </div>
+</div>
+
+<div *ngIf="showAlertError" class="alert alert-danger alert-dismissible fade show shadow-sm my-3" role="alert">
+  <h4 class="alert-heading">❌ Ajout refusé</h4>
+  <p>{{ messageAlerte }}</p>
+  <hr>
+  <div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-danger btn-sm" (click)="fermerAlerteErreur()">OK</button>
+  </div>
+</div>
+<div class="container mt-4" style="max-width: 600px;">
+  <div class="card p-4 shadow-sm">
+    <h3 class="mb-4 text-primary">Ajouter un nouvel Équipement</h3>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+    <form (ngSubmit)="soumettreFormulaire()">
+      
+      <div class="mb-3">
+  <label class="form-label font-weight-bold">Numéro de Série</label>
+  <input type="text" 
+         class="form-control bg-light" 
+         [value]="nouveauEquipement.numeroSerie || 'Généré automatiquement lors de la création...'" 
+         name="numeroSerie" 
+         readonly> </div>
+
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Désignation / Nom *</label>
+        <input type="text" class="form-control" [(ngModel)]="nouveauEquipement.designation" name="designation" required placeholder="Ex: PC Portable HP EliteBook">
+      </div>
+
+      <div class="mb-3">
+  <label class="form-label font-weight-bold">Type d'Article (Modèle) *</label>
+  <select class="form-select" [(ngModel)]="nouveauEquipement.articleId" name="articleId" required>
+    <option [ngValue]="null" disabled selected>-- Choisir un Article --</option>
+    <option *ngFor="let art of articles" [ngValue]="art.id">
+      {{ art.reference }} - {{ art.designation }}
+    </option>
+  </select>
+</div>
+
+      <div class="mb-3">
+        <label class="form-label">Localisation Physique Initiale</label>
+        <select class="form-select" [(ngModel)]="nouveauEquipement.localisationId" name="localisationId">
+          <option [ngValue]="null">-- Aucune (En Stock Central) --</option>
+          <option *ngFor="let loc of localisations" [value]="loc.id">
+            {{ loc.nom }} (Bât : {{ loc.batiment || 'N/A' }})
+          </option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Statut Initial</label>
+        <select class="form-select" [(ngModel)]="nouveauEquipement.statut" name="statut">
+          <option value="ACTIF">ACTIF</option>
+          <option value="EN_REPARATION">EN REPARATION</option>
+          <option value="A_RECYCLER">A RECYCLER</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Date d'Acquisition</label>
+        <input type="datetime-local" class="form-control" [(ngModel)]="nouveauEquipement.dateAcquisition" name="dateAcquisition">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Observations / Notes</label>
+        <textarea class="form-control" [(ngModel)]="nouveauEquipement.observations" name="observations" rows="3" placeholder="Informations complémentaires..."></textarea>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-secondary" routerLink="/equipements">Annuler</button>
+        <button type="submit" class="btn btn-success">Enregistrer l'équipement</button>
+      </div>
+
+    </form>
+  </div>
+
+  
+</div>

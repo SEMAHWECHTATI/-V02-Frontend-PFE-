@@ -15,6 +15,10 @@ import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component'
 import { DemandematrielComponent } from "../demandematriel/demandematriel.component";
 import { GestionnaireStockComponent } from '../gestionnaire-stock/gestionnaire-stock.component';
 import { EspaceDemandeurComponent } from "../espace-demandeur/espace-demandeur.component";
+import { ParametreComponent } from "../parametre/parametre.component";
+import { ConsommationRapportComponent } from "../consommation-rapport/consommation-rapport.component";
+import { SlaDashboardComponent } from '../sla-dashboard/sla-dashboard.component';
+import { DemandesListComponent } from "../demandes-list/demandes-list.component";
 
 @Component({
   selector: 'app-interface-administrateur',
@@ -30,7 +34,7 @@ import { EspaceDemandeurComponent } from "../espace-demandeur/espace-demandeur.c
     CreateTicketPageComponent,
     TicketDetailComponent,
     DemandematrielComponent,
-    GestionnaireStockComponent, EspaceDemandeurComponent],
+    GestionnaireStockComponent, EspaceDemandeurComponent, ParametreComponent, ConsommationRapportComponent, SlaDashboardComponent, DemandesListComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })

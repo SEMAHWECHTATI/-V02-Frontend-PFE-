@@ -1,0 +1,69 @@
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+      <h5 class="mb-0">📦 État Général du Stock Magasin</h5>
+      <span class="badge bg-light text-dark fw-bold">{{ stocksFiltres.length }} Ligne(s) de stock</span>
+    </div>
+
+    <div class="card-body bg-light border-bottom">
+      <div class="row">
+        <div class="col-md-6">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="🔍 Rechercher par Désignation, Référence ou Code-barres..."
+            [(ngModel)]="searchTerm"
+            (input)="filtrerStock()" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive" *ngIf="!loading; else loader">
+      <table class="table table-hover align-middle mb-0" *ngIf="stocksFiltres.length > 0; else noData">
+        <thead class="table-light">
+          <tr>
+            <th>Désignation de l'Article</th>
+            <th>Référence</th>
+            <th>Code-barres Unique</th>
+            <th class="text-center">Quantité Physique</th>
+            <th class="text-end">Prix Unitaire</th>
+            <th class="text-end">Valeur du Stock</th>
+            <th class="text-center">Statut Alerte</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of stocksFiltres">
+            <td><strong>{{ s.articleDesignation }}</strong></td>
+            <td><span class="badge bg-secondary">{{ s.articleReference }}</span></td>
+            <td><code>{{ s.codeBarresArticle }}</code></td>
+            
+            <td class="text-center fw-bold fs-5">{{ s.quantiteEnStock }}</td>
+            
+            <td class="text-end text-muted">{{ s.prixUnitaire | currency:'EUR' }}</td>
+            <td class="text-end fw-bold text-primary">{{ s.valeurTotale | currency:'EUR' }}</td>
+            
+            <td class="text-center">
+              <span *ngIf="s.estCritique" class="badge bg-danger">CRITIQUE</span>
+              <span *ngIf="!s.estCritique && s.estFaible" class="badge bg-warning text-dark">FAIBLE</span>
+              <span *ngIf="!s.estCritique && !s.estFaible" class="badge bg-success">CONFORME</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #loader>
+  <div class="text-center my-5 py-5">
+    <div class="spinner-border text-dark" role="status"></div>
+    <p class="text-muted mt-2">Génération de l'inventaire en cours...</p>
+  </div>
+</ng-template>
+
+<ng-template #noData>
+  <div class="text-center my-5 py-5 text-muted">
+    <p class="fs-4 mb-1">❌ Aucun stock trouvé</p>
+    <small>Aucune ligne de stock ne correspond à votre recherche actuelle.</small>
+  </div>
+</ng-template>

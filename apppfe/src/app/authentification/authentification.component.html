@@ -70,13 +70,43 @@
       </div>
 
       <form (ngSubmit)="onSubmit()">
-        <div class="mb-3">
-          <label for="email" class="form-label small fw-semibold text-secondary">Adresse Email</label>
-          <div class="input-group sagem-input-group">
-            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-            <input type="email" id="email" class="form-control" placeholder="prenom.nom@sagemcom.com"
-                   name="email" [(ngModel)]="email" required>
-          </div>
+      <div class="mb-3">
+  <label for="email" class="form-label small fw-semibold text-secondary">
+    Adresse Email
+  </label>
+
+  <div class="input-group sagem-input-group">
+    <span class="input-group-text">
+      <i class="bi bi-envelope"></i>
+    </span>
+
+    <input
+      type="email"
+      id="email"
+      class="form-control"
+      placeholder="prenom.nom@sagemcom.com"
+      name="email"
+      [(ngModel)]="email"
+      #emailCtrl="ngModel"
+      required
+      email>
+  </div>
+  
+
+  <!-- Message si le champ est vide -->
+  <div
+    *ngIf="emailCtrl.invalid && emailCtrl.touched && emailCtrl.errors?.['required']"
+    class="text-danger small mt-1">
+    L'adresse email est obligatoire.
+  </div>
+
+  <!-- Message si le format est incorrect -->
+  <div
+    *ngIf="emailCtrl.invalid && emailCtrl.touched && emailCtrl.errors?.['email']"
+    class="text-danger small mt-1">
+    Veuillez saisir une adresse email valide.
+  </div>
+
         </div>
 
         <div class="mb-4">

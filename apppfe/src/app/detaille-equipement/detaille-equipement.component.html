@@ -1,0 +1,82 @@
+<div class="container mt-4">
+  <h2>Gestion des Équipements (Inventaire)</h2>
+
+  <div class="card my-3 p-3 bg-light">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Scanner ou saisir un Code-Barres (ex: INV-123)..." 
+             [(ngModel)]="codeBarresRecherche" (keyup.enter)="rechercherParCodeBarres()">
+      <button class="btn btn-primary" (click)="rechercherParCodeBarres()">Rechercher</button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="loading" class="text-center my-3">Chargement en cours...</div>
+
+  <div class="row" *ngIf="equipement && !loading">
+    
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-dark text-white">Détails de l'Équipement</div>
+        <div class="card-body">
+          <p><strong>Désignation :</strong> {{ equipement.designation }}</p>
+          <p><strong>N° de Série :</strong> {{ equipement.numeroSerie }}</p>
+          <p><strong>Code-Barres :</strong> <span class="badge bg-secondary">{{ equipement.codeBarres }}</span></p>
+          <hr>
+          <p><strong>Statut Actuel :</strong> 
+            <span class="badge" [ngClass]="{
+              'bg-success': equipement.statut === 'ACTIF',
+              'bg-warning text-dark': equipement.statut === 'EN_REPARATION',
+              'bg-danger': equipement.statut === 'A_RECYCLER'
+            }">{{ equipement.statut }}</span>
+          </p>
+        <p><strong>Localisation Physique Actuelle :</strong> 
+  {{ $any(equipement).localisationNom ? $any(equipement).localisationNom : 'Aucune affectation' }}
+  
+  <small class="text-muted d-block" *ngIf="$any(equipement).localisationId">
+    Bât: {{ $any(equipement).localisationBatiment || 'N/A' }} - 
+    Étage: {{ $any(equipement).localisationEtage || 'N/A' }} - 
+    Bureau: {{ $any(equipement).localisationBureau || 'N/A' }}
+  </small>
+</p>
+          <p *ngIf="equipement.dateMiseAuRebut">
+            <strong>Date de mise au rebut :</strong> {{ equipement.dateMiseAuRebut | date:'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">Changer le Statut / Localisation</div>
+        <div class="card-body">
+          
+          <div class="mb-3">
+            <label class="form-label font-weight-bold">Modifier le Statut :</label>
+            <select class="form-select" [(ngModel)]="statutSelectionne">
+              <option value="ACTIF">ACTIF</option>
+              <option value="EN_REPARATION">EN REPARATION</option>
+              <option value="A_RECYCLER">A RECYCLER</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nouvelle Localisation Physique :</label>
+            <select class="form-select" [(ngModel)]="localisationSelectionneeId">
+              <option [value]="0">-- Sélectionner un emplacement --</option>
+              <option *ngFor="let loc of localisations" [value]="loc.id">
+                {{ loc.nom }} (Bâtiment {{ loc.batiment || 'N/A' }})
+              </option>
+            </select>
+          </div>
+
+          <button class="btn btn-success w-100 mt-3" (click)="enregistrerModifications()">
+            Enregistrer les modifications
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

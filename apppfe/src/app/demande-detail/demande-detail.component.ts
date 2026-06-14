@@ -9,12 +9,23 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   styleUrl: './demande-detail.component.css'
 })
 export class DemandeDetailComponent {
-  @Input() demande: any = null;
+@Input() demande: any;
   @Input() visible: boolean = false;
-  
-  @Output() fermer = new EventEmitter<void>();
+  @Input() roleUtilisateurConecte: string = ''; // Reçoit le rôle du parent
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() onValiderGestionnaire = new EventEmitter<any>();
+  @Output() onValiderAdmin = new EventEmitter<any>();
 
   onFermer(): void {
-    this.fermer.emit();
+    this.closed.emit();
+  }
+
+  declencherValidationGestionnaire(): void {
+    this.onValiderGestionnaire.emit(this.demande);
+  }
+
+  declencherValidationAdmin(): void {
+    this.onValiderAdmin.emit(this.demande);
   }
 }

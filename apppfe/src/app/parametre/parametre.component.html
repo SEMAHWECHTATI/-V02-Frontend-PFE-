@@ -1,0 +1,58 @@
+<div class="chatbot-settings">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4><i class="bi bi-robot me-2 text-primary"></i>Configuration du Chatbot</h4>
+      <p class="text-muted mb-0">Configurez l'assistant virtuel pour soulager votre support technique.</p>
+    </div>
+    <div class="form-check form-switch fs-5">
+      <input class="form-check-input" type="checkbox" id="activateBot" checked>
+      <label class="form-check-label" for="activateBot">Activer le bot</label>
+    </div>
+  </div>
+
+  <hr>
+
+  <form [formGroup]="chatbotConfigForm">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <h5 class="mb-3">Identité du Robot</h5>
+        
+        <div class="mb-3">
+          <label class="form-label">Nom du Chatbot</label>
+          <input type="text" class="form-control" formControlName="botName" placeholder="Ex: SupportBot">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Message d'introduction personnalisé</label>
+          <textarea class="form-control" formControlName="welcomeMessage" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <h5 class="mb-3">Comportement en cas d'échec</h5>
+        <p class="small text-muted">Si le bot ne sait pas répondre, vers quel groupe basculer l'utilisateur ?</p>
+
+        <div class="mb-3">
+          <label class="form-label">Groupe de secours par défaut</label>
+          <select class="form-select" formControlName="defaultGroupEscalation">
+            <option *ngFor="let groupe of groupesListe" [value]="groupe.id">
+              {{ groupe.nomGroupes }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Niveau d'autonomie (IA)</label>
+          <select class="form-select" formControlName="botModel">
+            <option value="rules">Arbre de décision simple (Boutons)</option>
+            <option value="gpt4">Intelligence Artificielle (Modèle GPT-4)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 text-end">
+      <button type="submit" class="btn btn-primary">Enregistrer les configurations</button>
+    </div>
+  </form>
+</div>

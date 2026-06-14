@@ -1,151 +1,271 @@
-<div class="mouvements-container">
-
-  <div class="mouvements-header">
-    <h2>🔄 Enregistrer un Mouvement</h2>
-    <p>Gérer les entrées, sorties et transferts de stock</p>
-  </div>
-
-  <!-- Messages -->
-  <div *ngIf="messageSucces" class="alert alert-success">
-    <i class="bi bi-check-circle-fill"></i>
-    {{ messageSucces }}
-  </div>
-
-  <div *ngIf="messageErreur" class="alert alert-danger">
-    <i class="bi bi-exclamation-circle-fill"></i>
-    {{ messageErreur }}
-  </div>
-
-  <!-- Formulaire -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mouvements-form">
-
-    <div class="form-section">
-      <h3>📋 Type de Mouvement</h3>
-
-      <div class="movement-types">
-        <button *ngFor="let type of typesMovement"
-                type="button"
-                (click)="form.get('typeMovement')?.setValue(type)"
-                [class.active]="form.get('typeMovement')?.value === type"
-                class="type-btn"
-                [style.border-left-color]="getTypeColor(type)">
-          <i class="bi" [ngClass]="
-            type === 'ENTREE' ? 'bi-arrow-down-circle' :
-            type === 'SORTIE' ? 'bi-arrow-up-circle' :
-            type === 'TRANSFERT' ? 'bi-arrow-left-right' :
-            type === 'PRET' ? 'bi-box-seam' :
-            type === 'RETOUR' ? 'bi-box-arrow-left' :
-            type === 'CONSOMMATION' ? 'bi-wrench' :
-            'bi-sliders'
-          "></i>
-          <span>{{ typeLabels[type] }}</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>📦 Article et Quantité</h3>
-
-      <div class="form-row">
-        <!-- Article -->
-        <div class="form-group">
-          <label for="articleId">
-            <i class="bi bi-box2-heart"></i> Article *
-          </label>
-          <select 
-            id="articleId"
-            formControlName="articleId"
-            [class.is-invalid]="isFieldInvalid('articleId')">
-            <option value="">-- Sélectionner un article --</option>
-            <option *ngFor="let article of articles" [value]="article.id">
-              {{ article.reference }} - {{ article.designation }}
-            </option>
-          </select>
+<div class="inventory-dashboard py-4 px-3">
+  
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <button type="button" 
+              class="btn nav-panel-btn w-100 py-3 d-flex align-items-center justify-content-center gap-3 shadow-sm"
+              [class.active]="vueActive === 'ENREGISTREMENT'"
+              (click)="changerVue('ENREGISTREMENT')">
+        <i class="bi bi-plus-circle-fill h4 mb-0"></i>
+        <div class="text-start">
+          <div class="fw-bold small text-uppercase">Mouvements</div>
+          <div class="text-muted extra-small">Enregistrement de Flux</div>
         </div>
-
-        <!-- Quantité -->
-        <div class="form-group">
-          <label for="quantite">
-            <i class="bi bi-boxes"></i> Quantité *
-          </label>
-          <input 
-            type="number" 
-            id="quantite"
-            formControlName="quantite"
-            placeholder="0"
-            [class.is-invalid]="isFieldInvalid('quantite')">
-        </div>
-      </div>
-    </div>
-
-    <!-- Affichage conditionnel pour TRANSFERT -->
-    <div *ngIf="form.get('typeMovement')?.value === 'TRANSFERT'" class="form-section">
-      <h3>📍 Localisations</h3>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="locSource">Localisation source *</label>
-          <input 
-            type="text" 
-            id="locSource"
-            formControlName="localisationSource"
-            placeholder="Bureau A - Étage 2">
-        </div>
-
-        <div class="form-group">
-          <label for="locDest">Localisation destination *</label>
-          <input 
-            type="text" 
-            id="locDest"
-            formControlName="localisationDestination"
-            placeholder="Bureau B - Étage 3">
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>💬 Justification</h3>
-
-      <div class="form-group">
-        <label for="justification">
-          <i class="bi bi-chat-left-text"></i> Justification *
-        </label>
-        <textarea 
-          id="justification"
-          formControlName="justification"
-          placeholder="Motif du mouvement..."
-          rows="4"
-          [class.is-invalid]="isFieldInvalid('justification')"></textarea>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>🎫 Informations supplémentaires</h3>
-
-      <div class="form-group">
-        <label for="referenceTicket">
-          <i class="bi bi-ticket"></i> Référence Ticket (optionnel)
-        </label>
-        <input 
-          type="text" 
-          id="referenceTicket"
-          formControlName="referenceTicket"
-          placeholder="TICKET-12345">
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="chargement || form.invalid">
-        <i class="bi bi-check-lg"></i>
-        {{ chargement ? 'Enregistrement...' : 'Enregistrer le mouvement' }}
       </button>
-      <button type="button" class="btn btn-secondary" (click)="form.reset()">
-        <i class="bi bi-arrow-counterclockwise"></i>
-        Réinitialiser
+    </div>
+    
+    <div class="col-md-4">
+      <button type="button" 
+              class="btn nav-panel-btn w-100 py-3 d-flex align-items-center justify-content-center gap-3 shadow-sm"
+              [class.active]="vueActive === 'SUIVI'"
+              (click)="changerVue('SUIVI')">
+        <i class="bi bi-journal-text h4 mb-0"></i>
+        <div class="text-start">
+          <div class="fw-bold small text-uppercase">Fiche Individuelle</div>
+          <div class="text-muted extra-small">Suivi précis par référence</div>
+        </div>
       </button>
     </div>
 
-  </form>
+    <div class="col-md-4">
+      <button type="button" 
+              class="btn nav-panel-btn w-100 py-3 d-flex align-items-center justify-content-center gap-3 shadow-sm"
+              [class.active]="vueActive === 'AUDIT'"
+              (click)="changerVue('AUDIT')">
+        <i class="bi bi-shield-check h4 mb-0"></i>
+        <div class="text-start">
+          <div class="fw-bold small text-uppercase">Registre d'Audit</div>
+          <div class="text-muted extra-small">Extractions périodiques</div>
+        </div>
+      </button>
+    </div>
+  </div>
 
+  <div *ngIf="messageSucces" class="custom-alert alert-success d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <div>{{ messageSucces }}</div>
+  </div>
+  
+  <div *ngIf="messageErreur" class="custom-alert alert-danger d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div>{{ messageErreur }}</div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12">
+
+      <div *ngIf="vueActive === 'ENREGISTREMENT'" class="card corporate-card border-0 shadow-sm mx-auto" style="max-width: 800px;">
+        <div class="card-body p-4">
+          <div class="card-title-section mb-4 border-bottom pb-2">
+            <h4 class="corporate-title mb-1">Enregistrement de Flux</h4>
+            <p class="corporate-subtitle text-muted">Veuillez renseigner les détails du mouvement de stock</p>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label text-uppercase tracking-wider small fw-bold text-muted mb-2">Nature de l'opération</label>
+            <div class="segmented-control p-1 bg-light rounded d-flex">
+              <button type="button" class="btn segmented-btn flex-fill py-2" [class.active]="typeSelectionne === 'ENTREE'" (click)="changerType('ENTREE')">
+                <i class="bi bi-arrow-down-short me-1"></i> Entrée
+              </button>
+              <button type="button" class="btn segmented-btn flex-fill py-2" [class.active]="typeSelectionne === 'SORTIE'" (click)="changerType('SORTIE')">
+                <i class="bi bi-arrow-up-short me-1"></i> Sortie
+              </button>
+              <button type="button" class="btn segmented-btn flex-fill py-2" [class.active]="typeSelectionne === 'TRANSFERT'" (click)="changerType('TRANSFERT')">
+                <i class="bi bi-arrow-left-right me-1"></i> Transfert
+              </button>
+            </div>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="stockId" class="form-label label-formal">Article en stock cible *</label>
+              <select id="stockId" formControlName="stockId" class="form-select select-formal" [class.is-invalid]="isFieldInvalid('stockId')">
+                <option value="">-- Sélectionner l'élément d'inventaire --</option>
+                <option *ngFor="let s of stocks" [value]="s.id">{{ s.articleDesignation }} — [ Dispo: {{ s.quantiteEnStock }} ]</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="quantite" class="form-label label-formal">Quantité requise *</label>
+              <input type="number" id="quantite" formControlName="quantite" class="form-control input-formal" placeholder="Ex: 10" [class.is-invalid]="isFieldInvalid('quantite')">
+            </div>
+
+            <div *ngIf="typeSelectionne === 'TRANSFERT'" class="p-3 bg-white border rounded mb-3 context-panel">
+              <div class="d-flex align-items-center mb-3 text-dark">
+                <i class="bi bi-geo-alt me-2 text-muted"></i>
+                <span class="fw-bold small text-uppercase tracking-wider">Acheminement du matériel</span>
+              </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="locSource" class="form-label small text-muted">Emplacement Source *</label>
+                  <select id="locSource" formControlName="locSource" class="form-select form-select-sm select-formal">
+                    <option value="">-- Origine --</option>
+                    <option *ngFor="let loc of localisations" [value]="loc.nom">{{ loc.nom }}</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="locDest" class="form-label small text-muted">Emplacement Cible *</label>
+                  <select id="locDest" formControlName="locDest" class="form-select form-select-sm select-formal">
+                    <option value="">-- Destination --</option>
+                    <option *ngFor="let loc of localisations" [value]="loc.nom">{{ loc.nom }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="justification" class="form-label label-formal">Justification réglementaire *</label>
+              <textarea id="justification" formControlName="justification" class="form-control textarea-formal" rows="3" placeholder="Renseigner le motif de la transaction..." [class.is-invalid]="isFieldInvalid('justification')"></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label for="referenceTicket" class="form-label label-formal">Référence Ticket Ordre / Intervention <span class="optional-text">(Optionnel)</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted small"><i class="bi bi-hash"></i></span>
+                <input type="text" id="referenceTicket" formControlName="referenceTicket" class="form-control input-formal border-start-0" placeholder="Ex: G-2026-954">
+              </div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-sm-9">
+                <button type="submit" class="btn btn-corporate-primary w-100 py-2.5" [disabled]="chargement || form.invalid">
+                  <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!chargement" class="bi bi-file-earmark-check me-1"></i> Soumettre l'écriture
+                </button>
+              </div>
+              <div class="col-sm-3">
+                <button type="button" class="btn btn-corporate-light w-100 py-2.5" (click)="form.reset()">Réinitialiser</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div *ngIf="vueActive === 'SUIVI'" class="card corporate-card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <h5 class="corporate-title mb-0">Fiche de Suivi Individuelle</h5>
+            <i class="bi bi-journal-text text-muted h5 mb-0"></i>
+          </div>
+          
+          <div class="mb-3">
+            <select class="form-select select-formal font-medium" (change)="chargerHistoriqueParReference($event)">
+              <option value="">-- Sélectionner une référence pour examen --</option>
+              <option *ngFor="let s of stocksUniques" [value]="s.articleReference">{{ s.articleDesignation }} (Ref: {{ s.articleReference }})</option>
+            </select>
+          </div>
+
+          <div *ngIf="referenceSelectionnee && !chargementHistorique" class="mb-4 small text-uppercase tracking-wider text-muted fw-bold">
+            <i class="bi bi-fingerprint me-1"></i> Registre global de la référence — {{ referenceSelectionnee }}
+          </div>
+
+          <div *ngIf="chargementHistorique" class="text-center py-4">
+            <div class="spinner-border text-muted" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+          </div>
+
+          <div *ngIf="!chargementHistorique && historiqueMouvements.length > 0" class="table-responsive border rounded table-container">
+            <table class="table table-formal align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Horodatage</th>
+                  <th>Opération</th>
+                  <th class="text-end">Qté</th>
+                  <th>Liaison Documentaire</th>
+                  <th>Note d'audit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of historiqueMouvements">
+                  <td>{{ m.dateMouvement | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <span class="badge badge-formal" [ngClass]="m.type === 'ENTREE' ? 'badge-entree' : m.type === 'SORTIE' ? 'badge-sortie' : 'badge-transfert'">{{ m.type }}</span>
+                  </td>
+                  <td class="fw-bold text-end text-dark">{{ m.quantite }}</td>
+                  <td>
+                    <span *ngIf="m.referenceTicket" class="badge text-bg-light border text-secondary font-monospace py-1.5"><i class="bi bi-paperclip me-1"></i>{{ m.referenceTicket }}</span>
+                    <button *ngIf="!m.referenceTicket" class="btn btn-link link-action p-0" (click)="lierTicket(m.id)">+ Assigner ticket</button>
+                  </td>
+                  <td class="text-truncate small text-muted" style="max-width: 180px;" [title]="m.justification">{{ m.justification }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!chargementHistorique && historiqueMouvements.length === 0 && referenceSelectionnee" class="text-center py-4 text-muted small">
+            <i class="bi bi-folder-x d-block mb-1 h4 text-light"></i> Aucun mouvement enregistré pour cette référence.
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="vueActive === 'AUDIT'" class="card corporate-card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <h5 class="corporate-title mb-0">Extraction pour Registre d'Audit</h5>
+            <i class="bi bi-shield-check text-muted h5 mb-0"></i>
+          </div>
+
+          <form [formGroup]="periodeForm" (ngSubmit)="chargerMouvementsParPeriode()" class="row g-3 align-items-end mb-4">
+            <div class="col-sm-5">
+              <label class="small text-uppercase tracking-wider font-semibold text-muted form-label">Date limite inférieure</label>
+              <input type="datetime-local" formControlName="debut" class="form-control input-formal form-control-sm">
+            </div>
+            <div class="col-sm-5">
+              <label class="small text-uppercase tracking-wider font-semibold text-muted form-label">Date limite supérieure</label>
+              <input type="datetime-local" formControlName="fin" class="form-control input-formal form-control-sm">
+            </div>
+            <div class="col-sm-2">
+              <button type="submit" class="btn btn-dark-formal w-100 py-1.5" [disabled]="chargementPeriode">Générer</button>
+            </div>
+          </form>
+
+          <div *ngIf="chargementPeriode" class="text-center py-4">
+            <div class="spinner-border text-muted" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+          </div>
+
+          <div *ngIf="!chargementPeriode && mouvementsPeriode.length > 0" class="table-responsive border rounded table-container">
+            <table class="table table-formal align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 12%">Horodatage</th>
+                  <th style="width: 25%">Désignation du Matériel</th>
+                  <th style="width: 10%">Flux</th>
+                  <th style="width: 8%" class="text-end">Quantité</th>
+                  <th style="width: 20%">Acheminement (Source ➔ Cible)</th>
+                  <th style="width: 15%">Opérateur Responsable</th>
+                  <th style="width: 10%">Rattachement Ticket</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let mp of mouvementsPeriode">
+                  <td class="font-monospace text-muted small">{{ mp.dateMouvement | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="fw-medium text-dark">{{ mp.articleDesignation || mp.stockDesignation || 'ID Stock #' + mp.stockId }}</td>
+                  <td>
+                    <span class="badge badge-formal" [ngClass]="{'badge-entree': mp.type === 'ENTREE', 'badge-sortie': mp.type === 'SORTIE', 'badge-transfert': mp.type === 'TRANSFERT'}">{{ mp.type }}</span>
+                  </td>
+                  <td class="fw-bold text-end text-dark pe-3">{{ mp.quantite }}</td>
+                  <td>
+                    <span *ngIf="mp.type === 'TRANSFERT'; else noTransfer" class="small text-secondary">
+                      <span class="badge bg-light text-dark border font-monospace px-1.5">{{ mp.localisationSource || 'N/A' }}</span>
+                      <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                      <span class="badge bg-light text-dark border font-monospace px-1.5">{{ mp.localisationDestination || 'N/A' }}</span>
+                    </span>
+                    <ng-template #noTransfer><span class="text-muted small italic-placeholder">— Flux Standard</span></ng-template>
+                  </td>
+                  <td class="text-secondary font-medium"><i class="bi bi-person me-1 small text-muted"></i>{{ mp.responsableName || 'ID Agent: ' + mp.responsableId }}</td>
+                  <td>
+                    <span *ngIf="mp.referenceTicket" class="badge text-bg-light border text-dark font-monospace py-1.5"><i class="bi bi-paperclip me-1"></i>{{ mp.referenceTicket }}</span>
+                    <button *ngIf="!mp.referenceTicket" class="btn btn-link link-action p-0 small text-decoration-none" (click)="lierTicket(mp.id)"><i class="bi bi-link-45deg"></i> Lier ticket</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!chargementPeriode && mouvementsPeriode.length === 0" class="text-center py-4 text-muted small">
+            <i class="bi bi-calendar-x d-block mb-1 h4 text-light"></i> Définir une plage temporelle d'évaluation pour charger les registres.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
+

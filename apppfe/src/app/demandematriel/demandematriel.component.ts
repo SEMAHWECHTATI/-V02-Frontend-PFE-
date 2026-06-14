@@ -70,42 +70,68 @@ isAdmin = false;
     this.chargerUtilisateur();
   }
 
-  public rechercheQRCodeBarres(qrcode: string): void {
-  if (!qrcode.trim()) return; // Évite de chercher si le champ est vide
+  public rechercheQRCodeBarres(inputElement: HTMLInputElement): void {
+    const qrcode = inputElement.value;
+    
+    if (!qrcode || !qrcode.trim()) return;
 
-  console.log('📡 Scan détecté, recherche du code :', qrcode);
+    console.log('📡 Scan détecté, recherche du code :', qrcode);
 
-  this.inventoryService.getArticleByCodeBarres(qrcode).subscribe({
-    next: (res) => {
-      // S'adapte si ton API renvoie directement un tableau ou un objet encapsulé
-      if (Array.isArray(res)) {
-        this.rechrchecodeabarre = res;
-      } else if (res?.articles) {
-        this.rechrchecodeabarre = res.articles;
-      } else if (res) {
-        this.rechrchecodeabarre = [res]; // Si l'API renvoie un seul article, on l'ajoute dans le tableau
-      } else {
+    this.inventoryService.getArticleByCodeBarres(qrcode).subscribe({
+      next: (res) => {
+        inputElement.value = ''; // On vide proprement l'élément HTML natif après lecture
+        
+        if (Array.isArray(res)) {
+          this.rechrchecodeabarre = res;
+        } else if (res?.articles) {
+          this.rechrchecodeabarre = res.articles;
+        } else if (res) {
+          this.rechrchecodeabarre = [res];
+        } else {
+          this.rechrchecodeabarre = [];
+        }
+      },
+      error: (err) => {
+        console.error('❌ Impossible de trouver l\'article par QR code :', err);
         this.rechrchecodeabarre = [];
+        inputElement.value = '';
       }
-    },
-    error: (err) => {
-      console.error('❌ Impossible de trouver l\'article par QR code :', err);
-      this.rechrchecodeabarre = [];
-    }
-  });
-}
+    });
+  }
 
-  // ============ USER ============
+// ============ USER & INIT ROLE ============
   private chargerUtilisateur(): void {
-
     const userStr = localStorage.getItem('utilisateurConnecte');
-
     if (!userStr) return;
 
     this.currentUser = JSON.parse(userStr);
+    
+    // Normalisation du rôle
+    this.role = this.currentUser?.roleDemande || this.currentUser?.role || 'Demandeur';
+    
+    this.isGestionnaire = this.role === 'Gestionnaire_Stock';
+    this.isAdmin = this.role === 'Admin' || this.role === 'Administrateur';
+
+    // On initialise la vue sur l'onglet par défaut autorisé
+    this.activeTab = 'creer'; 
 
     this.chargerArticles();
     this.chargerMesDemandes();
+  }
+
+  // ============ NAVIGATION SÉCURISÉE ============
+  switchTab(tab: string): void {
+    // 🛡️ Garde-fou : On refuse le switch si l'utilisateur n'a pas le rôle requis
+    if (tab === 'enAttente' && !this.isGestionnaire && !this.isAdmin) return;
+    if (tab === 'valideeGestionnaire' && !this.isAdmin) return;
+    if (tab === 'rechrchecodeabarre' && !this.isGestionnaire && !this.isAdmin) return;
+
+    this.activeTab = tab;
+
+    // Chargement paresseux de la donnée uniquement au clic de l'onglet concerné
+    if (tab === 'mesDemandes') this.chargerMesDemandes();
+    if (tab === 'enAttente') this.chargerDemandesEnAttente();
+    if (tab === 'valideeGestionnaire') this.chargerDemandesValideeGestionnaire();
   }
 
   // ============ FORM ============
@@ -294,8 +320,20 @@ isAdmin = false;
 
   // ============ DETAILS ============
   afficherDetails(d: any): void {
-    this.selectedDemandeDetail = d;
-    this.showDetailModal = true;
+    // Charger les détails complets de la demande
+    this.demandeService.getDemandeDetail(d.id).subscribe({
+      next: (res) => {
+        console.log('✅ Détails demande chargés:', res);
+        this.selectedDemandeDetail = res.demande || res;
+        this.showDetailModal = true;
+      },
+      error: (err) => {
+        console.error('❌ Erreur chargement détails:', err);
+        // Afficher avec les données partielles si erreur
+        this.selectedDemandeDetail = d;
+        this.showDetailModal = true;
+      }
+    });
   }
 
   fermerDetailModal(): void {
@@ -311,16 +349,16 @@ isAdmin = false;
     this.motifRejet = '';
   }
 
-  // ============ TABS ============
-  switchTab(tab: string): void {
+  // // ============ TABS ============
+  // switchTab(tab: string): void {
 
-    this.activeTab = tab;
+  //   this.activeTab = tab;
 
-    if (tab === 'mesDemandes') this.chargerMesDemandes();
-    if (tab === 'enAttente') this.chargerDemandesEnAttente();
-    if (tab === 'valideeGestionnaire') this.chargerDemandesValideeGestionnaire();
-        if (tab === 'rechrchecodeabarre') this.rechercheQRCodeBarres('');
+  //   if (tab === 'mesDemandes') this.chargerMesDemandes();
+  //   if (tab === 'enAttente') this.chargerDemandesEnAttente();
+  //   if (tab === 'valideeGestionnaire') this.chargerDemandesValideeGestionnaire();
+  //       if (tab === 'rechrchecodeabarre') this.rechercheQRCodeBarres('');
 
 
-  }
+  // }
 }

@@ -1,44 +1,42 @@
 <div class="demande-container">
 
-  <!-- Alertes -->
   <div *ngIf="messageSucces" class="alert alert-success">
-    <i class="bi bi-check-circle-fill"></i>
-    {{ messageSucces }}
+    <i class="bi bi-check-circle-fill"></i> {{ messageSucces }}
   </div>
 
   <div *ngIf="messageErreur" class="alert alert-danger">
-    <i class="bi bi-exclamation-circle-fill"></i>
-    {{ messageErreur }}
+    <i class="bi bi-exclamation-circle-fill"></i> {{ messageErreur }}
   </div>
 
-  <!-- Onglets Navigation -->
   <div class="tabs-container">
-  <div class="tabs">
-    <button class="tab-button" [class.active]="activeTab === 'creer'" (click)="switchTab('creer')">
-      <i class="bi bi-plus-circle"></i> Créer une Demande
-    </button>
+    <div class="tabs">
+      <button class="tab-button" [class.active]="activeTab === 'creer'" (click)="switchTab('creer')">
+        <i class="bi bi-plus-circle"></i> Créer une Demande
+      </button>
 
-    <button class="tab-button" [class.active]="activeTab === 'mesDemandes'" (click)="switchTab('mesDemandes')">
-      <i class="bi bi-list-check"></i> Mes Demandes
-    </button>
+      <button class="tab-button" [class.active]="activeTab === 'mesDemandes'" (click)="switchTab('mesDemandes')">
+        <i class="bi bi-list-check"></i> Mes Demandes
+      </button>
 
-    <button class="tab-button" [class.active]="activeTab === 'enAttente'" (click)="switchTab('enAttente')">
-      <i class="bi bi-hourglass-split"></i> En Attente Valide Gestionnaire
-    </button>
-     <button class="tab-button" [class.active]="activeTab === 'rechrchecodeabarre'" (click)="switchTab('rechrchecodeabarre')">
-      <i class="bi bi-hourglass-split"></i>Recherche par code a barre
-    </button>
+      <button *ngIf="role === 'Gestionnaire_Stock' || role === 'Admin' || role === 'Administrateur'"
+              class="tab-button" [class.active]="activeTab === 'enAttente'" (click)="switchTab('enAttente')">
+        <i class="bi bi-hourglass-split"></i> En Attente Validation
+      </button>
 
-    <button *ngIf="currentUser?.role === 'Administrateur'" 
-            class="tab-button" 
-            [class.active]="activeTab === 'valideeGestionnaire'" 
-            (click)="switchTab('valideeGestionnaire')">
-      <i class="bi bi-check-square"></i> Validées Administrateur
-    </button>
+      <button *ngIf="role === 'Gestionnaire_Stock' || role === 'Admin' || role === 'Administrateur'"
+              class="tab-button" [class.active]="activeTab === 'rechrchecodeabarre'" (click)="switchTab('rechrchecodeabarre')">
+        <i class="bi bi-qr-code-scan"></i> Recherche par Code-barres
+      </button>
+
+      <button *ngIf="role === 'Admin' || role === 'Administrateur'" 
+              class="tab-button" 
+              [class.active]="activeTab === 'valideeGestionnaire'" 
+              (click)="switchTab('valideeGestionnaire')">
+        <i class="bi bi-check-square"></i> Validées Administrateur
+      </button>
+    </div>
   </div>
-</div>
 
-  <!-- TAB 1: CRÉER UNE DEMANDE -->
   <div *ngIf="activeTab === 'creer'" class="tab-content">
     <div class="form-header">
       <h2>📋 Nouvelle Demande de Matériel</h2>
@@ -81,14 +79,14 @@
         </div>
       </div>
 
-      <div class="form-section">
+      <!-- <div class="form-section">
         <h3><i class="bi bi-file-earmark"></i> Informations Supplémentaires</h3>
         <div class="form-group">
           <label for="referenceTicket">Référence Ticket (optionnel)</label>
           <input type="text" id="referenceTicket" formControlName="referenceTicket" class="form-control"
                  placeholder="Ex: TICK-2026-001">
         </div>
-      </div>
+      </div> -->
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="chargement || form.invalid">
@@ -102,75 +100,68 @@
     </form>
   </div>
 
-  <div *ngIf="activeTab === 'rechrchecodeabarre'" class="tab-content">
-  <div class="modal-header">
-    <h3>🔍 Recherche par QR Code / Code-barres</h3>
-  </div>
-
-  <div class="search-box-container" style="margin: 20px 0;">
-    <div class="input-group" style="display: flex; gap: 10px;">
-      <input 
-        type="text" 
-        #qrInput
-        (keyup.enter)="rechercheQRCodeBarres(qrInput.value); qrInput.value = ''"
-        class="form-control" 
-        placeholder="Cliquez ici, puis scannez le QR code..." 
-        style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-      
-      <button 
-        type="button" 
-        class="btn btn-primary" 
-        (click)="rechercheQRCodeBarres(qrInput.value); qrInput.value = ''">
-        <i class="bi bi-search"></i> Rechercher
-      </button>
-    </div>
-  </div>
-
-  <div *ngIf="rechrchecodeabarre.length > 0" class="results-container" style="margin-top: 20px;">
-    <div *ngFor="let article of rechrchecodeabarre" class="article-result-card" style="padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; background-color: #f9f9f9;">
-      <h4 style="margin: 0 0 5px 0; color: #0d6efd;">{{ article.designation }}</h4>
-      <p style="margin: 3px 0;"><strong>Référence :</strong> <span class="badge bg-secondary">{{ article.reference }}</span></p>
-      <p style="margin: 3px 0;"><strong>Catégorie :</strong> {{ article.categorie }}</p>
-      <p style="margin: 3px 0;"><strong>Quantité en Stock :</strong> {{ article.quantiteEnStock }}</p>
-      <p style="margin: 3px 0;"><strong>Designation :</strong> {{ article.designation }}</p>
-      <p style="margin: 3px 0;"><strong>Fournisseur :</strong> {{ article.fournisseur }}</p>
-    </div>
-  </div>
-
-  <div *ngIf="rechrchecodeabarre.length === 0 && qrInput.value === '' " class="text-muted" style="text-align: center; margin-top: 30px;">
-    <i class="bi bi-qr-code-scan" style="font-size: 3rem; display: block; color: #ccc;"></i>
-    En attente d'un scan...
-  </div>
-</div>
-
-  <!-- TAB 2: MES DEMANDES -->
   <div *ngIf="activeTab === 'mesDemandes'" class="tab-content">
     <app-demandes-list [demandes]="mesDemandes" [type]="'mesDemandes'"
       [titre]="'📋 Mes Demandes de Matériel'" [description]="'Consultez l\'état de vos demandes'"
       [showActions]="false" (afficherDetails)="afficherDetails($event)"></app-demandes-list>
   </div>
 
-  <!-- TAB 3: DEMANDES EN ATTENTE -->
-  <div *ngIf="activeTab === 'enAttente'" class="tab-content">
+  <div *ngIf="activeTab === 'enAttente' && (role === 'Gestionnaire_Stock' || role === 'Admin' || role === 'Administrateur')" class="tab-content">
     <app-demandes-list [demandes]="demandesEnAttente" [type]="'enAttente'"
       [titre]="'⏳ Demandes en Attente'" [description]="'Validez ou rejetez les demandes en attente de traitement'"
       [showActions]="true" (validerGestionnaire)="openValidationGestionnaire($event)"
       (rejeter)="openRejectionModal($event)" (afficherDetails)="afficherDetails($event)"></app-demandes-list>
   </div>
 
-  <!-- TAB 4: DEMANDES VALIDÉES GESTIONNAIRE -->
-  <div *ngIf="activeTab === 'valideeGestionnaire' && currentUser?.role === 'Administrateur'" class="tab-content">
+  <div *ngIf="activeTab === 'valideeGestionnaire' && (role === 'Admin' || role === 'Administrateur')" class="tab-content">
     <app-demandes-list [demandes]="demandesValideeGestionnaire" [type]="'valideeGestionnaire'"
       [titre]="'✅ Demandes Validées Gestionnaire'" [description]="'Validez et consommez le stock pour les demandes validées par le gestionnaire'"
       [showActions]="true" (validerAdmin)="openValidationAdmin($event)"
       (rejeter)="openRejectionModal($event)" (afficherDetails)="afficherDetails($event)"></app-demandes-list>
   </div>
 
-  
+  <div *ngIf="activeTab === 'rechrchecodeabarre' && (role === 'Gestionnaire_Stock' || role === 'Admin' || role === 'Administrateur')" class="tab-content">
+    <div class="modal-header">
+      <h3>🔍 Recherche par QR Code / Code-barres</h3>
+    </div>
+
+    <div class="search-box-container" style="margin: 20px 0;">
+      <div class="input-group" style="display: flex; gap: 10px;">
+        <input 
+          type="text" 
+          #qrInput
+          (keyup.enter)="rechercheQRCodeBarres(qrInput)"
+          class="form-control" 
+          placeholder="Cliquez ici, puis scannez le QR code..." 
+          style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="rechercheQRCodeBarres(qrInput)">
+          <i class="bi bi-search"></i> Rechercher
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="rechrchecodeabarre.length > 0" class="results-container" style="margin-top: 20px;">
+      <div *ngFor="let article of rechrchecodeabarre" class="article-result-card" style="padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; background-color: #f9f9f9;">
+        <h4 style="margin: 0 0 5px 0; color: #0d6efd;">{{ article.designation }}</h4>
+        <p style="margin: 3px 0;"><strong>Référence :</strong> <span class="badge bg-secondary">{{ article.reference }}</span></p>
+        <p style="margin: 3px 0;"><strong>Catégorie :</strong> {{ article.categorie }}</p>
+        <p style="margin: 3px 0;"><strong>Quantité en Stock :</strong> {{ article.quantiteEnStock }}</p>
+        <p style="margin: 3px 0;"><strong>Fournisseur :</strong> {{ article.fournisseur }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="rechrchecodeabarre.length === 0" class="text-muted" style="text-align: center; margin-top: 30px;">
+      <i class="bi bi-qr-code-scan" style="font-size: 3rem; display: block; color: #ccc;"></i>
+      En attente d'un scan ou aucun résultat...
+    </div>
+  </div>
 
 </div>
 
-<!-- MODAL VALIDATION -->
 <div *ngIf="showValidationModal" class="modal-overlay" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -182,7 +173,7 @@
       <p *ngIf="selectedDemande"><strong>Quantité:</strong> {{ selectedDemande.quantiteDemandee }}</p>
       <p *ngIf="selectedDemande"><strong>Justification:</strong> {{ selectedDemande.justification }}</p>
       <p class="warning">
-        Êtes-vous sûr de vouloir valider cette demande?
+        Êtes-vous sûr de vouloir valider cette demande ?
         <span *ngIf="validationType === 'admin'"><br>⚠️ Le stock sera consommé automatiquement</span>
       </p>
     </div>
@@ -196,7 +187,6 @@
   </div>
 </div>
 
-<!-- MODAL REJET -->
 <div *ngIf="showRejectionModal" class="modal-overlay" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -222,5 +212,12 @@
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<app-demande-detail [demande]="selectedDemandeDetail" [visible]="showDetailModal" (fermer)="fermerDetailModal()"></app-demande-detail>
+<app-demande-detail
+  *ngIf="showDetailModal"
+  [visible]="showDetailModal"
+  [demande]="selectedDemandeDetail"
+  [roleUtilisateurConecte]="role"
+  (closed)="fermerDetailModal()"
+  (onValiderGestionnaire)="openValidationGestionnaire($event); fermerDetailModal()"
+  (onValiderAdmin)="openValidationAdmin($event); fermerDetailModal()">
+</app-demande-detail>

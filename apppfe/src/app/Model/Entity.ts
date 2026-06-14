@@ -107,7 +107,18 @@ export interface ApprobationDTO {
   groupeId: number | null; // Peut être null si le rôle n'exige pas de groupe
 }
 
-
+// ✅ Création d'une interface pour typer proprement la réponse SLA
+export interface SlaStatistics {
+  totalTicketsAvecSla: number;
+  slaGlobauxRespectes: number;
+  slaGlobauxDepasses: number;
+  tauxReussiteGlobal: number;
+  reussitePriseEnCharge: number;
+  echecPriseEnCharge: number;
+  reussiteResolution: number;
+  echecResolution: number;
+  tauxReussiteParPriorite: { [key: string]: number }; // 👈 Clé: Priorité (String), Valeur: Taux (Number)
+}
 
 
 

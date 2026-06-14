@@ -1,0 +1,28 @@
+/* Style pour l'affichage secondaire des références d'articles */
+.fs-7 {
+  font-size: 0.8rem;
+}
+
+/* Forcer le retour à la ligne automatique uniquement sur la cellule commentaire */
+.max-width-comment {
+  max-width: 280px;
+  white-space: normal !important;
+  word-wrap: break-word;
+}
+
+.italic {
+  font-style: italic;
+}
+
+/* Alignement et espacement des en-têtes */
+.table th {
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Effet au survol des lignes pour un aspect plus applicatif */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.015);
+  cursor: default;
+}

@@ -90,3 +90,32 @@ export interface DemandeMateriel {
   dateCreation?: Date;
   statut?: string;
 }
+
+export interface Localisation {
+ id: number;
+  nom: string;
+  description?: string;
+  batiment?: string;
+  etage?: string;
+  bureau?: string;
+  armoire?: string;
+  active: boolean; // 💡 Requis par votre base de données
+}
+
+export interface Equipement {
+  id: number;
+  numeroSerie: string;
+  designation: string;
+  statut: StatutArticle;
+  localisation?: Localisation;
+  codeBarres: string;
+  observations?: string;
+  dateAcquisition?: string;
+  dateMiseAuRebut?: string;
+
+  localisationId?: number;
+  localisationNom?: string;
+  localisationBatiment?: string;
+  localisationEtage?: string;
+  localisationBureau?: string;
+}
