@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Categorie, Priorite, TicketCreateDTO } from '../Model/Entity';
@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import { TicketService } from '../services/ticket.service';
 import { CategorieService } from '../services/categorie.service';
 import { ArticleFormComponent } from '../article-form/article-form.component';
+import { isPlatformBrowser } from '@angular/common'; // 👈 L'importation corrigée
 
 @Component({
   selector: 'app-create-ticket-page',
@@ -44,7 +45,8 @@ export class CreateTicketPageComponent implements OnInit {
     private fb: FormBuilder,
     private ticketservice: TicketService,
     private categorieservice: CategorieService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -58,27 +60,33 @@ export class CreateTicketPageComponent implements OnInit {
    * 👤 Charger l'utilisateur connecté
    */
   private loadUser(): void {
-    console.log('👤 Chargement utilisateur');
-    
-    const userStr = sessionStorage.getItem('currentUser') || localStorage.getItem('utilisateurConnecte');
-    
-    if (userStr) {
-      try {
-        let user = JSON.parse(userStr);
-        if (typeof user === 'string') {
-          user = JSON.parse(user);
+    // 👈 3. Vérifier si on est bien sur le navigateur avant de toucher au stockage
+    if (isPlatformBrowser(this.platformId)) {
+      console.log('👤 Chargement utilisateur (Navigateur)');
+      
+      const userStr = sessionStorage.getItem('currentUser') || localStorage.getItem('utilisateurConnecte');
+      
+      if (userStr) {
+        try {
+          let user = JSON.parse(userStr);
+          if (typeof user === 'string') {
+            user = JSON.parse(user);
+          }
+          this.currentUser = user;
+          console.log('✅ Utilisateur chargé:', {
+            id: this.currentUser.id,
+            nom: `${this.currentUser.prenom} ${this.currentUser.nom}`
+          });
+        } catch (error) {
+          console.error('❌ Erreur parsing utilisateur:', error);
+          this.errorMessage = 'Erreur lors du chargement de vos informations.';
         }
-        this.currentUser = user;
-        console.log('✅ Utilisateur chargé:', {
-          id: this.currentUser.id,
-          nom: `${this.currentUser.prenom} ${this.currentUser.nom}`
-        });
-      } catch (error) {
-        console.error('❌ Erreur parsing utilisateur:', error);
-        this.errorMessage = 'Erreur lors du chargement de vos informations.';
       }
+    } else {
+      console.log('🖥️ Compilation côté serveur : Évitement du sessionStorage');
     }
   }
+
 
   /**
    * 📋 Charger les catégories
