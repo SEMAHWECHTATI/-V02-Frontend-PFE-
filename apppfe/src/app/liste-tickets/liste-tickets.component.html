@@ -160,7 +160,7 @@
                 </span>
               </td>
               <td>{{ ticket.demandeur?.prenom }} {{ ticket.demandeur?.nom }}</td>
-              <td>{{ ticket.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ ticket.date | date:'dd/MM/yyyy hh:mm' }}</td>
               
               <!-- 🎯 ACTIONS -->
               <td (click)="$event.stopPropagation()">

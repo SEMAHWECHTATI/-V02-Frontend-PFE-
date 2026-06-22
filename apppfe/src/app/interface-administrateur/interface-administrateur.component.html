@@ -286,7 +286,20 @@
                 <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
             </a>
         </li>
+      
         <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'config-slas'" 
+               (click)="changerVue('config-slas')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-sliders text-secondary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Configurer les SLA</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+          <li class="w-100">
             <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
                [class.active]="vueActuelle === 'liste-slas'" 
                (click)="changerVue('liste-slas')" 
@@ -547,6 +560,10 @@
             </div>
             <div *ngIf="vueActuelle ==='liste-slas'">
      <app-sla-gestion></app-sla-gestion>
+</div>
+
+           <div *ngIf="vueActuelle ==='config-slas'">
+     <app-config-globale></app-config-globale>
 </div>
 
 

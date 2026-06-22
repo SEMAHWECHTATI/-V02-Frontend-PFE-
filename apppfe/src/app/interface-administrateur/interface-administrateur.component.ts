@@ -22,6 +22,7 @@ import { DemandesListComponent } from "../demandes-list/demandes-list.component"
 import { DashboardComponent } from "../dashboard/dashboard.component";
 import { InterfaceTechniceienComponent } from "../interface-techniceien/interface-techniceien.component";
 import { SlaGestionComponent } from "../sla-gestion/sla-gestion.component";
+import { ConfigGlobaleComponent } from "../config-globale/config-globale.component";
 
 @Component({
   selector: 'app-interface-administrateur',
@@ -37,7 +38,7 @@ import { SlaGestionComponent } from "../sla-gestion/sla-gestion.component";
     CreateTicketPageComponent,
     TicketDetailComponent,
     DemandematrielComponent,
-    GestionnaireStockComponent, EspaceDemandeurComponent, ParametreComponent, ConsommationRapportComponent, SlaDashboardComponent, DemandesListComponent, DashboardComponent, InterfaceTechniceienComponent, SlaGestionComponent],
+    GestionnaireStockComponent, EspaceDemandeurComponent, ParametreComponent, ConsommationRapportComponent, SlaDashboardComponent, DemandesListComponent, DashboardComponent, InterfaceTechniceienComponent, SlaGestionComponent, ConfigGlobaleComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })

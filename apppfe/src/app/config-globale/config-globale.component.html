@@ -1,0 +1,55 @@
+<div class="container p-4 text-light">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card bg-dark text-light border-secondary p-4 shadow">
+                <h4 class="border-bottom border-secondary pb-3 mb-4 text-info">
+                    <i class="bi bi-gear-fill me-2"></i>Paramètres Globaux du Système
+                </h4>
+
+                <div *ngIf="isLoading" class="text-center py-4">
+                    <div class="spinner-border text-info" role="status"></div>
+                </div>
+
+                <form *ngIf="!isLoading" (ngSubmit)="enregistrerConfig()">
+                    <div class="mb-4">
+                        <label class="form-label text-white-50">Seuil critique d'indice de faisabilité (%)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control bg-secondary bg-opacity-10 text-white border-secondary" 
+                                   [(ngModel)]="config.indiceFaisabiliteEquipe" name="indice" required>
+                            <span class="input-group-text bg-secondary border-secondary text-light">%</span>
+                        </div>
+                        <small class="text-muted">Déclenche un voyant d'alerte si le taux de succès passe sous ce seuil.</small>
+                    </div>
+
+                    <div class="mb-4 d-flex justify-content-between align-items-center bg-secondary bg-opacity-10 p-3 rounded border border-secondary">
+                        <div>
+                            <h6 class="mb-0 text-white">Alertes Emails Automatiques</h6>
+                            <small class="text-white-50">Envoyer des mails lors de la création d'un ticket</small>
+                        </div>
+                        <div class="form-check form-switch fs-5">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   [(ngModel)]="config.alertesEmailActives" name="emails">
+                        </div>
+                    </div>
+
+                    <div class="mb-4 d-flex justify-content-between align-items-center bg-secondary bg-opacity-10 p-3 rounded border border-secondary">
+                        <div>
+                            <h6 class="mb-0 text-white">Auto-assignation des Techniciens</h6>
+                            <small class="text-white-50">Assigner automatiquement le ticket à un membre libre du groupe</small>
+                        </div>
+                        <div class="form-check form-switch fs-5">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   [(ngModel)]="config.autoAssignationActive" name="assignation">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-info px-4">
+                            <i class="bi bi-cloud-arrow-up-fill me-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
