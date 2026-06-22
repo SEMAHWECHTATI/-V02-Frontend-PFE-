@@ -1,10 +1,11 @@
 <div class="container-fluid py-4">
+  
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h3 class="mb-1 text-dark fw-bold">📊 Journal des Consommations de Pièces</h3>
       <p class="text-muted mb-0">Rapport complet destiné aux managers et gestionnaires de stocks.</p>
     </div>
-    <button class="btn btn-outline-primary" (click)="chargerRapportConsommations()" [disabled]="isLoading">
+    <button class="btn btn-outline-primary shadow-sm" (click)="chargerRapportConsommations()" [disabled]="isLoading">
       <i class="bi bi-arrow-clockwise"></i> Rafraîchir
     </button>
   </div>
@@ -12,6 +13,48 @@
   <div *ngIf="errorMessage" class="alert alert-danger mb-4 d-flex align-items-center" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
     <div>{{ errorMessage }}</div>
+  </div>
+
+  <div class="row g-3 mb-4" *ngIf="!isLoading && !errorMessage">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm bg-white p-3 rounded-3 border-start border-primary border-4">
+        <div class="d-flex align-items-center">
+          <div class="p-2 bg-primary-subtle text-primary rounded-2 me-3">
+            <i class="bi bi-hash fs-4"></i>
+          </div>
+          <div>
+            <small class="text-muted text-uppercase fw-semibold d-block">Lignes consommées</small>
+            <span class="fs-4 fw-bold text-dark">{{ nombreInterventions }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm bg-white p-3 rounded-3 border-start border-danger border-4">
+        <div class="d-flex align-items-center">
+          <div class="p-2 bg-danger-subtle text-danger rounded-2 me-3">
+            <i class="bi bi-tools fs-4"></i>
+          </div>
+          <div>
+            <small class="text-muted text-uppercase fw-semibold d-block">Total pièces sorties</small>
+            <span class="fs-4 fw-bold text-dark">{{ totalPiecesConsommees }} unités</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm bg-white p-3 rounded-3 border-start border-success border-4">
+        <div class="d-flex align-items-center">
+          <div class="p-2 bg-success-subtle text-success rounded-2 me-3">
+            <i class="bi bi-currency-euro fs-4"></i>
+          </div>
+          <div>
+            <small class="text-muted text-uppercase fw-semibold d-block">Coût Valorisé Estimé</small>
+            <span class="fs-4 fw-bold text-dark">{{ totalDepenses | number:'1.2-2' }} DT</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="card shadow-sm border-0 mb-4 bg-white">
@@ -83,14 +126,14 @@
               </span>
             </td>
             
-            <td class="text-wrap max-width-comment text-muted italic fs-7">
+            <td class="text-wrap max-width-comment text-muted fst-italic fs-7">
               {{ conso.commentaire }}
             </td>
           </tr>
 
           <tr *ngIf="consommationsFiltrees.length === 0">
             <td colspan="6" class="text-center py-5 text-muted">
-              <i class="bi bi-inbox fs-2 d-block mb-2 text-neutral-400"></i>
+              <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
               Aucun mouvement de stock ou consommation ne correspond à votre recherche.
             </td>
           </tr>

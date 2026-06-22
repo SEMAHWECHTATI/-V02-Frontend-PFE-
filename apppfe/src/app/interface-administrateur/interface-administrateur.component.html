@@ -10,194 +10,298 @@
                 </a>
                 <hr class="w-100 text-secondary">
                 
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+               <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
                     
-                    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link align-middle px-0 text-white" 
-                           [class.active]="vueActuelle === 'accueil'" 
-                           (click)="changerVue('accueil')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Acceuil</span>
-                        </a>
-                    </li>
+    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+        <a class="nav-link px-3 py-2 text-light d-flex align-items-center gap-2 rounded" 
+           [class.active]="vueActuelle === 'accueil'" 
+           (click)="changerVue('accueil')" style="cursor: pointer;">
+            <i class="bi bi-house-door-fill text-primary fs-5"></i>
+            <span class="ms-1 d-none d-sm-inline fw-medium">Accueil</span>
+        </a>
+    </li>
 
-                     <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link align-middle px-0 text-white" 
-                           [class.active]="vueActuelle === 'stat'" 
-                           (click)="changerVue('stat')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-speedometer2 me-2"></i>Tableaux de bord (KPI)</span>
-                        </a>
-                    </li>
+    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+        <a class="nav-link px-3 py-2 text-light d-flex align-items-center gap-2 rounded" 
+           [class.active]="vueActuelle === 'stat'" 
+           (click)="changerVue('stat')" style="cursor: pointer;">
+            <i class="bi bi-speedometer2 text-info fs-5"></i>
+            <span class="ms-1 d-none d-sm-inline fw-medium">Tableaux de bord (KPI)</span>
+        </a>
+    </li>
 
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
-                        <a (click)="menuTicketsOuvert = !menuTicketsOuvert" 
-                           class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
-                           [class.active]="vueActuelle === 'creerTicket' || vueActuelle === 'liste-tickets' || vueActuelle === 'mesInterventions'"
-                           style="cursor: pointer;">
-                            <div>
-                                <i class="bi bi-tools me-2 text-success"></i> 
-                                <span class="ms-1 d-none d-sm-inline">Interventions & Tickets</span>
-                            </div>
-                            <i class="bi d-none d-sm-inline ms-2" 
-                               [ngClass]="menuTicketsOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
-                               style="font-size: 0.8rem;"></i>
-                        </a>
+    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
+        <a (click)="menuTicketsOuvert = !menuTicketsOuvert" 
+           class="nav-link px-3 py-2 text-light d-flex justify-content-between align-items-center rounded"
+           [class.active]="['creerTicket', 'create-categorie', 'create-groupe', 'liste-tickets', 'sla-dashboard', 'enumerations'].includes(vueActuelle)"
+           style="cursor: pointer; transition: all 0.2s ease;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-tools text-success fs-5"></i> 
+                <span class="ms-1 d-none d-sm-inline fw-semibold">Interventions & Tickets</span>
+            </div>
+            <i class="bi d-none d-sm-inline transition-icon" 
+               [ngClass]="menuTicketsOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
+               style="font-size: 0.75rem;"></i>
+        </a>
 
-                        <ul class="nav flex-column ms-3 collapse" [ngClass]="{'show': menuTicketsOuvert}">
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'creerTicket'" (click)="changerVue('creerTicket')" style="cursor: pointer;">
-                                    <i class="bi bi-plus-circle me-2 text-info"></i> 
-                                    <span class="d-none d-sm-inline">Créer un ticket</span>
-                                </a>
-                            </li>
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'create-categorie'" (click)="changerVue('create-categorie')" style="cursor: pointer;">
-                                    <i class="bi bi-plus-circle me-2 text-success"></i> 
-                                    <span class="d-none d-sm-inline">Créer une catégorie</span>
-                                </a>
-                            </li>
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'create-groupe'" (click)="changerVue('create-groupe')" style="cursor: pointer;">
-                                    <i class="bi bi-plus-circle me-2 text-success"></i> 
-                                    <span class="d-none d-sm-inline">Créer un groupe</span>
-                                </a>
-                            </li>
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'liste-tickets'" (click)="changerVue('liste-tickets')" style="cursor: pointer;">
-                                    <i class="bi bi-list-task me-2 text-warning"></i> 
-                                    <span class="d-none d-sm-inline">Liste des tickets</span>
-                                </a>
-                            </li>
-                            <!-- <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesInterventions'" (click)="changerVue('mesInterventions')" style="cursor: pointer;">
-                                    <i class="bi bi-clock-history me-2 text-secondary"></i> 
-                                    <span class="d-none d-sm-inline">Mes interventions</span>
-                                </a>
-                            </li> -->
-                            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'enumerations'" (click)="changerVue('enumerations')" style="cursor: pointer;">
-                                    <i class="bi bi-gear-fill me-2 text-danger"></i> 
-                                    <span class="d-none d-sm-inline">Référentiel (Énumérations)</span>
-                                </a>
-                            </li>
-                             <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'sla-dashboard'" (click)="changerVue('sla-dashboard')" style="cursor: pointer;">
-                                    <i class="bi bi-gear-fill me-2 text-danger"></i> 
-                                    <span class="d-none d-sm-inline">Dashboard SLA</span>
-                                </a>
-                            </li>
-                            <!-- <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'ticket-detail'" (click)="changerVue('ticket-detail')" style="cursor: pointer;">
-                                    <i class="bi bi-gear-fill me-2 text-danger"></i> 
-                                    <span class="d-none d-sm-inline">Détail du ticket</span>
-                                </a>
-                            </li> -->
-                        </ul>
-                    </li>
+        <ul class="nav flex-column ps-4 collapse" [ngClass]="{'show': menuTicketsOuvert}">
+            <li class="w-100 mt-1">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'creerTicket'" (click)="changerVue('creerTicket')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-plus-circle text-info fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Créer un ticket</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'create-categorie'" (click)="changerVue('create-categorie')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-folder-plus text-success fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Créer une catégorie</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'create-groupe'" (click)="changerVue('create-groupe')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill text-success fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Créer un groupe</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'liste-tickets'" (click)="changerVue('liste-tickets')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-list-task text-warning fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Liste des tickets</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'sla-dashboard'" (click)="changerVue('sla-dashboard')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bar-chart-line-fill text-danger fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Dashboard SLA</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100" *ngIf="currentUser?.role === 'Administrateur'">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'enumerations'" (click)="changerVue('enumerations')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-gear-fill text-secondary fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Référentiel</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+        </ul>
+    </li>
                     
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
-                        <a (click)="menuInventaireOuvert = !menuInventaireOuvert" 
-                           class="nav-link px-0 align-middle text-light d-flex justify-content-between align-items-center collapsible"
-                           [class.active]="vueActuelle === 'demandermatriel' || vueActuelle === 'liste-demandematiel' || vueActuelle === 'mesdemandes' || vueActuelle === 'piececonsomme'"
-                           style="cursor: pointer;">
-                            <div>
-                                <i class="bi bi-archive me-2 text-success"></i> 
-                                <span class="ms-1 d-none d-sm-inline">Inventaire & Stocks</span>
-                            </div>
-                            <i class="bi d-none d-sm-inline ms-2" 
-                               [ngClass]="menuInventaireOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
-                               style="font-size: 0.8rem;"></i>
-                        </a>
+    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur' || currentUser?.role === 'Technicien' || currentUser?.role === 'Demandeur'">
+        <a (click)="menuInventaireOuvert = !menuInventaireOuvert" 
+           class="nav-link px-3 py-2 text-light d-flex justify-content-between align-items-center rounded"
+           [class.active]="['demandermatriel', 'liste-demandematiel', 'mesdemandes', 'piececonsomme'].includes(vueActuelle)"
+           style="cursor: pointer; transition: all 0.2s ease;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-box-seam text-success fs-5"></i> 
+                <span class="ms-1 d-none d-sm-inline fw-semibold">Inventaire & Stocks</span>
+            </div>
+            <i class="bi d-none d-sm-inline transition-icon" 
+               [ngClass]="menuInventaireOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
+               style="font-size: 0.75rem;"></i>
+        </a>
 
-                        <ul class="nav flex-column ms-3 collapse" [ngClass]="{'show': menuInventaireOuvert}">
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'demandermatriel'" (click)="changerVue('demandermatriel')" style="cursor: pointer;">
-                                    <i class="bi bi-plus-circle me-2 text-info"></i> 
-                                    <span class="d-none d-sm-inline">Créer une demande de matériel</span>
-                                </a>
-                            </li>
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'liste-demandematiel'" (click)="changerVue('liste-demandematiel')" style="cursor: pointer;">
-                                    <i class="bi bi-list-task me-2 text-warning"></i> 
-                                    <span class="d-none d-sm-inline">Liste des demandes de matériel</span>
-                                </a>
-                            </li>
-                            <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'mesdemandes'" (click)="changerVue('mesdemandes')" style="cursor: pointer;">
-                                    <i class="bi bi-clock-history me-2 text-secondary"></i> 
-                                    <span class="d-none d-sm-inline">Mes demandes de matériel</span>
-                                </a>
-                            </li>
-                              <li class="w-100">
-                                <a class="nav-link px-0 text-light" [class.active]="vueActuelle === 'piececonsomme'" (click)="changerVue('piececonsomme')" style="cursor: pointer;">
-                                    <i class="bi bi-clock-history me-2 text-secondary"></i> 
-                                    <span class="d-none d-sm-inline">Pièces consommées</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+        <ul class="nav flex-column ps-4 collapse" [ngClass]="{'show': menuInventaireOuvert}">
+            <li class="w-100 mt-1">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'demandermatriel'" (click)="changerVue('demandermatriel')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-plus-circle text-info fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Créer une demande</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'liste-demandematiel'" (click)="changerVue('liste-demandematiel')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-list-task text-warning fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Liste des demandes</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'mesdemandes'" (click)="changerVue('mesdemandes')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge text-secondary fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Mes demandes</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+            <li class="w-100">
+                <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+                   [class.active]="vueActuelle === 'piececonsomme'" (click)="changerVue('piececonsomme')" style="cursor: pointer;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-pie-chart text-danger fs-5"></i> 
+                        <span class="d-none d-sm-inline fw-medium">Pièces consommées</span>
+                    </div>
+                    <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+                </a>
+            </li>
+        </ul>
+    </li>
 
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'alertes'" 
-                           (click)="changerVue('alertes')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline">
-                                <i class="bi bi-bell-fill"></i> Alertes & Notifications
-                                <span class="badge bg-warning text-dark ms-2 rounded-pill">5</span>
-                            </span>
-                        </a>
-                    </li>
-                       
+    <li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+        <a class="nav-link px-3 py-2 text-light d-flex align-items-center justify-content-between rounded" 
+           [class.active]="vueActuelle === 'alertes'" 
+           (click)="changerVue('alertes')" style="cursor: pointer;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-bell-fill text-warning fs-5"></i>
+                <span class="ms-1 d-none d-sm-inline fw-medium">Alertes & Notifications</span>
+            </div>
+            <span class="badge bg-warning text-dark rounded-pill d-none d-sm-inline-block">5</span>
+        </a>
+    </li>
+                    
+    <hr class="w-100 text-secondary my-2" *ngIf="currentUser?.role === 'Administrateur'">
 
-                    <hr class="w-100 text-secondary my-2" *ngIf="currentUser?.role === 'Administrateur'">
+  <!-- ⚙️ DOSSIER DÉROULANT : Configuration Système -->
+<li class="nav-item w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
+    
+    <!-- 🔘 Bouton Principal (Dossier Parent) -->
+    <a (click)="menuConfigurationOuvert = !menuConfigurationOuvert" 
+       class="nav-link px-3 py-2 text-light d-flex justify-content-between align-items-center rounded"
+       [class.active]="['parametres', 'utilisateurs', 'demandes', 'gestionstock', 'espacetechnicien', 'demandeurespace'].includes(vueActuelle)"
+       style="cursor: pointer; transition: all 0.2s ease;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-gear-fill text-secondary fs-5"></i>
+            <span class="ms-1 d-none d-sm-inline fw-semibold">Configuration Système</span>
+        </div>
+        <i class="bi d-none d-sm-inline transition-icon" 
+           [ngClass]="menuConfigurationOuvert ? 'bi-chevron-up' : 'bi-chevron-down'" 
+           style="font-size: 0.75rem;"></i>
+    </a>
 
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'utilisateurs'" 
-                           (click)="changerVue('utilisateurs')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-people-fill me-2 text-primary"></i> Gestion Utilisateurs</span>
-                        </a>
-                    </li>
+    <!-- 📂 Liste des sous-menus -->
+    <ul class="nav flex-column ps-4 collapse" [ngClass]="{'show': menuConfigurationOuvert}">
+        
+        <!-- Option 1: Gestion Utilisateurs -->
+        <li class="w-100 mt-1">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'utilisateurs'" 
+               (click)="changerVue('utilisateurs')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-people-fill text-primary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Gestion Utilisateurs</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
 
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'demandes'" 
-                           (click)="changerVue('demandes')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline">
-                                <i class="bi bi-file-earmark-person me-2 text-warning"></i> Demandes d'accès
-                                <span class="badge bg-danger ms-2 rounded-pill" *ngIf="nombreDemandesEnAttente > 0">
-                                    {{ nombreDemandesEnAttente }}
-                                </span>
-                            </span>
-                        </a>
-                    </li>
+        <!-- Option 2: Demandes d'accès (Avec son Badge) -->
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'demandes'" 
+               (click)="changerVue('demandes')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-person text-warning fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Demandes d'accès</span>
+                    <span class="badge bg-danger rounded-pill ms-1" *ngIf="nombreDemandesEnAttente > 0" style="font-size: 0.65rem;">
+                        {{ nombreDemandesEnAttente }}
+                    </span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
 
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'parametres'" 
-                           (click)="changerVue('parametres')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline"><i class="bi bi-gear-fill me-2 text-secondary"></i> Configuration Système</span>
-                        </a>
-                    </li>
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'gestionstock'" 
-                           (click)="changerVue('gestionstock')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline">
-                                <i class="bi bi-box-seam-fill text-danger"></i> Espace Gestionnare de Stock
-                            </span>
-                        </a>
-                    </li>
-                    <li class="w-100 mb-1" *ngIf="currentUser?.role === 'Administrateur'">
-                        <a class="nav-link px-0 align-middle text-light" 
-                           [class.active]="vueActuelle === 'demandeurespace'" 
-                           (click)="changerVue('demandeurespace')" style="cursor: pointer;">
-                            <span class="ms-1 d-none d-sm-inline">
-                                <i class="bi bi-person-fill text-primary"></i> Espace Demandeur
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-                                    
+        <!-- Option 3: Espace Gestionnaire de Stock -->
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'gestionstock'" 
+               (click)="changerVue('gestionstock')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-box-seam-fill text-danger fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Espace Gestionnaire</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+
+        <!-- Option 4: Espace Technicien -->
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'espacetechnicien'" 
+               (click)="changerVue('espacetechnicien')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-wrench text-primary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Espace Technicien</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+
+        <!-- Option 5: Espace Demandeur -->
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'demandeurespace'" 
+               (click)="changerVue('demandeurespace')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-person-fill text-primary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Espace Demandeur</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+
+        <!-- Option 6: Paramètres Généraux (Ancienne vue de base si nécessaire) -->
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'parametres'" 
+               (click)="changerVue('parametres')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-sliders text-secondary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Paramètres globaux</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+        <li class="w-100">
+            <a class="nav-link px-3 py-2 text-white-50 d-flex align-items-center justify-content-between rounded dynamic-sublink" 
+               [class.active]="vueActuelle === 'liste-slas'" 
+               (click)="changerVue('liste-slas')" 
+               style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-sliders text-secondary fs-5"></i> 
+                    <span class="d-none d-sm-inline fw-medium">Gestion des SLA</span>
+                </div>
+                <i class="bi bi-chevron-right d-none d-sm-inline opacity-25" style="font-size: 0.7rem;"></i>
+            </a>
+        </li>
+
+    </ul>
+</li>
+</ul>           
                 <hr class="w-100 text-secondary">
                 <div class="pb-4 w-100">
                     <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" 
@@ -429,17 +533,23 @@
             <div *ngIf="vueActuelle === 'demandes'">
                 <app-gerer-demande-inscri></app-gerer-demande-inscri>
             </div>
-            <div *ngIf="vueActuelle === 'parametres'">
-                <div class="alert alert-secondary"><i class="bi bi-gear-fill me-2"></i>Configuration des seuils, domaines d'intervention et paramètres DevOps.</div>
-            </div>
+            
 
             <div *ngIf="vueActuelle === 'gestionstock'">
                 <app-gestionnaire-stock></app-gestionnaire-stock>
             </div>
+            <div *ngIf="vueActuelle === 'espacetechnicien'">
+                
+                <app-interface-techniceien>     </app-interface-techniceien>
+            </div>
             <div *ngIf="vueActuelle === 'demandeurespace'">
                 <app-espace-demandeur></app-espace-demandeur>
             </div>
+            <div *ngIf="vueActuelle ==='liste-slas'">
+     <app-sla-gestion></app-sla-gestion>
+</div>
+
 
         </div>
     </div>
-</div>
+</div>  

@@ -1,58 +1,111 @@
-<div class="chatbot-settings">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h4><i class="bi bi-robot me-2 text-primary"></i>Configuration du Chatbot</h4>
-      <p class="text-muted mb-0">Configurez l'assistant virtuel pour soulager votre support technique.</p>
-    </div>
-    <div class="form-check form-switch fs-5">
-      <input class="form-check-input" type="checkbox" id="activateBot" checked>
-      <label class="form-check-label" for="activateBot">Activer le bot</label>
-    </div>
-  </div>
-
-  <hr>
-
-  <form [formGroup]="chatbotConfigForm">
-    <div class="row g-4">
-      <div class="col-md-6">
-        <h5 class="mb-3">Identité du Robot</h5>
+<div class="container-fluid">
+    <div class="row vh-100">
         
-        <div class="mb-3">
-          <label class="form-label">Nom du Chatbot</label>
-          <input type="text" class="form-control" formControlName="botName" placeholder="Ex: SupportBot">
+       
+
+        <div class="col py-4 bg-secondary bg-opacity-10 text-light overflow-auto">
+            
+            <div [ngSwitch]="vueActuelle">
+                
+                <div *ngSwitchCase="'parametres'" class="card bg-dark text-light border-secondary p-4 shadow-sm mx-auto" style="max-width: 950px;">
+                    <h3 class="border-bottom border-secondary pb-3 mb-4 d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-calculator-fill text-warning me-2"></i> Configuration Globale des Engagements (SLA)</span>
+                        <span class="badge bg-secondary fs-6">Rôle : {{ currentUser.role }}</span>
+                    </h3>
+
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <h5 class="text-info mb-3 pb-1 border-bottom border-dark">Fonctionnalités Système</h5>
+                            
+                            <div class="form-check form-switch mb-3 p-3 bg-secondary bg-opacity-10 rounded">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="switchSla" 
+                                       [checked]="configOptions.activationSLA" (change)="toggleOption('activationSLA')">
+                                <label class="form-check-label fw-medium" for="switchSla">Calculer et appliquer les SLA</label>
+                            </div>
+
+                            <div class="form-check form-switch mb-3 p-3 bg-secondary bg-opacity-10 rounded">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="switchMail" 
+                                       [checked]="configOptions.notificationsEmail" (change)="toggleOption('notificationsEmail')">
+                                <label class="form-check-label fw-medium" for="switchMail">Alertes Emails automatiques</label>
+                            </div>
+
+                            <div class="form-check form-switch mb-3 p-3 bg-secondary bg-opacity-10 rounded">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="switchAssign" 
+                                       [checked]="configOptions.autoAssignation" (change)="toggleOption('autoAssignation')">
+                                <label class="form-check-label fw-medium" for="switchAssign">Auto-assignation des Techniciens</label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-7 bg-secondary bg-opacity-10 p-4 rounded border border-secondary shadow-inner">
+                            <h5 class="text-warning mb-4"><i class="bi bi-sliders2-vertical me-2"></i> Ajustement des seuils de Délais</h5>
+                            
+                            <div class="mb-4 p-3 bg-dark bg-opacity-50 rounded border-start border-danger border-3">
+                                <h6 class="text-danger fw-bold mb-3">🔴 Niveau : Priorité Haute</h6>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-white-50">Prise en charge max :</span>
+                                        <span class="badge bg-danger fw-bold">{{ delaiPriseEnChargeHaute }} minutes</span>
+                                    </div>
+                                    <input type="range" class="form-range custom-range" min="5" max="120" step="5"
+                                           [(ngModel)]="delaiPriseEnChargeHaute" (input)="recalculerScoreSimule()">
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-white-50">Résolution finale max :</span>
+                                        <span class="badge bg-danger fw-bold">{{ delaiResolutionHaute }} heures</span>
+                                    </div>
+                                    <input type="range" class="form-range" min="1" max="48" step="1"
+                                           [(ngModel)]="delaiResolutionHaute" (input)="recalculerScoreSimule()">
+                                </div>
+                            </div>
+
+                            <div class="mb-4 p-3 bg-dark bg-opacity-50 rounded border-start border-warning border-3">
+                                <h6 class="text-warning fw-bold mb-3">🟡 Niveau : Priorité Moyenne</h6>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-white-50">Prise en charge max :</span>
+                                        <span class="badge bg-warning text-dark fw-bold">{{ delaiPriseEnChargeMoyenne }} minutes</span>
+                                    </div>
+                                    <input type="range" class="form-range" min="10" max="240" step="10"
+                                           [(ngModel)]="delaiPriseEnChargeMoyenne" (input)="recalculerScoreSimule()">
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-white-50">Résolution finale max :</span>
+                                        <span class="badge bg-warning text-dark fw-bold">{{ delaiResolutionMoyenne }} heures</span>
+                                    </div>
+                                    <input type="range" class="form-range" min="4" max="168" step="4"
+                                           [(ngModel)]="delaiResolutionMoyenne" (input)="recalculerScoreSimule()">
+                                </div>
+                            </div>
+
+                            <div class="alert mt-3 text-center d-flex align-items-center justify-content-around py-2 border"
+                                 [ngClass]="scorePerformanceEstime > 65 ? 'alert-success border-success' : 'alert-danger border-danger'">
+                                <span class="fw-bold fs-6">Indice de faisabilité de l'équipe :</span>
+                                <span class="fs-3 fw-bold">{{ scorePerformanceEstime }} %</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4 pt-3 border-top border-secondary">
+                        <button class="btn btn-success px-4 fw-medium shadow-sm" (click)="enregistrerConfiguration()">
+                            <i class="bi bi-cloud-arrow-up-fill me-2"></i> Enregistrer et Synchroniser
+                        </button>
+                    </div>
+                </div>
+
+                
+
+                <div *ngSwitchCase="'utilisateurs'">
+                    <div class="alert alert-info">Composant de Gestion des utilisateurs (En construction).</div>
+               </div>
+
+            </div>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Message d'introduction personnalisé</label>
-          <textarea class="form-control" formControlName="welcomeMessage" rows="3"></textarea>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <h5 class="mb-3">Comportement en cas d'échec</h5>
-        <p class="small text-muted">Si le bot ne sait pas répondre, vers quel groupe basculer l'utilisateur ?</p>
-
-        <div class="mb-3">
-          <label class="form-label">Groupe de secours par défaut</label>
-          <select class="form-select" formControlName="defaultGroupEscalation">
-            <option *ngFor="let groupe of groupesListe" [value]="groupe.id">
-              {{ groupe.nomGroupes }}
-            </option>
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Niveau d'autonomie (IA)</label>
-          <select class="form-select" formControlName="botModel">
-            <option value="rules">Arbre de décision simple (Boutons)</option>
-            <option value="gpt4">Intelligence Artificielle (Modèle GPT-4)</option>
-          </select>
-        </div>
-      </div>
     </div>
-
-    <div class="mt-4 text-end">
-      <button type="submit" class="btn btn-primary">Enregistrer les configurations</button>
-    </div>
-  </form>
 </div>

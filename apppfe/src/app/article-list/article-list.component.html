@@ -58,10 +58,10 @@
   </div>
 
   <!-- ===== ERROR MESSAGE ===== -->
-  <div *ngIf="erreur" class="alert alert-danger">
+  <!-- <div *ngIf="erreur" class="alert alert-danger">
     <i class="bi bi-exclamation-triangle"></i>
     <span>{{ erreur }}</span>
-  </div>
+  </div> -->
 
   <!-- ===== SEARCH & FILTER ===== -->
   <div class="search-filter-section">
@@ -97,6 +97,13 @@
     <table class="articles-table">
       <thead>
         <tr>
+          <th class="sortable" (click)="changerTri('categorie')">
+            <div class="th-content">
+              <span>Categorie</span>
+              <i *ngIf="triParColonne === 'categorie'" 
+                 [class]="'bi ' + (triDescending ? 'bi-sort-down' : 'bi-sort-up')"></i>
+            </div>
+          </th>
           <th class="sortable" (click)="changerTri('reference')">
             <div class="th-content">
               <span>Reference</span>
@@ -141,6 +148,9 @@
       <tbody>
         <tr *ngFor="let article of filteredArticles" [ngClass]="'status-' + getStockStatus(article)">
           <td class="code-cell">
+            <strong>{{ article.categorie }}</strong>
+          </td>
+          <td class="code-cell">
             <strong>{{ article.reference || '-' }}</strong>
           </td>
           <td class="name-cell">{{ article.designation || '-' }}</td>
@@ -168,6 +178,9 @@
             </button>
             <button class="btn-icon edit" title="Modifier">
               <i class="bi bi-pencil"></i>
+            </button>
+             <button class="btn-icon edit" title="Ajouter au stock" (click)="ajouterAuStock(article)">
+              <i class="bi bi-plus-circle"></i>
             </button>
             <button 
               class="btn-icon delete" 

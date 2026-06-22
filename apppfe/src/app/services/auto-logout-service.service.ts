@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthServiceService } from './auth-service.service';
 
@@ -9,9 +9,12 @@ import { AuthServiceService } from './auth-service.service';
 export class AutoLogoutServiceService {
 
   private timeoutId: any;
+  private warningTimeoutId: any; // 🎯 Ajout pour nettoyer proprement le timer d'avertissement
   private readonly IDLE_TIME = 15 * 60 * 1000; // 15 minutes
   private readonly WARNING_TIME = 13 * 60 * 1000; // 13 minutes (avertissement à 2 min)
   private warningShown = false;
+
+  private ngZone = inject(NgZone); // 🎯 Injection moderne de NgZone
 
   constructor(
     private router: Router,
@@ -24,42 +27,52 @@ export class AutoLogoutServiceService {
   }
 
   /**
-   * 🔍 Démarrer la surveillance
+   * 🔍 Démarrer la surveillance (Hors de la zone Angular pour ne pas bloquer l'hydratation)
    */
   startWatching() {
     if (isPlatformBrowser(this.platformId)) {
-      console.log('👁️ Surveillance de l\'inactivité activée');
-      
-      window.addEventListener('mousemove', () => this.resetTimer());
-      window.addEventListener('click', () => this.resetTimer());
-      window.addEventListener('keypress', () => this.resetTimer());
-      window.addEventListener('scroll', () => this.resetTimer());
-      
-      this.resetTimer();
+      // 🎯 On s'isole d'Angular pour l'écoute des événements du DOM lourds (mousemove, scroll)
+      this.ngZone.runOutsideAngular(() => {
+        console.log('👁️ Surveillance de l\'inactivité activée (Hors Zone)');
+        
+        window.addEventListener('mousemove', () => this.resetTimer());
+        window.addEventListener('click', () => this.resetTimer());
+        window.addEventListener('keypress', () => this.resetTimer());
+        window.addEventListener('scroll', () => this.resetTimer());
+        
+        this.resetTimer();
+      });
     }
   }
 
   /**
-   * 🔄 Réinitialiser le timer
+   * 🔄 Réinitialiser les timers
    */
   resetTimer() {
     if (isPlatformBrowser(this.platformId)) {
+      // Nettoyage impératif des DEUX anciens timeouts
       clearTimeout(this.timeoutId);
+      clearTimeout(this.warningTimeoutId);
       
       if (this.authService.isAuthenticated()) {
         this.warningShown = false;
         
-        // ✅ Avertissement à 2 minutes
-        setTimeout(() => {
+        // ✅ Avertissement à 13 minutes
+        this.warningTimeoutId = setTimeout(() => {
           if (!this.warningShown && this.authService.isAuthenticated()) {
-            this.showWarning();
+            // 🎯 On retourne dans la zone d'Angular uniquement pour interagir avec l'utilisateur (Modale/Confirm)
+            this.ngZone.run(() => {
+              this.showWarning();
+            });
             this.warningShown = true;
           }
         }, this.WARNING_TIME);
 
         // ✅ Logout automatique après 15 minutes
         this.timeoutId = setTimeout(() => {
-          this.logoutUser();
+          this.ngZone.run(() => {
+            this.logoutUser();
+          });
         }, this.IDLE_TIME);
       }
     }
@@ -76,7 +89,10 @@ export class AutoLogoutServiceService {
     );
 
     if (confirmDialog) {
-      this.resetTimer();
+      // On se replace hors zone pour relancer la surveillance discrètement
+      this.ngZone.runOutsideAngular(() => {
+        this.resetTimer();
+      });
     }
   }
 
@@ -96,6 +112,7 @@ export class AutoLogoutServiceService {
    */
   stopWatching() {
     clearTimeout(this.timeoutId);
+    clearTimeout(this.warningTimeoutId);
     console.log('👁️ Surveillance de l\'inactivité arrêtée');
   }
 }

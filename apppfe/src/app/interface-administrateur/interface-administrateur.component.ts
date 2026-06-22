@@ -20,6 +20,8 @@ import { ConsommationRapportComponent } from "../consommation-rapport/consommati
 import { SlaDashboardComponent } from '../sla-dashboard/sla-dashboard.component';
 import { DemandesListComponent } from "../demandes-list/demandes-list.component";
 import { DashboardComponent } from "../dashboard/dashboard.component";
+import { InterfaceTechniceienComponent } from "../interface-techniceien/interface-techniceien.component";
+import { SlaGestionComponent } from "../sla-gestion/sla-gestion.component";
 
 @Component({
   selector: 'app-interface-administrateur',
@@ -35,7 +37,7 @@ import { DashboardComponent } from "../dashboard/dashboard.component";
     CreateTicketPageComponent,
     TicketDetailComponent,
     DemandematrielComponent,
-    GestionnaireStockComponent, EspaceDemandeurComponent, ParametreComponent, ConsommationRapportComponent, SlaDashboardComponent, DemandesListComponent, DashboardComponent],
+    GestionnaireStockComponent, EspaceDemandeurComponent, ParametreComponent, ConsommationRapportComponent, SlaDashboardComponent, DemandesListComponent, DashboardComponent, InterfaceTechniceienComponent, SlaGestionComponent],
   templateUrl: './interface-administrateur.component.html',
   styleUrl: './interface-administrateur.component.css'
 })
@@ -52,6 +54,7 @@ export class InterfaceAdministrateurComponent implements OnInit {
   nombreDemandesEnAttente: number = 0;
   currentUser: any = null;
 menuInventaireOuvert: boolean = false;
+menuConfigurationOuvert: boolean = false;
   
   constructor(
     private router: Router, 

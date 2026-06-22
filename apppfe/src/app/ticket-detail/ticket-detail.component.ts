@@ -5,8 +5,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TicketService } from '../services/ticket.service';
 import { Article } from '../Model/article';
 import { InventoryService } from '../services/inventory.service';
-import { forkJoin } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { Stock, StockDTO } from '../Model/stock';
+import { StockService } from '../services/stock.service';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -15,7 +17,11 @@ import { switchMap } from 'rxjs/operators';
   templateUrl: './ticket-detail.component.html',
   styleUrl: './ticket-detail.component.css'
 })
+
+
 export class TicketDetailComponent implements OnInit, OnChanges {
+
+  
 
   @Input() ticketId?: number;
 
@@ -43,18 +49,184 @@ export class TicketDetailComponent implements OnInit, OnChanges {
   selectedFile: File | null = null;
   fileUploadInProgress: boolean = false;
   piecesJointes: any[] = [];
+  showUploadZone: boolean = false;
 
   // ===== PIÈCES CONSOMMÉES =====
-  piecesConsommees: Array<{ categorieId?: number, articleId?: number, quantite: number }> = [];
-  listeCategoriesPieces: Article[] = []; 
+  // piecesConsommees: Array<{ categorieId?: number, articleId?: number, quantite: number }> = [];
+  listeCategoriesPieces: Stock[] = []; 
   listeArticlesGlobal: Article[] = [];
+  piecesConsommees: any[] = [];      // Votre tableau de lignes dynamiques
+
+  
+
+
+  listeStocksDisponibles: StockDTO[] = []; // Stock global pour vérifier les quantités disponibles lors de la résolution
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private ticketservice: TicketService,
-    private articleservice: InventoryService
+    private articleservice: InventoryService,
+    private stockService: StockService
+  
   ) {}
+
+
+  // // ===== FICHIERS =====
+  // fileUploadInProgress: boolean = false;
+  // piecesJointes: any[] = [];
+  // showUploadZone: boolean = false;
+  
+  // 🎯 Nouvelles variables requises pour le multi-drop
+  selectedFiles: File[] = [];
+  draggedOver: boolean = false;
+
+
+  
+
+  // 🎯 Gestion du Drag & Drop mécanique Angular
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.draggedOver = true;
+  }
+
+  // Déclenche l'explorateur de fichiers natif lors du clic sur le conteneur principal
+// 🎯 Déclenche automatiquement l'explorateur de fichiers au clic sur la boîte
+// 🎯 Simule le clic sur l'input invisible au clic sur le bouton ou sur la zone
+triggerFileInput(): void {
+  const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+  if (fileInput) {
+    fileInput.click();
+  }
+}
+
+// ===== GESTION DRAG & DROP =====
+
+
+onDragLeave(event: DragEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
+  this.draggedOver = false;
+}
+
+onDrop(event: DragEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
+  this.draggedOver = false;
+
+  if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+    const file = event.dataTransfer.files[0];
+    console.log('📎 Fichier déposé:', file.name);
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.errorMessage = '❌ Le fichier dépasse 5MB';
+      return;
+    }
+
+    this.selectedFile = file;
+    this.errorMessage = '';
+  }
+}
+
+
+chargerStocks(): void {
+  this.articleservice.getAllStocks().subscribe({ // Ajustez le nom de votre service et de la méthode qui appelle l'API /api/inventory/stocks
+    next: (data: any[]) => {
+      this.listeStocksDisponibles = data;
+      console.log('📦 Stocks chargés avec succès :', this.listeStocksDisponibles);
+    },
+    error: (err) => {
+      console.error('❌ Erreur lors du chargement des stocks :', err);
+    }
+  });
+}
+
+// Déclenche une action ou une vérification si nécessaire lors du changement de sélection
+onStockChange(item: any): void {
+  // Optionnel : on initialise la quantité à 1 par défaut dès qu'un matériel est choisi
+  if (!item.quantite) {
+    item.quantite = 1;
+  }
+}
+
+// Permet de bloquer dynamiquement la quantité maximum saisissable dans le HTML
+getMaxQuantite(articleId: number): number {
+  const stockCorrespondant = this.listeStocksDisponibles.find(s => s.articleId === articleId);
+  return stockCorrespondant ? stockCorrespondant.quantiteEnStock : 999;
+}
+ 
+
+
+  // 🎯 Sécuriser et filtrer la liste de fichiers (taille max 5 Mo)
+  private ajouterFichiersDansLaListe(fileList: FileList): void {
+    const maxBytes = 5 * 1024 * 1024; // 5MB
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      if (file.size > maxBytes) {
+        alert(`❌ Le fichier "${file.name}" dépasse la limite autorisée de 5 Mo.`);
+        continue;
+      }
+      // Éviter les doublons exacts dans la sélection locale
+      if (!this.selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        this.selectedFiles.push(file);
+      }
+    }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  getTotalFileSize(): number {
+    return this.selectedFiles.reduce((total, file) => total + file.size, 0);
+  }
+
+  formatFileSize(sizeInBytes: number): string {
+    if (sizeInBytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(sizeInBytes) / Math.log(k));
+    return parseFloat((sizeInBytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  /**
+   * 🎯 UPLOAD MULTIPLE SÉCURISÉ (Asynchrone avec forkJoin)
+   * Envoie chaque fichier individuellement au backend puis rafraîchit la vue
+   */
+  uploadFichiersMultiples(): void {
+    if (this.selectedFiles.length === 0) return;
+    this.fileUploadInProgress = true;
+    this.errorMessage = '';
+
+    // Préparer les requêtes HTTP individuelles pour chaque fichier
+    const requetesUpload = this.selectedFiles.map(file => 
+      this.ticketservice.uploadPieceJointe(this.ticket.idTicket, file, this.currentUser.id)
+    );
+
+    // forkJoin attend la réponse réussie de TOUS les fichiers
+    forkJoin(requetesUpload).subscribe({
+      next: (responses: any[]) => {
+        console.log('✅ Tous les fichiers ont été téléchargés avec succès');
+        
+        // Ajouter les nouvelles pièces jointes retournées par l'API à la liste locale
+        responses.forEach(res => {
+          const piece = res.data || res;
+          if (piece) this.piecesJointes.push(piece);
+        });
+
+        this.selectedFiles = []; // Vider la sélection
+        this.fileUploadInProgress = false;
+        this.showUploadZone = false; // Fermer la boîte
+        this.successMessage = '✅ Fichier(s) ajouté(s) avec succès !';
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors de l\'envoi global:', err);
+        this.fileUploadInProgress = false;
+        this.errorMessage = 'Une erreur est survenue lors du téléversement de certains fichiers.';
+      }
+    });
+  }
 
   // ===== EXPORT TICKET =====
 
@@ -140,6 +312,8 @@ exporterEnExcel(): void {
   ngOnInit(): void {
     console.log('🎫 Initialisation TicketDetailComponent');
     this.chargerUtilisateur();
+    // 2. Dans votre ngOnInit() ou votre méthode de chargement initiale, appelez cette fonction :
+    this.chargerStocks();
     this.chargerCatalogueStock(); // Charge les catégories et les articles pour le modal
     
     if (this.ticketId) {
@@ -402,13 +576,15 @@ ouvrirModalResolution(): void {
 /**
  * ✅ RÉSOUDRE LE TICKET + ENREGISTRER LES PIÈCES
  */
+/**
+ * ✅ RÉSOUDRE LE TICKET + ENREGISTRER LES PIÈCES (Version sécurisée globale)
+ */
 resoudreTicket(): void {
   console.log('✅ Tentative de résolution du ticket');
 
   // 0. Validation du ticket
   if (!this.ticket || !this.ticket.idTicket) {
     this.errorMessage = '⚠️ Erreur: Ticket non chargé correctement. Veuillez rafraîchir la page.';
-    console.error('❌ Ticket non valide:', this.ticket);
     return;
   }
 
@@ -423,7 +599,7 @@ resoudreTicket(): void {
     return;
   }
 
-  // 2. Validation des pièces consommées (Uniquement si des pièces ont été ajoutées)
+  // 2. Validation des pièces consommées
   if (this.piecesConsommees.length > 0 && !this.validerPieces()) {
     this.errorMessage = '⚠️ Veuillez vérifier les pièces saisies (article sélectionné et quantité > 0)';
     return;
@@ -434,7 +610,91 @@ resoudreTicket(): void {
 
   const noteFinale = `${this.noteResolution}\n\n⏱️ Temps d'intervention : ${this.tempsIntervention} minute(s).`;
 
-  // 3. Appel API pour passer le ticket à l'état Résolu
+  // 🎯 ÉTAPE A : S'il y a des pièces, traitement séquentiel sécurisé
+  if (this.piecesConsommees.length > 0) {
+    const ticketIdentifiant = this.ticket.reference || `Ticket #${this.ticket.idTicket}`;
+    const observablesPieces: Observable<any>[] = [];
+    const listeErreursEncountered: string[] = [];
+
+    this.piecesConsommees.forEach(piece => {
+      if (!piece.articleId || piece.quantite <= 0) return;
+
+      // Construction du payload pour correspondre exactement à votre entité Spring Boot
+     const consommationPayload = {
+  quantite: piece.quantite,
+  commentaire: `Utilisé lors de la résolution du ${ticketIdentifiant}`,
+  referenceTicket: String(this.ticket.reference || this.ticket.idTicket),
+  articleId: piece.articleId,        // 💡 Option A (ID Direct)
+  article: { id: piece.articleId },  // 💡 Option B (Objet imbriqué)
+  responsableId: this.currentUser?.id, 
+  responsable: { id: this.currentUser?.id }
+};
+      // ⛓️ Chaînage logique : POST d'abord, puis PUT uniquement si succès
+      const traitementPiece$ = this.ticketservice.ajouterConsommationPiece(consommationPayload).pipe(
+        switchMap((resConsommation) => {
+          // Si le POST réussit, on passe à l'étape de diminution du stock
+          if (!resConsommation) return of(null);
+          
+          return this.articleservice.getStockByArticleId(piece.articleId).pipe(
+            switchMap(stockData => {
+              if (stockData && (stockData.id || stockData.stockId)) {
+                const stockId = stockData.id || stockData.stockId;
+                return this.articleservice.diminuerQuantite(stockId, piece.quantite);
+              }
+              return of(null);
+            }),
+            catchError((err) => {
+              const msgErreur = err.error?.error || err.error?.message || 'Stock introuvable (404)';
+              listeErreursEncountered.push(`• Problème Stock (ID Article: ${piece.articleId}) : ${msgErreur}`);
+              return of(null);
+            })
+          );
+        }),
+        catchError((err) => {
+          // Si le POST échoue (Erreur 500), on intercepte l'erreur ici et on bloque le chaînage
+          const msgErreur = err.error?.error || err.error?.message || 'Erreur Interne Serveur (500)';
+          listeErreursEncountered.push(`• Pièce consommée (ID Article: ${piece.articleId}) : ${msgErreur}`);
+          return of(null); // Permet à forkJoin de continuer sans tout faire cracher
+        })
+      );
+
+      observablesPieces.push(traitementPiece$);
+    });
+
+    // Éxécution synchronisée de toutes les pièces
+    forkJoin(observablesPieces).subscribe({
+      next: () => {
+        // ❌ S'il y a eu la moindre erreur (POST ou PUT), on stoppe
+        if (listeErreursEncountered.length > 0) {
+          this.actionInProgress = false;
+          alert(
+            `❌ Le ticket n'a PAS été résolu car des erreurs de stock/pièces sont survenues :\n\n` + 
+            listeErreursEncountered.join('\n') + 
+            `\n\nVeuillez vérifier le format des données et réessayer.`
+          );
+          return;
+        }
+
+        // 🚀 Tout est OK, on finalise sur le serveur
+        this.finaliserResolutionTicketServeur(noteFinale);
+      },
+      error: (err) => {
+        console.error('❌ Erreur critique pièces:', err);
+        this.errorMessage = 'Erreur lors de la vérification des pièces.';
+        this.actionInProgress = false;
+      }
+    });
+
+  } else {
+    // 🎯 CAS 2 : Pas de pièces consommées
+    this.finaliserResolutionTicketServeur(noteFinale);
+  }
+}
+
+/**
+ * ÉTAPE B : Appel API final pour passer le ticket à Résolu (Uniquement si tout le reste est OK)
+ */
+private finaliserResolutionTicketServeur(noteFinale: string): void {
   this.ticketservice.resoudreTicket(
     this.ticket.idTicket,
     this.currentUser.id,
@@ -442,8 +702,7 @@ resoudreTicket(): void {
     this.tempsIntervention
   ).subscribe({
     next: (res) => {
-      console.log('✅ Ticket marqué comme résolu sur le serveur');
-      
+      console.log('✅ Ticket marqué comme résolu avec succès !');
       const response = res as any;
       if (response && response.ticket) {
         this.ticket = response.ticket;
@@ -453,27 +712,23 @@ resoudreTicket(): void {
       
       this.ticket.statut = 'Resolu';
       this.ticket.noteResolution = noteFinale;
-      
-      console.log('✅ Ticket mis à jour localement - ID:', this.ticket.idTicket);
+      localStorage.removeItem(`ticket_start_${this.ticket.idTicket}`);
 
-      // 4. Enregistrement des pièces uniquement s'il y en a de valides
-      if (this.piecesConsommees.length > 0) {
-        this.enregistrerLesPiecesDuTicket();
-      } else {
-        // Si aucune pièce n'est utilisée, on finalise proprement ici
-        this.showResolveModal = false;
-        this.actionInProgress = false;
-        this.successMessage = '✅ Ticket résolu avec succès !';
-        localStorage.removeItem(`ticket_start_${this.ticket.idTicket}`);
-      }
+      this.showResolveModal = false;
+      this.actionInProgress = false;
+      this.piecesConsommees = [];
+      
+      alert('🎉 Ticket résolu et pièces enregistrées avec succès !');
+      this.router.navigate(['/index']);
     },
     error: (err) => {
-      console.error('❌ Erreur résolution ticket:', err);
-      this.errorMessage = 'Erreur lors de la résolution du ticket sur le serveur';
+      console.error('❌ Erreur finale résolution ticket:', err);
+      this.errorMessage = 'Erreur lors du passage du ticket à l\'état Résolu sur le serveur.';
       this.actionInProgress = false;
     }
   });
 }
+
 
 /**
  * ⚙️ Validation: S'assure que chaque ligne ajoutée dispose d'un article valide et d'une quantité > 0
@@ -494,74 +749,92 @@ resoudreTicket(): void {
    * 🛠️ Envoie chaque pièce enregistrée dans le tableau vers le Backend
    * ET réduit la quantité de stock correspondante
    */
-  private enregistrerLesPiecesDuTicket(): void {
-    if (this.piecesConsommees.length === 0) return;
+private enregistrerLesPiecesDuTicket(): void {
+  const observables: any[] = [];
+  // Tableau pour collecter toutes les erreurs rencontrées durant le traitement
+  const listeErreursEncountered: string[] = [];
+  
+  this.piecesConsommees.forEach(piece => {
+    if (!piece.articleId || piece.quantite <= 0) return;
+    
+    const payload = {
+      quantite: piece.quantite,
+      commentaire: `Utilisé pour le ticket ${this.ticket.reference}`,
+      referenceTicket: this.ticket.reference,
+      article: { id: piece.articleId },
+      responsable: { id: this.currentUser.id }
+    };
 
-    // Utiliser la référence ou l'ID du ticket pour le commentaire
-    const ticketIdentifiant = this.ticket.reference || `Ticket #${this.ticket.idTicket}`;
-
-    // Préparer les appels API en parallèle
-    const observables: any[] = [];
-
-    this.piecesConsommees.forEach(piece => {
-      // Vérifier que articleId est valide
-      if (!piece.articleId || piece.quantite <= 0) {
-        return;
-      }
-
-      // Construction du JSON pour ConsommationPiece
-      const consommationPayload = {
-        quantite: piece.quantite,
-        commentaire: `Utilisé lors de la résolution du ${ticketIdentifiant}`,
-        referenceTicket: this.ticket.reference || this.ticket.idTicket,
-        article: { id: piece.articleId },
-        responsable: { id: this.currentUser.id }
-      };
-
-      // 1️⃣ Ajouter la consommation
-      const ajouterConsommation$ = this.ticketservice.ajouterConsommationPiece(consommationPayload);
+    const chaineStockEtConsommation = forkJoin([
       
-      // 2️⃣ Réduire le stock (appel parallèle)
-      const diminuerStock$ = this.articleservice.getStockByArticleId(piece.articleId).pipe(
-        switchMap(stockData => {
-          const stockId = stockData.id || stockData.stockId;
-          return this.articleservice.diminuerQuantite(stockId, piece.quantite);
+      // 1. Enregistrement de la consommation
+      this.ticketservice.ajouterConsommationPiece(payload).pipe(
+        catchError((err) => {
+          console.error(`❌ Erreur consommation (Article ID: ${piece.articleId}):`, err);
+          const msgErreur = err.error?.error || err.error?.message || 'Erreur interne (500)';
+          listeErreursEncountered.push(`• Pièce consommée (ID: ${piece.articleId}) : ${msgErreur}`);
+          return of(null); // On retourne null pour que le forkJoin continue mais l'erreur est enregistrée
         })
-      );
-
-      // Ajouter les deux appels à la liste
-      observables.push(
-        forkJoin([
-          ajouterConsommation$,
-          diminuerStock$
-        ])
-      );
-    });
-
-    // Exécuter tous les appels en parallèle
-    if (observables.length > 0) {
-      forkJoin(observables).subscribe({
-        next: (results) => {
-          this.successMessage = '✅ Ticket résolu et pièces de rechange décomptées !';
-        },
-        error: (err) => {
-          console.error('❌ Erreur gestion pièces:', err.status, err.statusText);
-          
-          if (err.status === 403) {
-            this.errorMessage = '❌ Accès refusé : Vérifiez vos permissions pour gérer le stock';
-          } else if (err.status === 404) {
-            this.errorMessage = '❌ Ressource non trouvée : Vérifiez l\'ID de l\'article';
-          } else {
-            this.errorMessage = '❌ Erreur lors de la mise à jour du stock';
+      ),
+      
+      // 2. Mise à jour du stock
+      this.articleservice.getStockByArticleId(piece.articleId).pipe(
+        switchMap((stock: any) => {
+          if (stock && (stock.id || stock.stockId)) {
+            return this.articleservice.diminuerQuantite(stock.id || stock.stockId, piece.quantite);
           }
+          return of(null);
+        }),
+        catchError((err) => {
+          console.warn(`⚠️ Erreur stock (Article ID: ${piece.articleId}):`, err);
+          const msgErreur = err.error?.error || err.error?.message || 'Stock introuvable (404)';
+          listeErreursEncountered.push(`• Problème Stock (ID: ${piece.articleId}) : ${msgErreur}`);
+          return of(null);
+        })
+      )
+
+    ]);
+
+    observables.push(chaineStockEtConsommation);
+  });
+
+  // Déclenchement de l'exécution globale
+  if (observables.length > 0) {
+    forkJoin(observables).subscribe({
+      next: () => {
+        // 🎯 AJOUT DE LA VÉRIFICATION : S'il y a eu des erreurs, on bloque tout !
+        if (listeErreursEncountered.length > 0) {
+          this.actionInProgress = false; // Permet de recliquer sur le bouton
+          
+          // On affiche toutes les erreurs d'un coup à l'utilisateur
+          alert(
+            `❌ Le ticket n'a PAS été résolu car des erreurs sont survenues :\n\n` + 
+            listeErreursEncountered.join('\n') + 
+            `\n\nVeuillez corriger ces problèmes avant de valider à nouveau.`
+          );
+          // On s'arrête ici, la modale reste ouverte, le ticket n'est pas validé.
+          return; 
         }
-      });
-    }
 
-    // Vider le tableau après traitement
-    this.piecesConsommees = [];
+        // Si AUCUNE erreur n'est survenue, on finalise normalement
+        this.showResolveModal = false;
+        this.actionInProgress = false;
+        alert('🎉 Toutes les pièces et stocks ont été mis à jour. Ticket résolu avec succès !');
+        this.router.navigate(['/index']);
+      },
+      error: (err) => {
+        console.error('❌ Erreur critique globale:', err);
+        alert('❌ Une erreur bloquante empêche la finalisation de la demande.');
+        this.actionInProgress = false;
+      }
+    });
+  } else {
+    // Si aucune pièce n'était à enregistrer, l'action est finie (cas optionnel selon votre besoin)
+    this.showResolveModal = false;
+    this.actionInProgress = false;
+    this.router.navigate(['/index']);
   }
-
+}
   /**
    * 🔒 CLÔTURER LE TICKET
    */
@@ -594,30 +867,36 @@ resoudreTicket(): void {
   /**
    * ⚠️ RÉOUVRIR LE TICKET
    */
-  reouvrirTicket(): void {
-    console.log('⚠️ Réouverture du ticket');
+reouvrirTicket(): void {
+  console.log('⚠️ Réouverture du ticket');
 
-    const raison = prompt('Pourquoi la solution ne convient-elle pas ?');
-    if (!raison) return;
-
-    this.actionInProgress = true;
-    this.errorMessage = '';
-
-    this.ticketservice.demarrerTicket(this.ticket.idTicket, this.currentUser.id).subscribe({
-      next: (res) => {
-        console.log('✅ Ticket réouvert');
-        this.ticket = res;
-        this.ticket.statut = 'En_Cours';
-        this.actionInProgress = false;
-        this.successMessage = '⚠️ Le ticket est revenu à l\'état EN_COURS.';
-      },
-      error: (err) => {
-        console.error('❌ Erreur réouverture:', err);
-        this.errorMessage = 'Erreur lors de la réouverture du ticket';
-        this.actionInProgress = false;
-      }
-    });
+  const raison = prompt('Pourquoi la solution ne convient-elle pas ?');
+  if (!raison || raison.trim() === '') {
+    alert('❌ Vous devez obligatoirement fournir une raison pour réouvrir le ticket.');
+    return;
   }
+
+  this.actionInProgress = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  // 🎯 Appel de la nouvelle méthode dédiée à la réouverture
+  this.ticketservice.reouvrirTicket(this.ticket.idTicket, this.currentUser.id).subscribe({
+    next: (res: any) => {
+      console.log('✅ Ticket réouvert avec succès !', res);
+      
+      this.ticket = res.ticket; // On récupère l'objet ticket mis à jour depuis le Map du backend
+      this.actionInProgress = false;
+      this.successMessage = `⚠️ Le ticket est revenu à l'état EN_COURS. Raison : "${raison}"`;
+    },
+    error: (err) => {
+      console.error('❌ Erreur réouverture:', err);
+      // On extrait le message d'erreur précis renvoyé par le backend
+      this.errorMessage = err.error?.error || 'Erreur lors de la réouverture du ticket';
+      this.actionInProgress = false;
+    }
+  });
+}
 
   // ===== NOTES ET COMMENTAIRES =====
 
@@ -805,35 +1084,45 @@ resoudreTicket(): void {
     this.piecesConsommees.splice(index, 1);
   }
 
-  /**
-   * 🔄 Réinitialiser la sélection de l'article si la catégorie de la ligne change
-   */
-  onCategorieChange(item: any): void {
-    item.articleId = undefined;
-  }
+ 
 
   /**
    * 🔍 Filtrer dynamiquement la liste globale des articles selon l'id de la catégorie sélectionnée
    */
-  getArticlesParCategorie(categorieId?: number | string): Article[] {
-    if (!categorieId) return [];
+// getArticlesParCategorie(categorieId?: number | string): any[] {
+//   if (!categorieId || !this.listeStocksDisponibles) return [];
+  
+//   return this.listeStocksDisponibles.filter(stock => {
+//     // Récupération de la catégorie de l'article lié à ce stock
+//     const categorie = stock.articleDesignation || stock.articleReference;
     
-    return this.listeArticlesGlobal.filter(art => {
-      const categorie = (art as any).categorie;
-      
-      // Cas 1: categorie est un objet avec id
-      if (typeof categorie === 'object' && categorie !== null && categorie.id) {
-        return Number(categorie.id) === Number(categorieId);
-      }
-      
-      // Cas 2: categorie est une string
-      if (typeof categorie === 'string' && categorie.trim()) {
-        return categorie.trim() === String(categorieId).trim();
-      }
-      
-      return false;
-    });
-  }
+//     // Cas 1 : La catégorie est imbriquée sous forme d'objet { id: X, ... }
+//     if (typeof categorie === 'object' && categorie !== null && categorie) {
+//       return Number(categorie) === Number(categorieId);
+//     }
+    
+//     // Cas 2 : La catégorie est portée par un ID direct au premier niveau du DTO
+//     if (stock.articleId) {
+//       return Number(stock.articleId) === Number(categorieId);
+//     }
+    
+//     // Cas 3 : La catégorie est une chaîne de caractères
+//     if (typeof categorie === 'string' && categorie.trim()) {
+//       return categorie.trim() === String(categorieId).trim();
+//     }
+    
+//     return false;
+//   });
+// }
+
+/**
+ * 🔄 Réinitialise les sélections de la ligne si la catégorie change
+ */
+onCategorieChange(item: any): void {
+  item.articleId = undefined; // 🌟 TRÈS IMPORTANT : vide le second menu lors d'un changement
+  item.quantite = 1;
+}
+
 
   /**
    * ⚙️ Validation: S'assure que chaque ligne ajoutée dispose d'un article valide et d'une quantité > 0
@@ -915,4 +1204,48 @@ resoudreTicket(): void {
    * 📄 EXPORTER EN PDF
    */
  
+
+  /**
+   * 🔄 Récupère l'intégralité de la table Stock depuis le Backend
+   */
+  chargerTousLesStocks(): void {
+    this.stockService.getAllStocks().subscribe({
+      next: (data: StockDTO[]) => {
+        this.listeStocksDisponibles = data;
+        console.log('📦 Stocks récupérés avec succès:', this.listeStocksDisponibles);
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors de la récupération des tables de stock:', err);
+      }
+    });
+  }
+
+  /**
+   * 🎯 Filtre les éléments de la table stock par la catégorie sélectionnée
+   */
+getArticlesParCategorie(categorieSelectionnee: any): any[] {
+  if (!categorieSelectionnee || !this.listeStocksDisponibles) {
+    return [];
+  }
+  
+  // On compare en forçant le format texte pour être 100% sûr du ciblage
+  return this.listeStocksDisponibles.filter(stock => 
+    String(stock.articleCategorie).trim() === String(categorieSelectionnee).trim()
+  );
+}
+
+getCategoriesUniques(): any[] {
+  if (!this.listeStocksDisponibles) return [];
+  
+  // Map pour isoler les chaînes, puis Set pour éliminer les doublons
+  const categoriesBrutes = this.listeStocksDisponibles
+    .map(stock => stock.articleCategorie)
+    .filter(cat => cat !== undefined && cat !== null && cat.trim() !== '');
+    
+  return Array.from(new Set(categoriesBrutes));
+}
+
+ 
+ 
+
 }

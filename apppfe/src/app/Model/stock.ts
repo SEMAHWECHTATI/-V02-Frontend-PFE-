@@ -25,6 +25,7 @@ export interface StockDTO {
   
   // Relations issues du mapping Article
   articleId: number;
+  articleCategorie?: string;
   articleReference?: string;
   articleDesignation?: string;
   articleTypeArticle?: string;

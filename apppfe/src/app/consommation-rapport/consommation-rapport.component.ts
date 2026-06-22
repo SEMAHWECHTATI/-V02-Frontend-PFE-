@@ -12,17 +12,21 @@ import { InventoryService } from '../services/inventory.service';
   styleUrls: ['./consommation-rapport.component.css']
 })
 export class ConsommationRapportComponent implements OnInit {
-  // Contient la liste brute reçue du serveur
+  // Listes de données
   listeConsommations: any[] = [];
-  // Contient la liste affichée à l'écran après filtrage
   consommationsFiltrees: any[] = [];
   
-  // Gestion de l'état de l'interface
+  // États de l'interface
   isLoading: boolean = true;
   errorMessage: string = '';
   searchTerm: string = '';
 
-  constructor(private ticketService: InventoryService) {}
+  // Indicateurs Statistiques (KPI)
+  totalPiecesConsommees: number = 0;
+  totalDepenses: number = 0;
+  nombreInterventions: number = 0;
+
+  constructor(private consommationService: InventoryService) {}
 
   ngOnInit(): void {
     this.chargerRapportConsommations();
@@ -35,11 +39,12 @@ export class ConsommationRapportComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.ticketService.getToutesLesConsommations().subscribe({
+    this.consommationService.getToutesLesConsommations().subscribe({
       next: (data: any[]) => {
         console.log('📊 Données consommations reçues :', data);
         this.listeConsommations = data || [];
         this.consommationsFiltrees = [...this.listeConsommations];
+        this.calculerIndicateurs();
         this.isLoading = false;
       },
       error: (err) => {
@@ -51,36 +56,51 @@ export class ConsommationRapportComponent implements OnInit {
   }
 
   /**
+   * 🧮 Calcule les indicateurs financiers et volumétriques pour le tableau de bord
+   */
+  calculerIndicateurs(): void {
+    this.nombreInterventions = this.consommationsFiltrees.length;
+    
+    this.totalPiecesConsommees = this.consommationsFiltrees.reduce(
+      (sum, item) => sum + (item.quantite || 0), 0
+    );
+    
+    this.totalDepenses = this.consommationsFiltrees.reduce(
+      (sum, item) => sum + ((item.quantite || 0) * (item.article?.prixUnitaire || 0)), 0
+    );
+  }
+
+  /**
    * 🔍 Applique un filtre de recherche dynamique multi-critères
    */
   appliquerFiltre(): void {
     if (!this.searchTerm || !this.searchTerm.trim()) {
       this.consommationsFiltrees = [...this.listeConsommations];
+      this.calculerIndicateurs();
       return;
     }
 
     const term = this.searchTerm.toLowerCase().trim();
 
     this.consommationsFiltrees = this.listeConsommations.filter(conso => {
-      // 1. Recherche par référence ticket
       const matchTicket = conso.referenceTicket && conso.referenceTicket.toLowerCase().includes(term);
       
-      // 2. Recherche par article (Désignation ou Référence constructeur)
       const matchArticle = conso.article && (
         (conso.article.designation && conso.article.designation.toLowerCase().includes(term)) ||
         (conso.article.reference && conso.article.reference.toLowerCase().includes(term))
       );
       
-      // 3. Recherche par nom ou prénom du responsable/technicien
       const matchResponsable = conso.responsable && (
         (conso.responsable.nom && conso.responsable.nom.toLowerCase().includes(term)) ||
         (conso.responsable.prenom && conso.responsable.prenom.toLowerCase().includes(term))
       );
 
-      // 4. Recherche par commentaire
       const matchCommentaire = conso.commentaire && conso.commentaire.toLowerCase().includes(term);
 
       return matchTicket || matchArticle || matchResponsable || matchCommentaire;
     });
+
+    // Recalculer les KPIs uniquement sur les lignes visibles filtrées
+    this.calculerIndicateurs();
   }
 }

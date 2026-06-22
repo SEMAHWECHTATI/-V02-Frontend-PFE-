@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Ticket } from '../Model/Entity';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators'; // ✅ Ajout indispensable pour transformer la réponse du backend
+import { map, tap } from 'rxjs/operators'; // ✅ Ajout indispensable pour transformer la réponse du backend
 
 @Injectable({
   providedIn: 'root'
@@ -73,25 +73,30 @@ exportTicketExcel(idTicket: number): Observable<Blob> {
    * 📋 Récupérer TOUS les tickets (API complète)
    * GET /api/tickets/all
    */
-  getAllTicket(): Observable<any[]> {
-    console.log('📋 Récupération de TOUS les tickets');
-    
-    const request = this.http.get<any[]>(`${this.ticketUrl}/all`);
-    
-    // Mettre à jour le subject quand les tickets sont reçus
-    request.subscribe(
-      (tickets) => {
-        console.log('📊 Tickets reçus:', tickets.length);
-        this.ticketsListSubject.next(tickets);
+getAllTicket(): Observable<any> {
+  console.log('📋 Récupération de TOUS les tickets');
+  
+  return this.http.get<any>(`${this.ticketUrl}/all`).pipe(
+    tap({
+      next: (response) => {
+        // 🎯 On gère les deux formats possibles de ton API (Tableau brut ou Objet enveloppe)
+        const listeTickets = response && response.tickets ? response.tickets : response;
+        
+        if (Array.isArray(listeTickets)) {
+          console.log(`📊 Tickets reçus (${listeTickets.length} au total)`);
+          // On met à jour le Subject avec le tableau extrait
+          this.ticketsListSubject.next(listeTickets);
+        } else {
+          console.warn('⚠️ Le format reçu n\'est pas un tableau valide:', response);
+          this.ticketsListSubject.next([]);
+        }
       },
-      (error) => {
+      error: (error) => {
         console.error('❌ Erreur récupération tickets:', error);
       }
-    );
-
-    return request;
-  }
-
+    })
+  );
+}
   /**
    * 📋 Obtenir les tickets du subject (Observable)
    */
@@ -202,6 +207,11 @@ exportTicketExcel(idTicket: number): Observable<Blob> {
       { params }
     );
   }
+
+  reouvrirTicket(idTicket: number, idUtilisateur: number): Observable<any> {
+  const params = new HttpParams().set('idUtilisateur', idUtilisateur.toString());
+  return this.http.put<any>(`${this.ticketUrl}/${idTicket}/reouvrir`, {}, { params });
+}
 
   // ==================== NOTES / COMMENTAIRES ====================
 

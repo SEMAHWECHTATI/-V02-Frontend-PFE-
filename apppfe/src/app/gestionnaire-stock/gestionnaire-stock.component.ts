@@ -57,7 +57,13 @@ export class GestionnaireStockComponent implements OnInit {
   currentUser: any = {};
   today: Date = new Date();
   filtreSelectionne: string = 'Tous';
-  statsFinancieres!: DashboardFinance;
+  
+
+  statsFinancieres: DashboardFinance = {
+  valeurGlobale: 0,
+  totalStocksFaibles: 0,
+  totalRuptures: 0
+};
 
   stats = {
     totalArticles: 0,

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Article } from '../Model/article';
 import { InventoryService } from '../services/inventory.service';
-import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { of, Subject, throwError } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-article-list',
@@ -146,6 +146,7 @@ export class ArticleListComponent implements OnInit, OnDestroy {
     if (this.searchKeyword.trim()) {
       const keyword = this.searchKeyword.toLowerCase();
       filtered = filtered.filter(article =>
+        (article.categorie?.toLowerCase().includes(keyword)) ||
         (article.reference?.toLowerCase().includes(keyword)) ||
         (article.designation?.toLowerCase().includes(keyword)) ||
         (article.codeBarres?.toLowerCase().includes(keyword)) ||
@@ -262,6 +263,108 @@ export class ArticleListComponent implements OnInit, OnDestroy {
     }
   }
 
+ /**
+   * 📥 ACTION : Ajouter de la quantité au stock (via le DTO que ton backend attend)
+   */
+ajouterAuStock(article: Article): void {
+  // 1️⃣ On extrait l'ID et on vérifie s'il existe
+  if (!article.id) return;
+  
+  const articleIdSecurise: number = article.id;
+
+  const saisie = prompt(`Combien d'unités voulez-vous ajouter à l'article [${article.reference}] ?`, '10');
+  if (saisie === null) return; 
+
+  const quantite = parseInt(saisie, 10);
+  if (isNaN(quantite) || quantite <= 0) {
+    alert('❌ Veuillez saisir une quantité valide supérieure à 0.');
+    return;
+  }
+
+  this.chargement = true;
+
+  // 2️⃣ Interrogation du stock avec interception du 404
+  this.inventoryService.getStockByArticleId(articleIdSecurise).pipe(
+    takeUntil(this.destroy$),
+    catchError((err) => {
+      // 🎯 Si c'est un 404, l'article n'a pas encore de stock. C'est normal !
+      // On renvoie of(null) pour continuer dans le switchMap et créer le stock.
+      if (err.status === 404) {
+        console.log(`ℹ️ Aucun stock pour l'article ${articleIdSecurise}. Création autorisée.`);
+        return of(null);
+      }
+      // Pour tout autre code (ex: 500 doublon), on propage l'erreur
+      return throwError(() => err);
+    }),
+    switchMap((stockExistant: any) => {
+      
+      // Si un stock existe déjà, on tente de l'augmenter
+      if (stockExistant && (stockExistant.id || stockExistant.stockId)) {
+        const idDuStock = stockExistant.id || stockExistant.stockId;
+        
+        alert(`⚠️ Un stock existe déjà pour cet article.\nNous allons tenter de mettre à jour la quantité au lieu de créer un doublon.`);
+        
+        if (typeof this.inventoryService.augmenterQuantite === 'function') {
+          // On ajoute un catchError local sur l'augmentation pour capturer le message du backend (ex: votre 404 sur /augmenter)
+          return this.inventoryService.augmenterQuantite(idDuStock, quantite).pipe(
+            catchError((errAugmenter) => {
+              const msgBackend = errAugmenter.error?.message || errAugmenter.error?.error || errAugmenter.message || 'Inconnu';
+              alert(`❌ Échec de la mise à jour du stock par le backend.\nErreur retournée : "${msgBackend}"`);
+              return throwError(() => new Error('ERREUR_AUGMENTATION_BACKEND'));
+            })
+          );
+        } else {
+          throw new Error('DOUBLON_BLOQUE');
+        }
+      }
+
+      // Si stockExistant est null (suite au 404), on crée le DTO de zéro
+      const stockDTO = {
+        id: 0,
+        codeBarresArticle: article.codeBarres || "SANS-CB",
+        quantiteEnStock: quantite,
+        quantiteCritique: article.seuilCritique || 2,
+        quantiteMinimum: article.seuilMinimum || 5,
+        prixUnitaire: article.prixUnitaire || 0,
+        articleId: articleIdSecurise,
+        articleReference: article.reference,
+        articleDesignation: article.designation,
+        articleTypeArticle: article.typeArticle,
+        articleStatut: article.statut || "ACTIF",
+        valeurTotale: (article.prixUnitaire || 0) * quantite,
+        valeurTotal: (article.prixUnitaire || 0) * quantite
+      };
+
+      return this.inventoryService.enregistrerEntreeStock(articleIdSecurise, stockDTO);
+    })
+  ).subscribe({
+    next: (reponse: any) => {
+      console.log('✅ Opération sur le stock réussie :', reponse);
+      alert(`✅ Le stock a été traité avec succès !`);
+      this.chargement = false;
+      this.chargerArticles();
+    },
+    error: (err) => {
+      this.chargement = false;
+      
+      if (err.message === 'DOUBLON_BLOQUE' || err.status === 409) {
+        alert(`❌ Action annulée : Un stock existe déjà pour cet article. Veuillez modifier directement la ligne existante.`);
+      } else if (err.message === 'ERREUR_AUGMENTATION_BACKEND') {
+        this.erreur = "Le serveur a refusé la mise à jour de la quantité.";
+      } else {
+        console.error('❌ Erreur lors de la gestion du stock:', err);
+        if (err.status === 500 && err.error?.message?.includes('query did not return a unique result')) {
+          alert(`❌ Erreur critique : Il y a déjà des doublons pour cet article en base de données.`);
+        } else {
+          // Affiche le message d'erreur brut du serveur s'il y en a un autre
+          const rawMessage = err.error?.message || err.message || '';
+          alert(`❌ Impossible de finaliser l'action.\nErreur serveur: ${rawMessage}`);
+          this.erreur = "Impossible d'enregistrer le stock pour cet article.";
+        }
+      }
+    }
+  });
+}
   /**
    * 🗑️ Archiver article
    */

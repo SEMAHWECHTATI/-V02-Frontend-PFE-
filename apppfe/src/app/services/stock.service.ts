@@ -18,6 +18,9 @@ export class StockService {
   creerStock(articleId: number, stock: StockDTO): Observable<StockDTO> {
     return this.http.post<StockDTO>(`${this.apiUrl}/article/${articleId}`, stock);
   }
+  deleteStock(stockId: number): Observable<any> {
+  return this.http.delete<any>(`${this.apiUrl}/${stockId}`);
+}
 
   /**
    * 🔄 Mettre à jour directement la quantité en stock (Ajustement/Inventaire)
@@ -40,5 +43,9 @@ export class StockService {
 getAllStocks(): Observable<StockDTO[]> {
   return this.http.get<StockDTO[]>(this.apiUrl); 
   // Envoie une requête GET sur http://localhost:8070/api/inventory/stocks
+}
+
+getStockbyId(stockId: number): Observable<StockDTO> {
+  return this.http.get<StockDTO>(`${this.apiUrl}/article/${stockId}`);
 }
 }

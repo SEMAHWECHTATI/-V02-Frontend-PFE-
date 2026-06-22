@@ -1,0 +1,138 @@
+<div class="container-fluid p-4 text-light">
+
+    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4">
+        <div>
+            <h4 class="text-info mb-0"><i class="bi bi-shield-check me-2"></i>Gestion des Engagements SLA</h4>
+            <small class="text-white-50">Basculez entre la configuration et la visualisation des règles</small>
+        </div>
+        
+        <div class="btn-group shadow-sm" role="group">
+          
+            <button type="button" class="btn btn-outline-success" [class.active]="vueActuelle === 'formulaire'" (click)="vueActuelle = 'formulaire'; reinitialiserFormulaire()">
+                <i class="bi bi-plus-circle me-2"></i>Ajouter un SLA
+            </button>
+              <button type="button" class="btn btn-outline-info" [class.active]="vueActuelle === 'liste'" (click)="vueActuelle = 'liste'">
+                <i class="bi bi-table me-2"></i>Afficher tous les SLAs
+            </button>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        
+        <div class="col-md-6 col-lg-5" *ngIf="vueActuelle === 'formulaire'">
+            <div class="card bg-dark text-light border-secondary p-4 shadow animate__animated animate__fadeIn">
+                <h5 class="border-bottom border-secondary pb-2 mb-3" [class.text-warning]="isModification" [class.text-success]="!isModification">
+                    <i class="bi" [class.bi-pencil-square]="isModification" [class.bi-plus-square]="!isModification"></i>
+                    {{ isModification ? 'Modifier le SLA' : 'Créer un nouveau SLA' }}
+                </h5>
+                
+                <form (ngSubmit)="soumettreFormulaire(); vueActuelle = 'liste'">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Nom de la règle</label>
+                        <input type="text" class="form-control bg-secondary bg-opacity-10 text-white border-secondary" 
+                               [(ngModel)]="slaForm.nomSLA" name="nomSLA" placeholder="Ex: Panne Critique Matériel" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="categorie" class="form-label text-white-50 small">Catégorie rattachée</label>
+                        <select id="categorie" class="form-select bg-secondary bg-opacity-10 text-white border-secondary" 
+                                [(ngModel)]="selectedCategorieId" name="categorieId" required>
+                            <option [ngValue]="null" disabled selected>-- Choisir une catégorie --</option>
+                            <option *ngFor="let cat of listeCategories" [ngValue]="cat.idCategorie">
+                                {{ cat.nomCategorie }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Niveau de Priorité</label>
+                        <select class="form-select bg-secondary bg-opacity-10 text-white border-secondary" 
+                                [(ngModel)]="slaForm.priorite" name="priorite">
+                            <option value="Critique">🔴 Critique</option>   
+                            <option value="Haute">🟠 Haute</option>
+                            <option value="Moyenne">🟡 Moyenne</option>
+                            <option value="Basse">🟢 Basse</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <label class="form-label text-white-50 small">Prise en charge (h)</label>
+                            <input type="number" step="0.1" class="form-control bg-secondary bg-opacity-10 text-white border-secondary" 
+                                   [(ngModel)]="slaForm.delaiPriseEnChargeHeure" name="delaiPriseEnChargeHeure" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-white-50 small">Résolution (h)</label>
+                            <input type="number" step="0.1" class="form-control bg-secondary bg-opacity-10 text-white border-secondary" 
+                                   [(ngModel)]="slaForm.delaiResolutionHeure" name="delaiResolutionHeure" required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="vueActuelle = 'liste'; reinitialiserFormulaire()">Annuler</button>
+                        <button type="submit" class="btn btn-sm px-4" [ngClass]="isModification ? 'btn-warning' : 'btn-success'">
+                            <i class="bi bi-check-circle me-1"></i> {{ isModification ? 'Mettre à jour' : 'Enregistrer' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-12" *ngIf="vueActuelle === 'liste'">
+            <div class="card bg-dark text-light border-secondary p-3 shadow-sm animate__animated animate__fadeIn">
+                <h5 class="border-bottom border-secondary pb-2 mb-3 text-info">
+                    <i class="bi bi-table me-2"></i>Liste des engagements SLA actifs
+                </h5>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle border-secondary mb-0">
+                        <thead>
+                            <tr class="text-white-50 bg-secondary bg-opacity-10">
+                                <th>Nom de la règle</th>
+                                <th>Catégorie</th>
+                                <th>Priorité</th>
+                                <th>Prise en charge</th>
+                                <th>Résolution</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let sla of listeSLAs">
+                                <td class="fw-medium text-info">{{ sla.nomSLA }}</td>
+                                <td><span class="text-white-50">{{ sla.categorie?.nomCategorie || 'Non spécifiée' }}</span></td>
+                                <td>
+                                    <span class="badge" 
+                                          [ngClass]="{
+                                            'bg-danger': sla.priorite === 'Critique' || sla.priorite === 'Haute', 
+                                            'bg-warning text-dark': sla.priorite === 'Moyenne', 
+                                            'bg-success': sla.priorite === 'Basse'
+                                          }">
+                                        {{ sla.priorite }}
+                                    </span>
+                                </td>
+                                <td><i class="bi bi-clock me-1 text-info small"></i> {{ sla.delaiPriseEnChargeHeure }} h</td>
+                                <td><i class="bi bi-hourglass-split me-1 text-warning small"></i> {{ sla.delaiResolutionHeure }} h</td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-warning" title="Modifier" (click)="remplirPourModification(sla); vueActuelle = 'formulaire'">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" title="Supprimer" (click)="supprimerSLA(sla.idSLA)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="listeSLAs.length === 0">
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox me-2 fs-5"></i>Aucun SLA configuré pour le moment.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

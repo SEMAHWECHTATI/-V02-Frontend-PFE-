@@ -29,6 +29,7 @@
             <th class="text-end">Prix Unitaire</th>
             <th class="text-end">Valeur du Stock</th>
             <th class="text-center">Statut Alerte</th>
+            <th class="text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -46,6 +47,10 @@
               <span *ngIf="s.estCritique" class="badge bg-danger">CRITIQUE</span>
               <span *ngIf="!s.estCritique && s.estFaible" class="badge bg-warning text-dark">FAIBLE</span>
               <span *ngIf="!s.estCritique && !s.estFaible" class="badge bg-success">CONFORME</span>
+            </td>
+            <td class="text-center">
+               
+                            <button class="btn btn-sm btn-outline-danger" (click)="supprimerStock(s.id)">Supprimer ce stock</button>
             </td>
           </tr>
         </tbody>

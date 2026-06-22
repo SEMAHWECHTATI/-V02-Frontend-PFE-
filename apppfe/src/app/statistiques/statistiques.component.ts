@@ -371,12 +371,21 @@ chargerArticles(): void {
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (res: any) => {
-        // Sécurité : Si res est null/undefined, on force un tableau vide
-        this.articles = res || [];
+        // 🎯 PROTECTION SUR MESURE : On extrait le tableau peu importe la forme de la réponse
+        if (res && res.articles && Array.isArray(res.articles)) {
+          this.articles = res.articles; // Format Objet Enveloppe { articles: [...] }
+        } else if (Array.isArray(res)) {
+          this.articles = res;          // Format Tableau Brut [...]
+        } else {
+          this.articles = [];           // Cas de secours pour éviter le crash
+          console.warn('⚠️ L\'API n\'a pas renvoyé un tableau d\'articles valide:', res);
+        }
+
+        // Maintenant, la copie et les filtres s'exécuteront en toute sécurité !
         this.articlesFiltered = [...this.articles];
-        console.log('✅ Articles charges:', this.articles.length);
+        console.log('✅ Articles chargés avec succès ! Nombre :', this.articles.length);
         
-        // 🔥 On applique les filtres seulement maintenant !
+        // 🔥 On applique les filtres
         this.appliquerFiltres();
       },
       error: (err) => {

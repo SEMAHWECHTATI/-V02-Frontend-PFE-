@@ -34,6 +34,32 @@ export class InventoryService {
   }
 
   /**
+   * ➕ POST : Enregistrer une nouvelle consommation de pièce (Ex: lors de la résolution)
+   * URL correspondante : POST http://localhost:8070/api/consommations-pieces
+   */
+  creerConsommation(consommationPayload: any): Observable<any> {
+    return this.http.post<any>(this.apiConsommationsUrl, consommationPayload);
+  }
+
+  /**
+   * 🔍 GET : Récupérer toutes les pièces consommées sur un ticket spécifique via sa référence
+   * URL correspondante : GET http://localhost:8070/api/consommations-pieces/ticket/{reference}
+   */
+  getConsommationsParTicket(referenceTicket: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiConsommationsUrl}/ticket/${referenceTicket}`);
+  }
+
+
+  /**
+   * 🗑️ DELETE : Annuler ou supprimer une consommation par son ID unique
+   * URL correspondante : DELETE http://localhost:8070/api/consommations-pieces/{id}
+   */
+  supprimerConsommation(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiConsommationsUrl}/${id}`);
+  }
+
+
+  /**
  * Récupère la valeur financière cumulée groupée par type d'article
  * Cible : GET /api/inventory/articles/inventory/valeur-par-type
  */
@@ -48,6 +74,12 @@ getValueByType(): Observable<any> {
     console.log('📝 Création article:', article.designation);
     return this.http.post(`${this.apiUrl}/articles`, article);
   }
+
+ enregistrerEntreeStock(articleId: number, stockPayload: any): Observable<any> {
+    console.log(`📦 Envoi du stock DTO pour l'article ID ${articleId}`);
+    return this.http.post(`${this.apiUrl}/stocks/article/${articleId}`, stockPayload);
+  }
+
 
   modifierArticle(id: number, article: Article): Observable<any> {
     console.log('✏️ Modification article:', id);
@@ -130,22 +162,24 @@ getValueByType(): Observable<any> {
   }
 
   mettreAJourQuantite(stockId: number, quantite: number): Observable<any> {
-    console.log('🔄 Mise à jour quantité:', quantite);
-    let params = new HttpParams().set('quantite', quantite.toString());
-    return this.http.put(`${this.apiUrl}/stocks/${stockId}/quantite`, {}, { params });
-  }
+  let params = new HttpParams().set('quantite', quantite.toString()); // ❌ 'quantite' au lieu de 'nouvelleQuantite'
+  return this.http.put(`${this.apiUrl}/stocks/${stockId}/quantite`, {}, { params });
+}
 
-  augmenterQuantite(stockId: number, quantite: number): Observable<any> {
-    console.log('➕ Augmentation quantité:', quantite);
-    let params = new HttpParams().set('quantite', quantite.toString());
-    return this.http.put(`${this.apiUrl}/stocks/${stockId}/augmenter`, {}, { params });
-  }
+// Exemple dans votre inventory.service.ts
+augmenterQuantite(stockId: number, quantite: number): Observable<any> {
+  console.log(`📊 Service - Augmentation quantité pour le Stock ID: ${stockId}, Qté: ${quantite}`);
+  
+  // 🎯 Option 1 : Si votre backend attend un paramètre URL (?quantite=X)
+  return this.http.put(`${this.apiUrl}/stocks/${stockId}/augmenter?quantite=${quantite}`, {});
 
+  // 🎯 Option 2 (À tester si l'Option 1 donne un 404) : Si le backend utilise une URL différente, ex :
+  // return this.http.put(`${this.apiUrl}/stocks/augmenter/${stockId}`, { quantite });
+}
   diminuerQuantite(stockId: number, quantite: number): Observable<any> {
-    console.log('➖ Diminution quantité:', quantite);
-    let params = new HttpParams().set('quantite', quantite.toString());
-    return this.http.put(`${this.apiUrl}/stocks/${stockId}/diminuer`, {}, { params });
-  }
+  let params = new HttpParams().set('quantite', quantite.toString()); // 🔄 OK ! Correspond au @RequestParam Integer quantite
+  return this.http.put(`${this.apiUrl}/stocks/${stockId}/diminuer`, {}, { params });
+}
 
   getStocksFaibles(): Observable<any> {
     console.log('⚠️ Récupération stocks faibles');
