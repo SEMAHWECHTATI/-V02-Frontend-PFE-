@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Localisation } from '../Model/Entity';
 import { EquipementService } from '../services/equipement.service';
 import { Router } from '@angular/router';
@@ -39,6 +39,14 @@ export class AjouterEquipementComponent implements OnInit {
   messageAlerte: string = '';
   codeBarresGenere: string = '';
 
+articlesFiltres: any[] = []; // Liste temporaire affichée à l'écran
+texteRechercheArticle: string = '';
+afficherSuggestions: boolean = false;
+
+localisationsFiltrees: any[] = []; // Liste filtrée affichée à l'écran
+texteRechercheLocalisation: string = '';
+afficherSuggestionsLoc: boolean = false;
+
   constructor(private equipementService: EquipementService, private router: Router) { }
 
   ngOnInit(): void {
@@ -58,6 +66,117 @@ export class AjouterEquipementComponent implements OnInit {
       console.error("Erreur lors du chargement des articles", err);
     }
   });
+}
+
+filtrerArticles(): void {
+  this.afficherSuggestions = true;
+  
+  if (!this.texteRechercheArticle.trim()) {
+    this.articlesFiltres = this.articles;
+    return;
+  }
+
+  const motCle = this.texteRechercheArticle.toLowerCase();
+  
+  // Recherche intelligente par référence OU par désignation
+  this.articlesFiltres = this.articles.filter(art => 
+    art.reference?.toLowerCase().includes(motCle) || 
+    art.designation?.toLowerCase().includes(motCle)
+  );
+}
+
+/**
+ * 🎯 Déclenché lorsque l'utilisateur clique sur un article suggéré
+ */
+selectionnerArticle(art: any): void {
+  this.nouveauEquipement.articleId = art.id;
+  // Affiche l'article sélectionné de façon propre dans le champ de saisie
+  this.texteRechercheArticle = `${art.reference} - ${art.designation}`;
+  this.afficherSuggestions = false;
+}
+
+/**
+ * ❌ Réinitialise le choix de l'article
+ */
+reinitialiserSelectionArticle(): void {
+  this.nouveauEquipement.articleId = null;
+  this.texteRechercheArticle = '';
+  this.articlesFiltres = this.articles;
+  this.afficherSuggestions = false;
+}
+
+// Optionnel : Fermer la liste de suggestions si on clique ailleurs sur la page
+@HostListener('document:click', ['$event'])
+clicExterieur(event: Event) {
+  const elementForm = (event.target as HTMLElement).closest('.position-relative');
+  if (!elementForm) {
+    this.afficherSuggestions = false;
+    // Si l'utilisateur quitte sans sélectionner et a effacé le texte, on reset l'ID
+    if (!this.texteRechercheArticle) {
+      this.nouveauEquipement.articleId = null;
+    }
+  }
+}
+
+/**
+ * 🔍 Filtre la liste des emplacements selon la saisie (recherche multicritère)
+ */
+filtrerLocalisations(): void {
+  this.afficherSuggestionsLoc = true;
+  
+  if (!this.texteRechercheLocalisation.trim()) {
+    this.localisationsFiltrees = this.localisations;
+    return;
+  }
+
+  const motCle = this.texteRechercheLocalisation.toLowerCase();
+  
+  // Recherche intelligente par Nom de salle, Bâtiment, Étage ou Numéro de bureau
+  this.localisationsFiltrees = this.localisations.filter(loc => 
+    loc.nom?.toLowerCase().includes(motCle) || 
+    loc.batiment?.toLowerCase().includes(motCle) || 
+    loc.etage?.toLowerCase().includes(motCle) || 
+    loc.bureau?.toLowerCase().includes(motCle)
+  );
+}
+
+/**
+ * 🎯 Déclenché lors du clic sur un emplacement suggéré
+ */
+selectionnerLocalisation(loc: any | null): void {
+  if (loc === null) {
+    // Cas du Stock Central
+    this.nouveauEquipement.localisationId = null;
+    this.texteRechercheLocalisation = '-- Aucune (En Stock Central) --';
+  } else {
+    // Cas d'un emplacement physique précis
+    this.nouveauEquipement.localisationId = loc.id;
+    this.texteRechercheLocalisation = `${loc.nom} (Bât : ${loc.batiment || 'N/A'})`;
+  }
+  this.afficherSuggestionsLoc = false;
+}
+
+/**
+ * ❌ Réinitialise la sélection de l'emplacement
+ */
+reinitialiserSelectionLocalisation(): void {
+  this.nouveauEquipement.localisationId = null;
+  this.texteRechercheLocalisation = '';
+  this.localisationsFiltrees = this.localisations;
+  this.afficherSuggestionsLoc = false;
+}
+
+// 🔐 Ferme la liste déroulante si l'utilisateur clique en dehors du champ sur l'écran
+@HostListener('document:click', ['$event'])
+clicExterieurComposant(event: Event) {
+  const elementForm = (event.target as HTMLElement).closest('.position-relative');
+  if (!elementForm) {
+    this.afficherSuggestionsLoc = false;
+    // Si le champ est totalement vidé à la main, on repasse automatiquement en stock central
+    if (!this.texteRechercheLocalisation.trim()) {
+      this.nouveauEquipement.localisationId = null;
+    }
+  }
 }
 
   soumettreFormulaire(): void {

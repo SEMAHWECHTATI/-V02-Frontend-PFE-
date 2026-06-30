@@ -1,80 +1,189 @@
 <div class="container mt-4">
   <h2>Gestion des Équipements (Inventaire)</h2>
 
-  <div class="card my-3 p-3 bg-light">
+  <div class="card my-3 p-3 bg-light shadow-sm">
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Scanner ou saisir un Code-Barres (ex: INV-123)..." 
              [(ngModel)]="codeBarresRecherche" (keyup.enter)="rechercherParCodeBarres()">
-      <button class="btn btn-primary" (click)="rechercherParCodeBarres()">Rechercher</button>
+      <button class="btn btn-primary" (click)="rechercherParCodeBarres()">
+        <i class="bi bi-search"></i> Rechercher
+      </button>
+      <button class="btn btn-outline-dark" (click)="afficherTousLesEquipements()">
+        <i class="bi bi-table"></i> Afficher la table complète
+      </button>
     </div>
   </div>
 
-  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-  <div *ngIf="loading" class="text-center my-3">Chargement en cours...</div>
+  <div *ngIf="errorMessage" class="alert alert-danger shadow-sm">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert alert-success shadow-sm">{{ successMessage }}</div>
+  <div *ngIf="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2">Chargement en cours...</p>
+  </div>
 
-  <div class="row" *ngIf="equipement && !loading">
+  <div class="row" *ngIf="!loading">
     
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header bg-dark text-white">Détails de l'Équipement</div>
-        <div class="card-body">
-          <p><strong>Désignation :</strong> {{ equipement.designation }}</p>
-          <p><strong>N° de Série :</strong> {{ equipement.numeroSerie }}</p>
-          <p><strong>Code-Barres :</strong> <span class="badge bg-secondary">{{ equipement.codeBarres }}</span></p>
-          <hr>
-          <p><strong>Statut Actuel :</strong> 
-            <span class="badge" [ngClass]="{
-              'bg-success': equipement.statut === 'ACTIF',
-              'bg-warning text-dark': equipement.statut === 'EN_REPARATION',
-              'bg-danger': equipement.statut === 'A_RECYCLER'
-            }">{{ equipement.statut }}</span>
-          </p>
-        <p><strong>Localisation Physique Actuelle :</strong> 
-  {{ $any(equipement).localisationNom ? $any(equipement).localisationNom : 'Aucune affectation' }}
-  
-  <small class="text-muted d-block" *ngIf="$any(equipement).localisationId">
-    Bât: {{ $any(equipement).localisationBatiment || 'N/A' }} - 
-    Étage: {{ $any(equipement).localisationEtage || 'N/A' }} - 
-    Bureau: {{ $any(equipement).localisationBureau || 'N/A' }}
-  </small>
-</p>
-          <p *ngIf="equipement.dateMiseAuRebut">
-            <strong>Date de mise au rebut :</strong> {{ equipement.dateMiseAuRebut | date:'dd/MM/yyyy HH:mm' }}
-          </p>
+    <div class="col-lg-12 mb-4" *ngIf="listeEquipements && listeEquipements.length > 0 && !equipement">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">📋 Liste Générale du Matériel Informatique</h5>
+          <span class="badge bg-primary">{{ listeEquipements.length }} Équipement(s)</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover mb-0 align-middle">
+              <thead class="table-secondary">
+                <tr>
+                  <th scope="col" style="width: 70px;">Code Barre</th>
+                  <th scope="col">Désignation</th>
+                  
+                  <th scope="col">Article d'Origine</th>
+                  <th scope="col">Statut</th>
+                  <th scope="col">Emplacement Physique</th>
+                  <th scope="col" class="text-center" style="width: 160px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let eq of listeEquipements">
+                                    <td><span class="badge bg-light text-dark border border-secondary">{{ eq.codeBarres }}</span></td>
+
+                  <td class="fw-bold text-dark">{{ eq.designation }}</td>
+                  <td>
+                    <span class="text-muted d-block small">{{ eq.articleDesignation }}</span>
+                    <small class="fw-semibold">{{ eq.articleReference }}</small>
+                    <small class="fw-semibold">{{ eq.articleId }}</small>
+                  </td>
+                  <td>
+                    <span class="badge px-2 py-2 w-100" [ngClass]="{
+                      'bg-success': eq.statut === 'ACTIF',
+                      'bg-warning text-dark': eq.statut === 'EN_REPARATION',
+                      'bg-danger': eq.statut === 'A_RECYCLER'
+                    }">{{ eq.statut.replace('_', ' ') }}</span>
+                  </td>
+                  <td>
+                    <span class="fw-bold text-primary d-block">{{ eq.localisationNom || 'Non spécifiée' }}</span>
+                    <small class="text-muted" *ngIf="eq.localisationId">
+                      Bât: {{ eq.localisationBatiment || 'N/A' }} - Ét: {{ eq.localisationEtage || 'N/A' }} - Bur: {{ eq.localisationBureau || 'N/A' }}
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-primary w-100" (click)="selectionnerEquipement(eq)">
+                      <i class="bi bi-pencil-square"></i> Gérer / Modifier
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header bg-primary text-white">Changer le Statut / Localisation</div>
-        <div class="card-body">
-          
-          <div class="mb-3">
-            <label class="form-label font-weight-bold">Modifier le Statut :</label>
-            <select class="form-select" [(ngModel)]="statutSelectionne">
-              <option value="ACTIF">ACTIF</option>
-              <option value="EN_REPARATION">EN REPARATION</option>
-              <option value="A_RECYCLER">A RECYCLER</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Nouvelle Localisation Physique :</label>
-            <select class="form-select" [(ngModel)]="localisationSelectionneeId">
-              <option [value]="0">-- Sélectionner un emplacement --</option>
-              <option *ngFor="let loc of localisations" [value]="loc.id">
-                {{ loc.nom }} (Bâtiment {{ loc.batiment || 'N/A' }})
-              </option>
-            </select>
-          </div>
-
-          <button class="btn btn-success w-100 mt-3" (click)="enregistrerModifications()">
-            Enregistrer les modifications
+    <div class="col-lg-7 mb-4" *ngIf="equipement">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">📋 Fiche Technique Unique</h5>
+          <button class="btn btn-sm btn-outline-light" (click)="equipement = null">
+            <i class="bi bi-arrow-left"></i> Retour à la table
           </button>
-
         </div>
+        
+        <div class="card-body p-0">
+          <table class="table table-striped table-hover mb-0 align-middle">
+            <tbody>
+              <tr>
+                <th scope="row" class="w-35 bg-light text-secondary ps-3">Désignation</th>
+                <td class="fw-bold ps-3">{{ equipement.designation }}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="bg-light text-secondary ps-3">N° de Série</th>
+                <td class="text-monospace ps-3">{{ equipement.numeroSerie || '-' }}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="bg-light text-secondary ps-3">Code-Barres</th>
+                <td class="ps-3"><span class="badge bg-outline-dark border border-dark text-dark fw-bold">{{ equipement.codeBarres }}</span></td>
+              </tr>
+              <tr>
+                <th scope="row" class="bg-light text-secondary ps-3">Modèle d'Article (Lien)</th>
+                <td class="ps-3">
+                  <span class="badge bg-dark me-2">{{ $any(equipement).articleReference }}</span>
+                  {{ $any(equipement).articleDesignation }}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="bg-light text-secondary ps-3">Statut Actuel</th>
+                <td class="ps-3">
+                  <span class="badge px-3 py-2" [ngClass]="{
+                    'bg-success': equipement.statut === 'ACTIF',
+                    'bg-warning text-dark': equipement.statut === 'EN_REPARATION',
+                    'bg-danger': equipement.statut === 'A_RECYCLER'
+                  }">{{ equipement.statut }}</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="bg-light text-secondary ps-3">Localisation Physique</th>
+                <td class="ps-3">
+                  <span class="fw-bold text-primary">
+                    {{ $any(equipement).localisationNom ? $any(equipement).localisationNom : 'Aucune affectation' }}
+                  </span>
+                  
+                  <div class="mt-1 small text-muted" *ngIf="$any(equipement).localisationId">
+                    <span class="badge bg-light text-dark border me-1">Bâtiment: {{ $any(equipement).localisationBatiment || 'N/A' }}</span>
+                    <span class="badge bg-light text-dark border me-1">Étage: {{ $any(equipement).localisationEtage || 'N/A' }}</span>
+                    <span class="badge bg-light text-dark border">Bureau: {{ $any(equipement).localisationBureau || 'N/A' }}</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="equipement.dateMiseAuRebut">
+                <th scope="row" class="bg-light text-danger ps-3">Mise au rebut le</th>
+                <td class="text-danger fw-bold ps-3">{{ equipement.dateMiseAuRebut | date:'dd/MM/yyyy HH:mm' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5 mb-4" *ngIf="equipement">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">⚡ Mettre à jour l'emplacement</h5>
+        </div>
+        
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <div class="mb-4">
+              <label class="form-label fw-bold"><i class="bi bi-tag-fill text-primary"></i> Modifier le Statut :</label>
+              <select class="form-select form-select-lg" [(ngModel)]="statutSelectionne">
+                <option value="ACTIF">ACTIF</option>
+                <option value="EN_REPARATION">EN REPARATION</option>
+                <option value="A_RECYCLER">A RECYCLER</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold"><i class="bi bi-geo-alt-fill text-danger"></i> Nouvelle Localisation :</label>
+              <select class="form-select form-select-lg" [(ngModel)]="localisationSelectionneeId">
+                <option [value]="0">-- Sélectionner un emplacement --</option>
+                <option *ngFor="let loc of localisations" [value]="loc.id">
+                  {{ loc.nom }} (Bâtiment {{ loc.batiment || 'N/A' }})
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-success btn-lg w-100 py-3 shadow" (click)="enregistrerModifications()">
+            <i class="bi bi-cloud-check-fill"></i> Enregistrer les modifications
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12" *ngIf="(!listeEquipements || listeEquipements.length === 0) && !equipement">
+      <div class="card-body text-center py-5 text-muted bg-white border rounded shadow-sm">
+        <i class="bi bi-table fs-1 d-block mb-2 text-secondary"></i>
+        <p class="mb-0">Aucun équipement affiché à l'écran.</p>
+        <small class="text-muted">Utilisez la recherche par code-barres ou cliquez sur "Afficher la table complète".</small>
       </div>
     </div>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InventoryService } from '../services/inventory.service';
@@ -12,11 +12,14 @@ import { Article } from '../Model/article';
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.css'
 })
-export class ArticleDetailComponent implements OnInit {
+export class ArticleDetailComponent implements OnInit, OnChanges { // 🌟 Ajoutez OnChanges
 
   private inventoryService = inject(InventoryService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  // 🌟 Cet Input va capter l'ID envoyé par le composant parent
+  @Input() articleId?: number; 
 
   article: Article | null = null;
   chargement: boolean = false;
@@ -26,22 +29,31 @@ export class ArticleDetailComponent implements OnInit {
     this.chargerArticle();
   }
 
-  /**
-   * 📋 Charger article par ID
-   */
+  // 🌟 Écoute si le parent change d'article sans détruire le composant
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['articleId'] && !changes['articleId'].isFirstChange()) {
+      this.chargerArticle();
+    }
+  }
+
   chargerArticle(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+    // 🌟 Priorité à l'Input du parent, sinon on regarde l'URL
+    const idFromRoute = this.route.snapshot.paramMap.get('id');
+    const id = this.articleId ? this.articleId : (idFromRoute ? Number(idFromRoute) : null);
+
+    if (!id) {
+      console.warn("⚠️ Aucun ID d'article fourni au composant detail.");
+      return;
+    }
 
     this.chargement = true;
 
-    this.inventoryService.getArticleById(Number(id)).subscribe({
+    this.inventoryService.getArticleById(id).subscribe({
       next: (res) => {
         this.article = res;
         this.chargement = false;
         console.log('✅ Article chargé:', this.article);
         
-        // Charger historique mouvements
         if (this.article?.id) {
           this.chargerHistoriqueMouvements(this.article.id);
         }
@@ -52,7 +64,6 @@ export class ArticleDetailComponent implements OnInit {
       }
     });
   }
-
   /**
    * 📋 Charger historique mouvements
    */

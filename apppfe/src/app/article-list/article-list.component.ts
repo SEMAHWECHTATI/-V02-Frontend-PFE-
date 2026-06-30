@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Output , EventEmitter} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Article } from '../Model/article';
@@ -15,9 +15,28 @@ import { takeUntil, debounceTime, distinctUntilChanged, switchMap, catchError } 
 })
 export class ArticleListComponent implements OnInit, OnDestroy {
 
+  @Output() vueDetailsDemandee = new EventEmitter<number>();
+
   private inventoryService = inject(InventoryService);
   private destroy$ = new Subject<void>();
   private searchSubject$ = new Subject<string>();
+
+
+
+showModal = false;
+selectedArticle: any = null;
+
+voirDetails(article: any) {
+  this.selectedArticle = article;
+  this.showModal = true;
+}
+
+fermerModal() {
+  this.showModal = false;
+  this.selectedArticle = null;
+}
+
+
 
 
     Math = Math;

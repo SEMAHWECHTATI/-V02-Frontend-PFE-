@@ -12,6 +12,9 @@ export class EquipementService {
   private locUrl = 'http://localhost:8070/api/localisations'; // Optionnel si vous listez les locs
 
   constructor(private http: HttpClient) { }
+  getTousLesEquipements(): Observable<Equipement[]> {
+    return this.http.get<Equipement[]>(this.apiUrl);
+  }
 
   // À ajouter dans equipement.service.ts
 ajouterEquipement(equipementData: any): Observable<Equipement> {

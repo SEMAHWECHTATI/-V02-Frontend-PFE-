@@ -234,23 +234,24 @@
   <select 
     id="fournisseur" 
     class="form-select" 
-    formControlName="fournisseur" 
-    [class.is-invalid]="isFieldInvalid('fournisseur')">
+    formControlName="fournisseurId" 
+    [class.is-invalid]="isFieldInvalid('fournisseurId')">
     
-    <option value="" disabled>-- Sélectionnez un fournisseur --</option>
-    <option *ngFor="let f of fournisseurs" [value]="f.nom">
+    <option [ngValue]="null" disabled>-- Sélectionnez un fournisseur --</option>
+    
+    <option *ngFor="let f of fournisseurs" [ngValue]="f.id">
       {{ f.nom }} 
     </option>
     
   </select>
   
-  <small class="error" *ngIf="isFieldInvalid('fournisseur')">
+  <small class="error" *ngIf="isFieldInvalid('fournisseurId')">
     Veuillez sélectionner un fournisseur.
   </small>
 </div>
 
 <div *ngIf="form.get('fournisseur')?.value" class="alert alert-info mt-2">
-  Fournisseur choisi pour l'article : <strong>{{ form.get('fournisseur')?.value }}</strong>
+  Fournisseur choisi pour l'article : <strong>{{ form.get('fournisseurId')?.value }}</strong>
 </div>
       </div>
     </div>
@@ -342,5 +343,7 @@
     </div>
 
   </form>
+
+  
 
 </div>

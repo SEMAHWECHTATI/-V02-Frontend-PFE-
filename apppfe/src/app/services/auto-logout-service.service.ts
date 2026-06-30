@@ -86,6 +86,7 @@ export class AutoLogoutServiceService {
       '⚠️ Vous êtes inactif depuis 13 minutes.\n\n' +
       'Vous serez déconnecté dans 2 minutes.\n\n' +
       'Cliquez OK pour rester connecté.'
+      
     );
 
     if (confirmDialog) {

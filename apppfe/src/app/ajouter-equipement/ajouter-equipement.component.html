@@ -34,30 +34,118 @@
          name="numeroSerie" 
          readonly> </div>
 
-      <div class="mb-3">
-        <label class="form-label font-weight-bold">Désignation / Nom *</label>
-        <input type="text" class="form-control" [(ngModel)]="nouveauEquipement.designation" name="designation" required placeholder="Ex: PC Portable HP EliteBook">
-      </div>
-
-      <div class="mb-3">
-  <label class="form-label font-weight-bold">Type d'Article (Modèle) *</label>
-  <select class="form-select" [(ngModel)]="nouveauEquipement.articleId" name="articleId" required>
-    <option [ngValue]="null" disabled selected>-- Choisir un Article --</option>
-    <option *ngFor="let art of articles" [ngValue]="art.id">
-      {{ art.reference }} - {{ art.designation }}
-    </option>
-  </select>
+   <div class="mb-3">
+  <label class="form-label font-weight-bold">Désignation / Nom *</label>
+  <input type="text" 
+         class="form-control" 
+         [(ngModel)]="nouveauEquipement.designation" 
+         name="designation" 
+         required 
+         placeholder="Ex: PC Portable HP EliteBook 840">
+  <div class="form-text text-muted">Saisissez la marque, le type et le modèle précis de l'appareil.</div>
 </div>
 
-      <div class="mb-3">
-        <label class="form-label">Localisation Physique Initiale</label>
-        <select class="form-select" [(ngModel)]="nouveauEquipement.localisationId" name="localisationId">
-          <option [ngValue]="null">-- Aucune (En Stock Central) --</option>
-          <option *ngFor="let loc of localisations" [value]="loc.id">
-            {{ loc.nom }} (Bât : {{ loc.batiment || 'N/A' }})
-          </option>
-        </select>
-      </div>
+    <div class="mb-3 position-relative">
+  <label class="form-label font-weight-bold">Type d'Article (Modèle) *</label>
+  
+  <div class="input-group">
+    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+    <input type="text" 
+           class="form-control" 
+           placeholder="Tapez pour rechercher un article (Réf ou Nom)..."
+           [(ngModel)]="texteRechercheArticle"
+           (input)="filtrerArticles()"
+           (focus)="afficherSuggestions = true"
+           name="rechercheArticle"
+           required>
+    <button *ngIf="nouveauEquipement.articleId" 
+            class="btn btn-outline-secondary" 
+            type="button" 
+            (click)="reinitialiserSelectionArticle()">
+      <i class="bi bi-x-circle-fill text-danger"></i>
+    </button>
+  </div>
+
+  <div class="card position-absolute w-100 shadow mt-1" 
+       *ngIf="afficherSuggestions && articlesFiltres.length > 0" 
+       style="z-index: 1050; max-height: 250px; overflow-y: auto;">
+    <ul class="list-group list-group-flush">
+      <button type="button" 
+              class="list-group-item list-group-item-action text-start d-flex justify-content-between align-items-center py-2"
+              *ngFor="let art of articlesFiltres"
+              (click)="selectionnerArticle(art)">
+        <div>
+          <span class="badge bg-dark me-2">{{ art.reference }}</span>
+          <span class="fw-semibold">{{ art.designation }}</span>
+        </div>
+        <small class="text-muted text-uppercase fs-7">{{ art.typeArticle }}</small>
+      </button>
+    </ul>
+  </div>
+
+  <div class="card position-absolute w-100 shadow mt-1 p-3 text-center text-muted" 
+       *ngIf="afficherSuggestions && texteRechercheArticle && articlesFiltres.length === 0"
+       style="z-index: 1050;">
+    <i class="bi bi-exclamation-circle d-block mb-1"></i>
+    Aucun article trouvé pour "{{ texteRechercheArticle }}"
+  </div>
+</div>
+
+    <div class="mb-3 position-relative">
+  <label class="form-label font-weight-bold">Localisation Physique Initiale</label>
+  
+  <div class="input-group">
+    <span class="input-group-text bg-white"><i class="bi bi-geo-alt-fill text-danger"></i></span>
+    <input type="text" 
+           class="form-control" 
+           placeholder="Rechercher un emplacement (Nom, Bâtiment, Bureau)..."
+           [(ngModel)]="texteRechercheLocalisation"
+           (input)="filtrerLocalisations()"
+           (focus)="afficherSuggestionsLoc = true"
+           name="rechercheLocalisation">
+    
+    <button *ngIf="nouveauEquipement.localisationId" 
+            class="btn btn-outline-secondary" 
+            type="button" 
+            (click)="reinitialiserSelectionLocalisation()">
+      <i class="bi bi-x-circle-fill text-danger"></i>
+    </button>
+  </div>
+
+  <div class="card position-absolute w-100 shadow mt-1" 
+       *ngIf="afficherSuggestionsLoc && localisationsFiltrees.length > 0" 
+       style="z-index: 1050; max-height: 220px; overflow-y: auto;">
+    <ul class="list-group list-group-flush">
+      <button type="button" 
+              class="list-group-item list-group-item-action text-start py-2 text-muted fw-bold"
+              (click)="selectionnerLocalisation(null)">
+        <i class="bi bi-box-seam me-2"></i> -- Aucune (En Stock Central) --
+      </button>
+      
+      <button type="button" 
+              class="list-group-item list-group-item-action text-start py-2"
+              *ngFor="let loc of localisationsFiltrees"
+              (click)="selectionnerLocalisation(loc)">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-arrow-right-short text-primary"></i> 
+            <span class="fw-semibold">{{ loc.nom }}</span>
+          </div>
+          <small class="text-muted">
+            Bât: {{ loc.batiment || 'N/A' }} - Ét: {{ loc.etage || 'N/A' }} - Bur: {{ loc.bureau || 'N/A' }}
+          </small>
+        </div>
+      </button>
+    </ul>
+  </div>
+
+  <div class="card position-absolute w-100 shadow mt-1 p-3 text-center text-muted" 
+       *ngIf="afficherSuggestionsLoc && texteRechercheLocalisation && localisationsFiltrees.length === 0"
+       style="z-index: 1050;">
+    <i class="bi bi-geo-fill d-block mb-1 text-secondary"></i>
+    Aucun emplacement trouvé pour "{{ texteRechercheLocalisation }}"
+  </div>
+</div>
 
       <div class="mb-3">
         <label class="form-label">Statut Initial</label>

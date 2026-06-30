@@ -104,18 +104,25 @@ export interface Localisation {
 
 export interface Equipement {
   id: number;
-  numeroSerie: string;
-  designation: string;
-  statut: StatutArticle;
-  localisation?: Localisation;
   codeBarres: string;
+  designation: string;
+  statut: 'ACTIF' | 'EN_REPARATION' | 'A_RECYCLER'; // Aligné avec l'énumération StatutArticle
+  
+  // 📦 Champs liés à l'Article d'origine (provenant du DTO aplati)
+  articleId: number;
+  articleReference: string;
+  articleDesignation: string;
+  
+  // 📍 Champs liés à la Localisation physique (provenant du DTO aplati)
+  localisationId: number | null;
+  localisationNom: string | null;
+  localisationBatiment: string | null;
+  localisationEtage: string | null;
+  localisationBureau: string | null;
+
+  // 📝 Autres propriétés optionnelles (si gérées dans d'autres fiches)
+  numeroSerie?: string;
   observations?: string;
   dateAcquisition?: string;
   dateMiseAuRebut?: string;
-
-  localisationId?: number;
-  localisationNom?: string;
-  localisationBatiment?: string;
-  localisationEtage?: string;
-  localisationBureau?: string;
 }

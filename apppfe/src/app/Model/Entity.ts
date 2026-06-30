@@ -44,10 +44,31 @@ export interface PreferenceNotification {
 }
 export interface JournalAudit {
   id: number;
-  action: ActionAudit;
-  description: string;
+  dateAction: string; // Correspond à LocalDateTime (chaîne ISO)
+  
+  // Enums stricts calqués sur le backend Java
+  action: 'CONNEXION' | 'DECONNEXION' | 'BLOCAGE' | 'CHANGEMENT_MDP' | 'ECHEC_CONNEXION' | 'DEBLOCAGE' | 'RESET_MDP' | 'APPROBATION_DEMANDE';
+  module: 'AUTHENTIFICATION' | 'TICKET' | 'STOCK' | 'SYSTEME' | 'GESTION_APPLICATION'; // Ajuste selon tes enums ModuleAudit.java
+  niveau: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';          // Correspond à NiveauAudit.java
+  
+  // Relations
+  utilisateur: Utilisateur | null; // Peut être null (ex: échec connexion ou action système)
+  
+  // Informations de traçabilité
+  entite: string;       // Exemple: "Ticket", "Authentification"
+  entiteId: number | null;
+  description: string;  // Le message textuel complet
+  
+  // Historique des modifications (les payloads JSON ou texte)
+  ancienneValeur: string | null;
+  nouvelleValeur: string | null;
+  
+  // Données techniques réseau
   adresseIp: string;
-  dateAction: Date;
+  userAgent: string;    // Navigateur, OS, etc.
+  
+  // Statut
+  succes: boolean;
 }
 
 // Main Utilisateur Entity

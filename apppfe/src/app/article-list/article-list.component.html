@@ -173,12 +173,9 @@
             </span>
           </td>
           <td class="actions-cell">
-            <button class="btn-icon view" title="Voir details">
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="btn-icon edit" title="Modifier">
-              <i class="bi bi-pencil"></i>
-            </button>
+        <button class="btn-icon view" title="Voir details" (click)="voirDetails(article)">
+  <i class="bi bi-eye"></i>
+</button>
              <button class="btn-icon edit" title="Ajouter au stock" (click)="ajouterAuStock(article)">
               <i class="bi bi-plus-circle"></i>
             </button>
@@ -230,5 +227,49 @@
     <h3>Aucun article</h3>
     <p>Creez votre premier article pour commencer</p>
   </div>
+
+  <div class="modal-backdrop" *ngIf="showModal" (click)="fermerModal()"></div>
+
+<div class="modal-container" *ngIf="showModal">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h3>Détails de l'article</h3>
+      <button class="close-btn" (click)="fermerModal()">✖</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body" *ngIf="selectedArticle">
+
+      <p><strong>Référence :</strong> {{ selectedArticle.reference }}</p>
+      <p><strong>Désignation :</strong> {{ selectedArticle.designation }}</p>
+      <p><strong>Catégorie :</strong> {{ selectedArticle.categorie }}</p>
+      <p><strong>Type :</strong> {{ selectedArticle.typeArticle }}</p>
+      <p><strong>Code Barres :</strong> {{ selectedArticle.codeBarres }}</p>
+      
+
+      <hr>
+
+      <p><strong>Quantité :</strong> {{ selectedArticle.quantiteEnStock }}</p>
+      <p><strong>Prix unitaire :</strong> {{ selectedArticle.prixUnitaire }} EUR</p>
+      <p><strong>Valeur totale :</strong>
+        {{ (selectedArticle.quantiteEnStock || 0) * (selectedArticle.prixUnitaire || 0) }} EUR
+      </p>
+
+      <p>
+        <strong>Statut :</strong>
+        {{ selectedArticle.statut }}
+      </p>
+<p><strong>Fournisseur :</strong> {{ selectedArticle.fournisseurNom || '-' }}</p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="fermerModal()">Fermer</button>
+    </div>
+
+  </div>
+</div>
 
 </div>

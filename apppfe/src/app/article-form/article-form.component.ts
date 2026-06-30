@@ -6,11 +6,12 @@ import { Article, StatutArticle, StatutArticleLabels, TypeArticle, TypeArticleLa
 import { QRCodeModule } from 'angularx-qrcode';
 import { FournisseurService } from '../services/fournisseur.service';
 import { Fournisseur } from '../Model/Entity';
+import { ArticleListComponent } from "../article-list/article-list.component";
 
 @Component({
   selector: 'app-article-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeModule, ArticleListComponent],
   templateUrl: './article-form.component.html',
   styleUrl: './article-form.component.css'
 })
@@ -336,10 +337,12 @@ export class ArticleFormComponent implements OnInit {
       quantiteEnStock: [0, [Validators.required, Validators.min(0)]],
       prixUnitaire: [0, [Validators.required, Validators.min(0)]],
       fournisseur: [''],
+      fournisseurId: [''],
       dateAchat: [''],
       dateGarantie: [''],
       seuilMinimum: [5, [Validators.required, Validators.min(1)]],
-      seuilCritique: [2, [Validators.required, Validators.min(0)]]
+      seuilCritique: [2, [Validators.required, Validators.min(0)]],
+      groupeId: ['']
     });
   }
 
@@ -506,22 +509,36 @@ export class ArticleFormComponent implements OnInit {
   /**
    * Prépare les données pour le backend
    */
-  private prepareArticleData(): Article {
-    const formValue = this.form.getRawValue();
+private prepareArticleData(): any {
+  const formValue = this.form.getRawValue();
+  
+  // 1. On extrait et convertit l'ID du fournisseur en nombre propre
+  const fId = formValue.fournisseurId ? Number(formValue.fournisseurId) : null;
+
+  // 2. On construit explicitement l'objet DTO attendu par Spring Boot
+  const articleDTO = {
+    categorie: formValue.categorie,
+    reference: formValue.reference,
+    codeBarres: formValue.codeBarres || '',
+    designation: formValue.designation === 'AUTRE' ? formValue.designationPersonnalisee : formValue.designation,
+    description: formValue.description,
+    typeArticle: formValue.typeArticle,
+    statut: formValue.statut,
+    quantiteEnStock: formValue.quantiteEnStock,
+    prixUnitaire: formValue.prixUnitaire,
+    dateAchat: formValue.dateAchat,
+    dateGarantie: formValue.dateGarantie,
+    seuilMinimum: formValue.seuilMinimum,
+    seuilCritique: formValue.seuilCritique,
+    groupeId: formValue.groupeId ? Number(formValue.groupeId) : null,
     
-    const article: Article = {
-      ...formValue,
-      designation: formValue.designation === 'AUTRE' 
-        ? formValue.designationPersonnalisee 
-        : formValue.designation,
-      codeBarres: formValue.codeBarres || ''
-    };
+    // 🌟 On force l'envoi de la clé exacte 'fournisseurId' attendue par ton ArticleDTO Java
+    fournisseurId: fId 
+  };
 
-    delete (article as any).designationPersonnalisee;
-
-    console.log('📦 Article à envoyer:', article);
-    return article;
-  }
+  console.log('📦 Article DTO final envoyé au backend :', articleDTO);
+  return articleDTO;
+}
 
   /**
    * Traite la réussite

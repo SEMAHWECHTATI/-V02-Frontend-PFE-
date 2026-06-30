@@ -13,23 +13,59 @@ import { CommonModule } from '@angular/common';
   styleUrl: './detaille-equipement.component.css'
 })
 export class DetailleEquipementComponent implements OnInit {
+// 🌟 NOUVELLE MÉTHODE : Déclenchée au clic sur le bouton
+
   
-  equipement!: Equipement;
+  constructor(
+    private equipementService: EquipementService,
+    private route: ActivatedRoute
+  ) { }
+
+
+  equipement: Equipement | null = null; 
   localisations: Localisation[] = [];
   
-  // Variables pour le formulaire de modification
-  statutSelectionne!: StatutArticle;
-  localisationSelectionneeId!: number;
+  // 🌟 Nouvelle variable pour stocker la liste complète du tableau
+  listeEquipements: Equipement[] = []; 
   
   loading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
   codeBarresRecherche: string = '';
 
-  constructor(
-    private equipementService: EquipementService,
-    private route: ActivatedRoute
-  ) { }
+  
+  // Variables pour le formulaire de modification
+  statutSelectionne!: StatutArticle;
+  localisationSelectionneeId!: number;
+ 
+ 
+ 
+
+
+  afficherTousLesEquipements(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.equipement = null; // On cache la vue "fiche unique"
+
+    this.equipementService.getTousLesEquipements().subscribe({
+      next: (data) => {
+        this.listeEquipements = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.errorMessage = "Impossible de récupérer la liste complète des équipements.";
+        this.loading = false;
+      }
+    });
+  }
+
+  selectionnerEquipement(eq: Equipement): void {
+    this.equipement = eq;
+    this.statutSelectionne = eq.statut.toString() as StatutArticle;
+    this.localisationSelectionneeId = eq.localisationId || 0;
+  }
+
 
   ngOnInit(): void {
     // 1. Charger la liste des localisations pour le formulaire
@@ -78,8 +114,8 @@ export class DetailleEquipementComponent implements OnInit {
   }
 
   initFormulaire(): void {
-    this.statutSelectionne = this.equipement.statut;
-    this.localisationSelectionneeId = this.equipement.localisation?.id || 0;
+    this.statutSelectionne = this.equipement?.statut.toString() as StatutArticle;
+    this.localisationSelectionneeId = this.equipement?.localisationId || 0;
   }
 
   chargerLocalisations(): void {
@@ -95,7 +131,7 @@ export class DetailleEquipementComponent implements OnInit {
     this.successMessage = '';
 
     this.equipementService.modifierStatutEtLocalisation(
-      this.equipement.id, 
+      this.equipement?.id || 0,
       this.statutSelectionne, 
       this.localisationSelectionneeId
     ).subscribe({

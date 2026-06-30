@@ -17,6 +17,24 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.menu-category-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #a0aec0; /* Couleur grise élégante */
+  padding: 12px 16px 6px 16px;
+  margin-top: 8px;
+}
+
+
+.menu-separator {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 10px 16px;
+  opacity: 0.5;
+}
+
 * {
   margin: 0;
   padding: 0;
