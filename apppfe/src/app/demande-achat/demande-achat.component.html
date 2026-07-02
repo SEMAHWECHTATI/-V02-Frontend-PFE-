@@ -1,0 +1,131 @@
+<div class="card-page">
+  <h2>Demande d'achat matériel</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="grid-form">
+    
+    <div class="form-group">
+      <label for="nomMateriel">Nom du Matériel</label>
+      <input id="nomMateriel" formControlName="nomMateriel" placeholder="Ex: PC Portable HP" />
+    </div>
+
+    <div class="form-group">
+      <label for="categorie">Catégorie</label>
+      <input id="categorie" formControlName="categorie" placeholder="Ex: Informatique" />
+    </div>
+
+    <div class="form-group">
+      <label for="quantite">Quantité</label>
+      <input id="quantite" type="number" formControlName="quantite" placeholder="Ex: 5" />
+    </div>
+
+    <div class="form-group">
+      <label for="serviceDemandeur">Service Demandeur</label>
+      <input id="serviceDemandeur" formControlName="serviceDemandeur" placeholder="Ex: R&D G2II" />
+    </div>
+
+    <div class="form-group">
+      <label for="niveauUrgence">Niveau d'Urgence</label>
+      <select id="niveauUrgence" formControlName="niveauUrgence">
+        <option value="LOW">LOW</option>
+        <option value="MOYEN">MOYEN</option>
+        <option value="HIGH">HIGH</option>
+        <option value="CRITIQUE">CRITIQUE</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="coutEstime">Coût Estimé (€)</label>
+      <input id="coutEstime" type="number" formControlName="coutEstime" placeholder="Ex: 1200" />
+    </div>
+
+    <div class="form-group">
+      <label for="demandeur">Demandeur (Nom / Prénom)</label>
+      <input id="demandeur" formControlName="demandeur" placeholder="Ex: Jean Dupont" />
+    </div>
+
+    <div class="form-group">
+      <label for="dateDemande">Date de la Demande</label>
+      <input id="dateDemande" type="date" formControlName="dateDemande" />
+    </div>
+
+    <div class="form-group full-width">
+      <label for="justification">Justification Professionnelle</label>
+      <textarea id="justification" formControlName="justification" placeholder="Expliquez brièvement le besoin..."></textarea>
+    </div>
+
+    <div class="form-group full-width">
+      <label for="emailDestinataire">Email du Destinataire</label>
+      <input id="emailDestinataire" type="email" formControlName="emailDestinataire" placeholder="achats@sagem.com" />
+    </div>
+
+    <div class="actions full-width">
+      <button type="button" class="btn btn-secondary" (click)="togglePreview()">
+        {{ previewVisible ? 'Masquer la prévisualisation' : 'Prévisualiser' }}
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+        {{ loading ? 'Génération en cours...' : 'Générer et envoyer' }}
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="previewVisible" class="preview-box">
+    <h3>Prévisualisation des données</h3>
+    <div class="preview-grid">
+      <p><strong>Matériel:</strong> {{ form.value.nomMateriel || '-' }}</p>
+      <p><strong>Catégorie:</strong> {{ form.value.categorie || '-' }}</p>
+      <p><strong>Quantité:</strong> {{ form.value.quantite || '-' }}</p>
+      <p><strong>Urgence:</strong> {{ form.value.niveauUrgence || '-' }}</p>
+      <p><strong>Service:</strong> {{ form.value.serviceDemandeur || '-' }}</p>
+      <p><strong>Coût:</strong> {{ form.value.coutEstime ? (form.value.coutEstime + ' €') : '-' }}</p>
+      <p><strong>Demandeur:</strong> {{ form.value.demandeur || '-' }}</p>
+      <p><strong>Date:</strong> {{ form.value.dateDemande || '-' }}</p>
+      <p class="full-width"><strong>Justification:</strong> {{ form.value.justification || '-' }}</p>
+      <p class="full-width"><strong>Email:</strong> {{ form.value.emailDestinataire || '-' }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="result" class="result-card">
+    <h3>Résultat de l'opération</h3>
+    <p><strong>ID Enregistrement:</strong> {{ result.id }}</p>
+    <p><strong>N° Demande Généré:</strong> {{ result.numeroDemande }}</p>
+    <p><strong>Statut Actuel:</strong> <span class="badge">{{ result.statut }}</span></p>
+    <button class="btn btn-dark" (click)="downloadPdf(result.id)">
+      <i class="icon-download"></i> Télécharger le PDF officiel
+    </button>
+  </div>
+
+  <hr class="section-divider" />
+
+  <div class="history-section">
+    <h3>Demandes Récentes</h3>
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>N° Demande</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of demandes">
+          <td>{{ d.id }}</td>
+          <td><strong>{{ d.numeroDemande }}</strong></td>
+          <td>
+            <span class="status-badge" [ngClass]="d.statut.toLowerCase()">{{ d.statut }}</span>
+          </td>
+          <td class="text-center">
+            <button class="btn-table btn-table-pdf" (click)="downloadPdf(d.id)" title="Télécharger le PDF">PDF</button>
+            <button class="btn-table btn-table-resend" (click)="resend(d.id)" title="Renvoyer l'email notification">Renvoyer</button>
+          </td>
+        </tr>
+        <tr *ngIf="demandes.length === 0">
+          <td colspan="4" class="text-center empty-msg">Aucune demande récente trouvée.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

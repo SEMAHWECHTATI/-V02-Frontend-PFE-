@@ -76,4 +76,9 @@ constructor(private http: HttpClient) {
         })
       );
     }
+
+    getUtilisateursParGroupe(nomGroupe: string): Observable<Utilisateur[]> {
+    console.log(`🔍 Filtrage des techniciens pour le groupe : ${nomGroupe}`);
+    return this.http.get<Utilisateur[]>(`${this.apiUrl}/par-groupe/${nomGroupe}`);
+  }
 }

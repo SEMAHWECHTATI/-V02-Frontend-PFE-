@@ -257,8 +257,83 @@
             </div>
           </div>
         </div>
+
+
+        
       </section>
-    </div>
+<div class="card p-3 shadow-sm mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="text-primary mb-0">🎯 Mes Ordres de Mission & Actions Assignées</h5>
+    <span class="badge bg-primary">{{ listeActions.length }} Action(s)</span>
+  </div>
+
+  <div *ngIf="listeActions.length === 0" class="alert alert-info text-center my-3">
+    📭 Aucune demande d'action ne vous est assignée pour le moment.
+  </div>
+
+  <div class="table-responsive" *ngIf="listeActions.length > 0">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Ticket Parent</th>
+          <th>Objet de la Mission</th>
+          <th>Criticité</th>
+          <th>Date Limite</th>
+          <th>Statut</th>
+          <th class="text-center" style="width: 150px;">Décision</th> </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let action of listeActions">
+          <td>
+            <span class="badge bg-secondary fw-bold">
+              {{ action.ticket?.reference || 'N/A' }}
+            </span>
+          </td>
+          <td>
+            <div class="fw-bold text-dark">{{ action.objet }}</div>
+            <small class="text-muted text-truncate d-inline-block" style="max-width: 300px;">
+              {{ action.justification }}
+            </small>
+          </td>
+          <td>
+            <span class="badge" 
+                  [ngClass]="{
+                    'bg-danger': action.criticite === 'HIGH' || action.criticite === 'CRITIQUE',
+                    'bg-warning text-dark': action.criticite === 'MEDIUM' || action.criticite === 'MOYENNE',
+                    'bg-info text-dark': action.criticite === 'LOW' || action.criticite === 'BASSE'
+                  }">
+              {{ action.criticite }}
+            </span>
+          </td>
+          <td>{{ action.dateBesoin | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge bg-warning text-dark">{{ action.statut }}</span>
+          </td>
+          
+          <td>
+            <div class="d-flex justify-content-center gap-2">
+              <button 
+                class="btn btn-sm btn-success d-inline-flex align-items-center"
+                (click)="validerAction(action)"
+                [disabled]="action.statut === 'RESOLU' || action.statut === 'REJETE'"
+                title="Valider la mission">
+                <i class="bi bi-check-lg me-1"></i> Valider
+              </button>
+              <button 
+                class="btn btn-sm btn-outline-danger d-inline-flex align-items-center"
+                (click)="rejeterAction(action)"
+                [disabled]="action.statut === 'RESOLU' || action.statut === 'REJETE'"
+                title="Rejeter la mission">
+                <i class="bi bi-x-lg me-1"></i> Rejeter
+              </button>
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
     <!-- AUTRES VUES -->
     <div class="content-view" *ngIf="vueActuelle !== 'dashboard'">
@@ -269,6 +344,7 @@
       </div>
     </div>
 
-  </main>
+  
+
 
 </div>

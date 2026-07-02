@@ -8,11 +8,13 @@ import { CreateTicketPageComponent } from '../create-ticket-page/create-ticket-p
 import { TicketDetailComponent } from "../ticket-detail/ticket-detail.component";
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { DemandeActionService } from '../services/demande-action.service';
+import { DemandeActionComponent } from "../demande-action/demande-action.component";
 
 @Component({
   selector: 'app-interface-techniceien',
   standalone: true,
-  imports: [CommonModule, FormsModule, ListeTicketsComponent, CreateTicketPageComponent, TicketDetailComponent,NgChartsModule],
+  imports: [CommonModule, FormsModule, ListeTicketsComponent, CreateTicketPageComponent, TicketDetailComponent, NgChartsModule, DemandeActionComponent],
   templateUrl: './interface-techniceien.component.html',
   styleUrl: './interface-techniceien.component.css'
 })
@@ -21,6 +23,8 @@ export class InterfaceTechniceienComponent implements OnInit, OnDestroy {
   user: any = null;
 
   filtreSelectionne: string = 'Tous';
+
+  listeActions: any[] = [];
 
   // ✅ On ajoute 'nouveau' pour les notifications
   stats = {
@@ -35,6 +39,7 @@ export class InterfaceTechniceienComponent implements OnInit, OnDestroy {
 
   constructor(
     private apiService: UtilisateurService,
+    private actionService: DemandeActionService,
     private ticketService: TicketService, // ✅ INJECTION
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -48,11 +53,13 @@ export class InterfaceTechniceienComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadUser();
     this.loadStats();
+    this.loadActions();
 
     // Optionnel : Rafraîchir les stats toutes les minutes pour les notifications
     if (isPlatformBrowser(this.platformId)) {
       this.intervalId = setInterval(() => {
         this.loadStats();
+        this.loadActions();
       }, 60000); 
     }
   }
@@ -193,17 +200,70 @@ getTauxResolution(): number {
 /**
  * ⚡ Nombre de tickets urgents (Haute + Critique)
  */
-getTicketsUrgents(): number {
-  // À adapter selon tes données
-  return 0; // À calculer depuis l'API
-}
+// getTicketsUrgents(): number {
+//   // À adapter selon tes données
+//   return 0; // À calculer depuis l'API
+// }
 
 /**
  * ✅ Tickets résolus aujourd'hui
  */
-getResolvedToday(): number {
-  // À adapter selon tes données
-  return 0; // À calculer depuis l'API
+// getResolvedToday(): number {
+//   // À adapter selon tes données
+//   return 0; // À calculer depuis l'API
+// }
+validerAction(action: any) {
+  if (confirm(`Voulez-vous vraiment valider l'action : "${action.objet}" ?`)) {
+    this.actionService.validerAction(action.id).subscribe({
+      next: (res) => {
+        console.log("Action validée avec succès !", res);
+        this.loadActions(); // 🔄 Rafraîchit instantanément la table
+        this.loadStats();   // 📊 Recharge les compteurs KPI globaux
+      },
+      error: (err) => console.error("⚠️ Erreur lors de la validation", err)
+    });
+  }
 }
 
+rejeterAction(action: any) {
+  if (confirm(`Voulez-vous vraiment rejeter l'action : "${action.objet}" ?`)) {
+    this.actionService.rejeterAction(action.id).subscribe({
+      next: (res) => {
+        console.log("Action rejetée avec succès !", res);
+        this.loadActions(); // 🔄 Rafraîchit la table
+        this.loadStats();   // 📊 Recharge les compteurs
+      },
+      error: (err) => console.error("⚠️ Erreur lors du rejet", err)
+    });
+  }
+}
+
+getTicketsUrgents(): number {
+  return this.listeActions.filter((action: any) => action.criticite === 'HIGH').length;
+}
+
+/**
+ * ✅ Demandes d'action résolues ou closes affectées à ce technicien
+ */
+getResolvedToday(): number {
+  // Compte les actions qui ne sont plus au statut BROUILLON ou EN_COURS
+  return this.listeActions.filter((action: any) => action.statut === 'RESOLU' || action.statut === 'CLOTURE').length;
+}
+
+
+loadActions() {
+  this.actionService.getActions().subscribe({
+    next: (data) => {
+      if (this.user && this.user.id) {
+        // 🎯 On ne garde que les actions assignées au technicien actuellement connecté
+        this.listeActions = data.filter((action: any) => 
+          action.assignedTechnicien && action.assignedTechnicien.id === this.user.id
+        );
+      } else {
+        this.listeActions = data; // Repli par défaut si l'utilisateur n'est pas chargé
+      }
+    },
+    error: (err) => console.error("⚠️ Impossible de charger les demandes d'actions", err)
+  });
+}
 }

@@ -95,14 +95,27 @@
                 <th scope="row" class="w-35 bg-light text-secondary ps-3">Désignation</th>
                 <td class="fw-bold ps-3">{{ equipement.designation }}</td>
               </tr>
-              <tr>
+              <!-- <tr>
                 <th scope="row" class="bg-light text-secondary ps-3">N° de Série</th>
                 <td class="text-monospace ps-3">{{ equipement.numeroSerie || '-' }}</td>
-              </tr>
+              </tr> -->
               <tr>
-                <th scope="row" class="bg-light text-secondary ps-3">Code-Barres</th>
-                <td class="ps-3"><span class="badge bg-outline-dark border border-dark text-dark fw-bold">{{ equipement.codeBarres }}</span></td>
-              </tr>
+  <th scope="row" class="bg-light text-secondary ps-3">Code-Barres</th>
+  <td class="ps-3 d-flex align-items-center justify-content-between pe-3">
+    <div>
+      <span class="badge bg-outline-dark border border-dark text-dark fw-bold font-monospace fs-6">
+        {{ equipement.codeBarres }}
+      </span>
+    </div>
+
+    <button type="button" 
+            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3"
+            (click)="imprimerQRCode(equipement)">
+      <i class="bi bi-qr-code-scan"></i>
+      <span class="fw-bold small">Imprimer l'étiquette</span>
+    </button>
+  </td>
+</tr>
               <tr>
                 <th scope="row" class="bg-light text-secondary ps-3">Modèle d'Article (Lien)</th>
                 <td class="ps-3">

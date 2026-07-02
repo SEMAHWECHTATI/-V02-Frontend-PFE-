@@ -16,6 +16,7 @@ export class EquipementService {
     return this.http.get<Equipement[]>(this.apiUrl);
   }
 
+  
   // À ajouter dans equipement.service.ts
 ajouterEquipement(equipementData: any): Observable<Equipement> {
   return this.http.post<Equipement>(this.apiUrl, equipementData);

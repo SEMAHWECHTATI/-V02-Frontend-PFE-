@@ -1,151 +1,217 @@
-<div class="fournisseur-container">
+<div class="container-fluid py-4 bg-light min-vh-100">
 
-  <div class="header-section">
-    <h2>🚚 Gestion des Fournisseurs</h2>
-    <p>Ajoutez et gérez les fournisseurs de votre matériel informatique</p>
-  </div>
-
-  <div *ngIf="messageSucces" class="alert alert-success">
-    <i class="bi bi-check-circle-fill"></i>
-    {{ messageSucces }}
-  </div>
-
-  <div *ngIf="messageErreur" class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle-fill"></i>
-    {{ messageErreur }}
-  </div>
-
-  <div class="content-grid">
-    
-    <div class="form-card">
-      <h3>{{ modeEdition ? '✏️ Modifier le Fournisseur' : '➕ Nouveau Fournisseur' }}</h3>
-      
-     <form [formGroup]="fournisseurForm" (ngSubmit)="soumettreFormulaire()">
-        
-        <div class="form-group">
-          <label for="nom"><i class="bi bi-building"></i> Nom du fournisseur *</label>
-          <input 
-            type="text" 
-            id="nom" 
-            class="form-control" 
-            formControlName="nom" 
-            placeholder="Ex: Dell Technologies"
-            [class.is-invalid]="isFieldInvalid('nom')">
-          <small class="error-text" *ngIf="isFieldInvalid('nom')">
-            Le nom est requis (minimum 2 caractères).
-          </small>
-        </div>
-
-        <div class="form-group">
-          <label for="email"><i class="bi bi-envelope"></i> Adresse Email *</label>
-          <input 
-            type="email" 
-            id="email" 
-            class="form-control" 
-            formControlName="email" 
-            placeholder="contact@fournisseur.com"
-            [class.is-invalid]="isFieldInvalid('email')">
-          <small class="error-text" *ngIf="isFieldInvalid('email')">
-            Veuillez entrer une adresse email valide.
-          </small>
-        </div>
-           <div class="form-group">
-          <label for="contact"><i class="bi bi-person"></i> Contact *</label>
-          <input 
-            type="text" 
-            id="contact" 
-            class="form-control" 
-            formControlName="contact" 
-            placeholder="Ex: John Doe"
-            [class.is-invalid]="isFieldInvalid('contact')">
-          <small class="error-text" *ngIf="isFieldInvalid('contact')">
-            Le contact est requis (minimum 2 caractères).
-          </small>
-        </div>
-
-        <div class="form-group">
-          <label for="telephone"><i class="bi bi-telephone"></i> Téléphone *</label>
-          <input 
-            type="text" 
-            id="telephone" 
-            class="form-control" 
-            formControlName="telephone" 
-            placeholder="+33 1 23 45 67 89"
-            [class.is-invalid]="isFieldInvalid('telephone')">
-          <small class="error-text" *ngIf="isFieldInvalid('telephone')">
-            Veuillez entrer un numéro de téléphone valide.
-          </small>
-        </div>
-
-        <div class="form-group">
-          <label for="adresse"><i class="bi bi-geo-alt"></i> Adresse postale</label>
-          <textarea 
-            id="adresse" 
-            class="form-control" 
-            formControlName="adresse" 
-            rows="3" 
-            placeholder="Adresse complète du fournisseur"></textarea>
-        </div>
-
-       <div class="d-flex gap-2 mt-3">
-  <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="chargement || fournisseurForm.invalid">
-    <i class="bi bi-save"></i> 
-    {{ chargement ? 'Enregistrement...' : (modeEdition ? 'Mettre à jour' : 'Enregistrer') }}
-  </button>
-  
-  <button *ngIf="modeEdition" type="button" class="btn btn-secondary" (click)="annulerEdition()">
-    <i class="bi bi-x-circle"></i> Annuler
-  </button>
-</div>
-      </form>
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom gap-3">
+    <div>
+      <h1 class="h3 mb-1 fw-bold text-dark d-flex align-items-center gap-2">
+        <i class="bi bi-truck text-primary"></i> Gestion des Fournisseurs
+      </h1>
+      <p class="text-muted mb-0">Centralisez, filtrez et gérez les coordonnées de vos partenaires informatiques.</p>
     </div>
 
-    <div class="list-card">
-      <h3>📋 Liste des Fournisseurs</h3>
+    <div class="btn-group p-1 bg-white border rounded-3 shadow-sm" role="group">
+      <button type="button" 
+              class="btn fw-medium d-flex align-items-center gap-2 px-3 py-2 border-0 rounded-2"
+              [class.btn-primary]="vueActive === 'AJOUTER'"
+              [class.text-secondary]="vueActive !== 'AJOUTER'"
+              (click)="vueActive = 'AJOUTER'">
+        <i class="bi" [ngClass]="modeEdition ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+        {{ modeEdition ? 'Modifier la fiche' : 'Ajouter un fournisseur' }}
+      </button>
       
-      <div *ngIf="chargement && fournisseurs.length === 0" class="text-center p-4 text-muted">
-        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-        Chargement des données...
+      <button type="button" 
+              class="btn fw-medium d-flex align-items-center gap-2 px-3 py-2 border-0 rounded-2"
+              [class.btn-primary]="vueActive === 'AFFICHER'"
+              [class.text-secondary]="vueActive !== 'AFFICHER'"
+              (click)="vueActive = 'AFFICHER'; annulerEdition()">
+        <i class="bi bi-table"></i>
+        Afficher la liste
+        <span class="badge rounded-pill fs-8 ms-1" [ngClass]="vueActive === 'AFFICHER' ? 'bg-white text-primary' : 'bg-light text-dark border'">
+          {{ fournisseursFilter.length }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="messageSucces" class="alert d-flex align-items-center shadow-sm border-0 mb-4" role="alert" style="background-color: #e6f7ed; color: #137333; border-left: 4px solid #137333 !important;">
+    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+    <div class="fw-medium">{{ messageSucces }}</div>
+  </div>
+
+  <div *ngIf="messageErreur" class="alert d-flex align-items-center shadow-sm border-0 mb-4" role="alert" style="background-color: #fce8e6; color: #c5221f; border-left: 4px solid #c5221f !important;">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+    <div class="fw-medium">{{ messageErreur }}</div>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="vueActive === 'AJOUTER'">
+    <div class="col-lg-7 col-xl-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold text-dark mb-4 pb-2 border-bottom">
+            {{ modeEdition ? 'Formulaire de modification' : 'Enregistrement d\'un nouveau partenaire' }}
+          </h2>
+          
+          <form [formGroup]="fournisseurForm" (ngSubmit)="soumettreFormulaire()">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="nom" class="form-label small fw-semibold text-secondary">Nom de l'entreprise *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-building"></i></span>
+                  <input type="text" id="nom" class="form-control border-start-0 ps-0" formControlName="nom" placeholder="Ex: Dell Technologies" [class.is-invalid]="isFieldInvalid('nom')">
+                </div>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('nom')">Le nom est requis (minimum 2 caractères).</div>
+              </div>
+
+              <div class="col-12">
+                <label for="contact" class="form-label small fw-semibold text-secondary">Nom du contact référent *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                  <input type="text" id="contact" class="form-control border-start-0 ps-0" formControlName="contact" placeholder="Ex: John Doe" [class.is-invalid]="isFieldInvalid('contact')">
+                </div>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('contact')">Le contact est requis (minimum 2 caractères).</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="email" class="form-label small fw-semibold text-secondary">Adresse Email *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                  <input type="email" id="email" class="form-control border-start-0 ps-0" formControlName="email" placeholder="contact@fournisseur.com" [class.is-invalid]="isFieldInvalid('email')">
+                </div>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">Veuillez entrer une adresse email valide.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="telephone" class="form-label small fw-semibold text-secondary">Téléphone direct *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
+                  <input type="text" id="telephone" class="form-control border-start-0 ps-0" formControlName="telephone" placeholder="+33 1 23 45 67 89" [class.is-invalid]="isFieldInvalid('telephone')">
+                </div>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('telephone')">Veuillez entrer un numéro de téléphone valide.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="adresse" class="form-label small fw-semibold text-secondary">Adresse postale / Siège</label>
+                <textarea id="adresse" class="form-control" formControlName="adresse" rows="3" placeholder="Rue, Code postal, Ville..."></textarea>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 pt-4 border-top mt-4">
+              <button type="submit" class="btn btn-primary px-4 fw-medium shadow-sm d-flex align-items-center gap-2" [disabled]="chargement || fournisseurForm.invalid">
+                <i class="bi" [ngClass]="chargement ? 'spinner-border spinner-border-sm' : 'bi-cloud-arrow-up-fill'"></i>
+                {{ modeEdition ? 'Mettre à jour la fiche' : 'Valider l\'enregistrement' }}
+              </button>
+              
+              <button type="button" class="btn btn-light border text-secondary fw-medium px-4" (click)="annulerEdition(); vueActive = 'AFFICHER'">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3" *ngIf="vueActive === 'AFFICHER'">
+    <div class="card-body p-4">
+      
+      <div class="row justify-content-between align-items-center mb-4 g-3" *ngIf="fournisseurs.length > 0">
+        <div class="col-md-5 col-lg-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-filter-left fs-5"></i></span>
+            <input type="text" 
+                   class="form-control bg-light border-start-0 ps-0" 
+                   placeholder="Filtrer par nom, contact, email..." 
+                   [(ngModel)]="texteRechercheFournisseur"
+                   (input)="filtrerFournisseurs()">
+            <button *ngIf="texteRechercheFournisseur" 
+                    class="btn btn-light border border-start-0 text-muted" 
+                    type="button" 
+                    (click)="texteRechercheFournisseur=''; filtrerFournisseurs()">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-auto text-end">
+          <span class="text-muted small">
+            Affichage de <strong>{{ fournisseursFilter.length }}</strong> sur {{ fournisseurs.length }} entrées
+          </span>
+        </div>
       </div>
 
-      <div *ngIf="!chargement && fournisseurs.length === 0" class="empty-state">
-        <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-        <p>Aucun fournisseur enregistré pour le moment.</p>
+      <div *ngIf="chargement && fournisseurs.length === 0" class="d-flex flex-column align-items-center justify-content-center p-5 text-muted">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <span class="small">Synchronisation avec la base de données...</span>
       </div>
 
-      <div class="table-responsive" *ngIf="fournisseurs.length > 0">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Nom</th>
-              <th>Contact</th>
-              <th>Adresse</th>
-              <th class="text-center">Actions</th>
+      <div *ngIf="!chargement && fournisseurs.length === 0" class="text-center py-5">
+        <div class="bg-light d-inline-flex p-3 rounded-circle text-muted mb-3">
+          <i class="bi bi-archive-fill fs-2"></i>
+        </div>
+        <h4 class="h6 fw-bold text-dark">Aucun fournisseur répertorié</h4>
+        <p class="text-muted small mx-auto mb-3" style="max-width: 320px;">Votre registre ne contient aucune donnée pour le moment.</p>
+        <button class="btn btn-primary btn-sm fw-medium" (click)="vueActive = 'AJOUTER'">
+          <i class="bi bi-plus"></i> Ajouter un partenaire
+        </button>
+      </div>
+
+      <div *ngIf="fournisseurs.length > 0 && fournisseursFilter.length === 0" class="text-center py-5 my-2">
+        <div class="text-warning mb-2"><i class="bi bi-search fs-3"></i></div>
+        <h5 class="h6 fw-bold text-dark">Aucun résultat trouvé</h5>
+        <p class="text-muted small mb-0">Aucun fournisseur ne correspond à votre recherche "{{ texteRechercheFournisseur }}".</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="fournisseursFilter.length > 0">
+        <table class="table align-middle border-0 table-hover mb-0">
+          <thead>
+            <tr class="text-uppercase text-secondary fs-7 bg-light">
+              <th class="border-0 px-3 py-3 rounded-start">Entreprise</th>
+              <th class="border-0 py-3">Contact Principal</th>
+              <th class="border-0 py-3">Adresse / Siège</th>
+              <th class="border-0 px-3 py-3 text-end rounded-end">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let f of fournisseurs">
-              <td class="fw-bold">{{ f.nom }}</td>
-              <td>
-                <div><i class="bi bi-envelope text-primary"></i> {{ f.email }}</div>
-                <div><i class="bi bi-person text-info"></i> {{ f.contact }}</div>
-                <div><i class="bi bi-telephone text-success"></i> {{ f.telephone }}</div>
+            <tr *ngFor="let f of fournisseursFilter" class="border-bottom">
+              <td class="px-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; min-width: 40px;">
+                    {{ f.nom.slice(0, 2).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark">{{ f.nom }}</div>
+                    <span class="badge bg-light text-muted border fs-8 fw-normal">Ref: #0{{ f.id }}</span>
+                  </div>
+                </div>
               </td>
-              <td><small class="text-muted">{{ f.adresse || 'Non renseignée' }}</small></td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-outline-primary me-2" (click)="editerFournisseur(f)" title="Modifier">
-                     <i class="bi bi-pencil"></i>
-                                    </button>
-  
-                     <button class="btn btn-sm btn-outline-danger" (click)="supprimerFournisseur(f.id)" title="Supprimer">
-                  <i class="bi bi-trash"></i>
-                </button>
+              
+              <td class="py-3">
+                <div class="d-flex flex-column gap-1 small">
+                  <span class="text-dark fw-medium"><i class="bi bi-person text-muted me-1"></i> {{ f.contact }}</span>
+                  <span class="text-muted"><i class="bi bi-envelope text-muted me-1"></i> {{ f.email }}</span>
+                  <span class="text-muted"><i class="bi bi-telephone text-muted me-1"></i> {{ f.telephone }}</span>
+                </div>
+              </td>
+              
+              <td class="py-3">
+                <span class="text-muted fs-7 text-wrap d-block" style="max-width: 250px;">
+                  {{ f.adresse || '❌ Non spécifiée' }}
+                </span>
+              </td>
+              
+              <td class="px-3 py-3 text-end">
+                <div class="d-inline-flex gap-1">
+                  <button class="btn btn-sm btn-light border" (click)="editerFournisseur(f); vueActive = 'AJOUTER'" title="Modifier">
+                    <i class="bi bi-pencil-square text-primary"></i>
+                  </button>
+                  <button class="btn btn-sm btn-light border" (click)="supprimerFournisseur(f.id)" title="Supprimer">
+                    <i class="bi bi-trash3-fill text-danger"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>

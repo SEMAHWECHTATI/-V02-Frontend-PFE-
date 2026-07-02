@@ -1,26 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms'; // 👈 Ajout de FormsModule
 import { Localisation } from '../Model/Entity';
 import { LocalisationService } from '../services/localisation.service';
-
 
 @Component({
   selector: 'app-localisation',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule], // 👈 Ajout de FormsModule ici
   templateUrl: './localisation.component.html',
   styleUrl: './localisation.component.css'
 })
 export class LocalisationComponent implements OnInit {
   localisations: Localisation[] = [];
+  localisationsFilter: Localisation[] = []; // 👈 Liste dédiée à l'affichage filtré du tableau
   locForm!: FormGroup;
   
   // États de l'interface
   chargement = false;
   modeEdition = false;
   idEnEdition?: number;
-  
+  vueActive: 'AJOUTER' | 'AFFICHER' = 'AFFICHER'; // 👈 Gestion de la bascule d'onglets
+  texteRechercheLocalisation = '';                 // 👈 Stocke le mot-clé tapé
+
   // Messages utilisateur
   messageSucces = '';
   messageErreur = '';
@@ -35,9 +37,6 @@ export class LocalisationComponent implements OnInit {
     this.chargerLocalisations();
   }
 
-  /**
-   * 🏗️ Initialisation du formulaire réactif (basé sur LocalisationDTO)
-   */
   initialiserFormulaire(): void {
     this.locForm = this.fb.group({
       nom: ['', [Validators.required, Validators.maxLength(100)]],
@@ -46,17 +45,15 @@ export class LocalisationComponent implements OnInit {
       etage: [''],
       bureau: [''],
       armoire: [''],
-      active: [true] // Par défaut, une nouvelle localisation est active
+      active: [true]
     });
   }
 
-  /**
-   * 📥 Charger la liste depuis le backend
-   */
   chargerLocalisations(): void {
     this.localisationService.getAllLocalisations().subscribe({
       next: (data) => {
         this.localisations = data;
+        this.filtrerLocalisations(); // 👈 Initialise et synchronise la vue filtrée
       },
       error: (err) => {
         console.error('Erreur chargement localisations', err);
@@ -66,8 +63,24 @@ export class LocalisationComponent implements OnInit {
   }
 
   /**
-   * 💾 Créer ou Modifier une localisation
+   * 🔍 Logique de filtrage instantané multi-critère
    */
+  filtrerLocalisations(): void {
+    if (!this.texteRechercheLocalisation || !this.texteRechercheLocalisation.trim()) {
+      this.localisationsFilter = [...this.localisations];
+      return;
+    }
+
+    const motCle = this.texteRechercheLocalisation.toLowerCase().trim();
+
+    this.localisationsFilter = this.localisations.filter(l => 
+      (l.nom && l.nom.toLowerCase().includes(motCle)) ||
+      (l.batiment && l.batiment.toLowerCase().includes(motCle)) ||
+      (l.armoire && l.armoire.toLowerCase().includes(motCle)) ||
+      (l.bureau && l.bureau.toLowerCase().includes(motCle))
+    );
+  }
+
   soumettreFormulaire(): void {
     if (this.locForm.invalid) {
       this.locForm.markAllAsTouched();
@@ -78,7 +91,6 @@ export class LocalisationComponent implements OnInit {
     const locData: Localisation = this.locForm.value;
 
     if (this.modeEdition && this.idEnEdition) {
-      // 🔄 MODE MODIFICATION (PUT)
       this.localisationService.modifierLocalisation(this.idEnEdition, locData).subscribe({
         next: (locModifiee) => {
           const index = this.localisations.findIndex(l => l.id === this.idEnEdition);
@@ -86,26 +98,25 @@ export class LocalisationComponent implements OnInit {
           
           this.afficherSucces('✅ Localisation modifiée avec succès !');
           this.annulerEdition();
+          this.vueActive = 'AFFICHER'; // 👈 Retourne automatiquement sur le tableau
         },
         error: (err) => this.gererErreur(err, 'modification')
       });
     } else {
-      // ➕ MODE CRÉATION (POST)
       this.localisationService.creerLocalisation(locData).subscribe({
         next: (locCree) => {
           this.localisations.push(locCree);
           this.afficherSucces('✅ Localisation ajoutée avec succès !');
           this.locForm.reset({ active: true });
+          this.filtrerLocalisations(); // Refraichit le tableau
           this.chargement = false;
+          this.vueActive = 'AFFICHER'; // 👈 Redirige vers le tableau pour voir la ligne créée
         },
         error: (err) => this.gererErreur(err, 'création')
       });
     }
   }
 
-  /**
-   * ✏️ Préparer le formulaire pour la modification
-   */
   editerLocalisation(loc: Localisation): void {
     this.modeEdition = true;
     this.idEnEdition = loc.id;
@@ -121,9 +132,6 @@ export class LocalisationComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /**
-   * ❌ Annuler le mode édition
-   */
   annulerEdition(): void {
     this.modeEdition = false;
     this.idEnEdition = undefined;
@@ -131,15 +139,13 @@ export class LocalisationComponent implements OnInit {
     this.chargement = false;
   }
 
-  /**
-   * 🗑️ Supprimer une localisation
-   */
   supprimerLocalisation(id: number | undefined): void {
     if (!id) return;
     if (confirm('Êtes-vous sûr de vouloir supprimer cette localisation ?')) {
       this.localisationService.supprimerLocalisation(id).subscribe({
         next: () => {
           this.localisations = this.localisations.filter(l => l.id !== id);
+          this.filtrerLocalisations(); // Met à jour le visuel immédiatement
           this.afficherSucces('✅ Localisation supprimée.');
         },
         error: (err) => {
@@ -149,8 +155,6 @@ export class LocalisationComponent implements OnInit {
       });
     }
   }
-
-  // --- Fonctions utilitaires pour les messages ---
 
   private gererErreur(err: any, action: string): void {
     console.error(`Erreur ${action}`, err);

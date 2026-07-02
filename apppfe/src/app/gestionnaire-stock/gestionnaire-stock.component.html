@@ -360,11 +360,18 @@
           <p class="subtitle">Gestion Inventaire IT</p>
         </div>
       </div>
-      <div class="header-right">
-        <div class="search-bar">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Rechercher...">
-        </div>
+     <div class="header-right">
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input
+      type="text"
+      placeholder="Rechercher un produit, référence, ticket..."
+      [(ngModel)]="globalSearchTerm"
+      (keyup.enter)="rechercheGlobale()"
+    >
+    <button class="btn btn-sm btn-light ms-2" (click)="rechercheGlobale()">OK</button>
+  </div>
+
         <div class="user-section">
           <div class="avatar">
             {{ currentUser.prenom?.[0] }}{{ currentUser.nom?.[0] }}

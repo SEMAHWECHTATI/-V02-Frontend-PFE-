@@ -1,0 +1,90 @@
+<div class="card p-3 mb-4">
+  <h4 class="text-primary">📋 Ordre de Mission : Assignation par Ticket</h4>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="row g-2">
+    
+    <div class="col-md-4">
+      <label class="form-label font-weight-bold">Groupe Technique Destinataire</label>
+      <select class="form-select border-primary" formControlName="assignedGroupeId">
+        <option [value]="null" disabled selected>-- Choisir un groupe technique --</option>
+        <option *ngFor="let g of groupesDisponibles" [value]="g.id">
+          {{ g.nomGroupes }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+  <label class="form-label font-weight-bold">Tickets du Groupe (Nouveaux)</label>
+  <select class="form-select border-danger fw-bold text-danger" 
+          (change)="onTicketChange($event)" 
+          [disabled]="ticketsDisponibles.length === 0"
+          [value]="form.get('ticketId')?.value">
+    <option [value]="null" disabled selected *ngIf="ticketsDisponibles.length === 0">Aucun ticket pour ce groupe</option>
+    <option [value]="null" disabled selected *ngIf="ticketsDisponibles.length > 0">-- Sélectionner un N° Ticket --</option>
+    
+    <ng-container *ngFor="let ticket of ticketsDisponibles">
+      <option *ngIf="ticket.statut === 'Nouveau'" [value]="ticket.idTicket">
+        {{ ticket.reference }} - {{ ticket.titre }}
+      </option>
+    </ng-container>
+
+  </select>
+  <input type="hidden" formControlName="ticketId">
+</div>
+
+    <div class="col-md-4">
+      <label class="form-label font-weight-bold">Technicien Référent</label>
+      <select class="form-select" formControlName="assignedTechnicienId" [disabled]="techniciensFiltres.length === 0">
+        <option [value]="null" *ngIf="techniciensFiltres.length === 0">Veuillez d'abord choisir un groupe</option>
+        <option *ngFor="let t of techniciensFiltres" [value]="t.id">
+          👤 {{ t.prenom }} {{ t.nom }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Objet des travaux</label>
+      <input class="form-control" formControlName="objet" placeholder="Ex: Remplacement écran pupitre ligne 2">
+    </div>
+
+    <div class="col-12">
+      <textarea class="form-control" rows="2" formControlName="justification" placeholder="Instructions particulières..."></textarea>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary w-100" [disabled]="form.invalid">🚀 Assigner au plan de charge technique</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3">
+  <h5>🛠️ Tâches en cours de traitement par Ticket</h5>
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Ticket lié</th>
+        <th>Groupe en Charge</th>
+        <th>Technicien Désigné</th>
+        <th>Mission</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of listeActions">
+        <td>
+          <span class="badge bg-secondary">
+            {{ item.ticket?.reference || 'N/A' }}
+          </span>
+        </td>
+        <td>{{ item.assignedGroupe?.nomGroupes || 'Non spécifié' }}</td>
+        <td>
+          <span *ngIf="item.assignedTechnicien; else unassigned">
+            👤 {{ item.assignedTechnicien?.prenom }} {{ item.assignedTechnicien?.nom }}
+          </span>
+          <ng-template #unassigned><span class="text-muted">Non assigné</span></ng-template>
+        </td>
+        <td>{{ item.objet }}</td>
+        <td><span class="badge bg-warning text-dark">{{ item.statut }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

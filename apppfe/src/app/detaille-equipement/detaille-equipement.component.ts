@@ -125,6 +125,53 @@ export class DetailleEquipementComponent implements OnInit {
     });
   }
 
+  imprimerQRCode(equipement: any): void {
+  // 1. Création d'une fenêtre temporaire
+  const fenetreImpression = window.open('', '_blank', 'width=400,height=400');
+  
+  if (fenetreImpression) {
+    fenetreImpression.document.write(`
+      <html>
+        <head>
+          <title>Impression Étiquette Matériel - ${equipement.codeBarres}</title>
+          <style>
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              text-align: center; 
+              padding: 20px; 
+            }
+            .ticket-box {
+              border: 2px dashed #000;
+              padding: 15px;
+              display: inline-block;
+            }
+            .title { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+            .model { font-size: 11px; color: #555; margin-bottom: 15px; }
+            .barcode-placeholder { 
+              font-size: 32px; 
+              letter-spacing: 4px; 
+              margin: 10px 0;
+            }
+            .code-text { font-weight: bold; font-size: 16px; margin-top: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="ticket-box">
+            <div class="title">SAGEMCOM - EQUIPEMENT</div>
+            <div class="model">${equipement.designation || 'N/A'}</div>
+            
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${equipement.codeBarres}" 
+                 alt="QR Code" 
+                 onload="window.print(); window.close();" />
+                 
+            <div class="code-text">${equipement.codeBarres}</div>
+          </div>
+        </body>
+      </html>
+    `);
+    fenetreImpression.document.close();
+  }
+}
   enregistrerModifications(): void {
     this.loading = true;
     this.errorMessage = '';

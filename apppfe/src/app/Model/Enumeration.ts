@@ -64,6 +64,14 @@ export enum TypeTicket {
   Demande_Matriel = 'Demande_Matriel',
   Derogation = 'Derogation',
   Demande_Service = 'Demande_Service',
+  INTERVENTION_RESEAUX = 'INTERVENTION_RESEAUX',
+  DEMANDE_MATERIEL = 'DEMANDE_MATERIEL',
+  DEROGATION = 'DEROGATION',
+  DEMANDE_SERVICE = 'DEMANDE_SERVICE'
+}
+
+export enum Criticite {
+    LOW, MOYEN, HIGH, CRITIQUE
 }
 
 export enum Priorite {

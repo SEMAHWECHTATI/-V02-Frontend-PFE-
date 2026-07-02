@@ -57,6 +57,9 @@ export class GestionnaireStockComponent implements OnInit {
   currentUser: any = {};
   today: Date = new Date();
   filtreSelectionne: string = 'Tous';
+
+  globalSearchTerm: string = '';
+resultatsRechercheGlobale: any[] = [];
   
 
   statsFinancieres: DashboardFinance = {
@@ -88,6 +91,46 @@ export class GestionnaireStockComponent implements OnInit {
     this.filtreSelectionne = statut;
     this.vueActuelle = 'listedemandes'; // On bascule sur la vue de la liste
   }
+
+  rechercheGlobale(): void {
+  const terme = this.globalSearchTerm?.trim().toLowerCase();
+  if (!terme) return;
+
+  // 1) Recherche dans les articles / stocks
+  this.inventoryService.getAllStocks().subscribe({
+    next: (stocks: any[]) => {
+      const produits = (stocks || []).filter((s: any) =>
+        (s.articleReference || s.reference || '').toLowerCase().includes(terme) ||
+        (s.articleDesignation || s.designation || '').toLowerCase().includes(terme)
+      );
+
+      if (produits.length > 0) {
+        // Aller vers la vue la plus utile
+        this.vueActuelle = 'stockslist';
+        this.resultatsRechercheGlobale = produits;
+        console.log('✅ Résultats produits:', produits);
+        return;
+      }
+
+      // 2) Optionnel: recherche alertes
+      this.inventoryService.getAlertesDashboard().subscribe({
+        next: () => {
+          // Pas de match produit => fallback
+          this.resultatsRechercheGlobale = [];
+          alert(`Aucun produit trouvé pour "${this.globalSearchTerm}"`);
+        },
+        error: () => {
+          this.resultatsRechercheGlobale = [];
+          alert(`Aucun résultat pour "${this.globalSearchTerm}"`);
+        }
+      });
+    },
+    error: (err) => {
+      console.error('❌ Erreur recherche globale:', err);
+      alert('Erreur lors de la recherche globale.');
+    }
+  });
+}
 
   ngOnInit(): void {
     console.log('🚀 Initialisation GestionnaireStock');

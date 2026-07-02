@@ -1,123 +1,234 @@
-<div class="container py-4">
-  <h2 class="mb-4 text-primary">📍 Gestion des Localisations</h2>
+<div class="container-fluid py-4 bg-light min-vh-100">
 
-  <div *ngIf="messageSucces" class="alert alert-success shadow-sm">{{ messageSucces }}</div>
-  <div *ngIf="messageErreur" class="alert alert-danger shadow-sm">{{ messageErreur }}</div>
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom gap-3">
+    <div>
+      <h1 class="h3 mb-1 fw-bold text-dark d-flex align-items-center gap-2">
+        <i class="bi bi-geo-alt text-primary"></i> Gestion des Localisations
+      </h1>
+      <p class="text-muted mb-0">Définissez et cartographiez l'emplacement de vos serveurs, bureaux et racks.</p>
+    </div>
 
-  <div class="row">
-    <div class="col-lg-4 mb-4">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white">
-          <h4 class="mb-0 text-primary">
-            {{ modeEdition ? '✏️ Modifier Localisation' : '➕ Nouvelle Localisation' }}
-          </h4>
-        </div>
-        <div class="card-body">
+    <div class="btn-group p-1 bg-white border rounded-3 shadow-sm" role="group">
+      <button type="button" 
+              class="btn fw-medium d-flex align-items-center gap-2 px-3 py-2 border-0 rounded-2"
+              [class.btn-primary]="vueActive === 'AJOUTER'"
+              [class.text-secondary]="vueActive !== 'AJOUTER'"
+              (click)="vueActive = 'AJOUTER'">
+        <i class="bi" [ngClass]="modeEdition ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+        {{ modeEdition ? 'Modifier l\'emplacement' : 'Nouvelle localisation' }}
+      </button>
+      
+      <button type="button" 
+              class="btn fw-medium d-flex align-items-center gap-2 px-3 py-2 border-0 rounded-2"
+              [class.btn-primary]="vueActive === 'AFFICHER'"
+              [class.text-secondary]="vueActive !== 'AFFICHER'"
+              (click)="vueActive = 'AFFICHER'; annulerEdition()">
+        <i class="bi bi-table"></i>
+        Afficher la liste
+        <span class="badge rounded-pill fs-8 ms-1" [ngClass]="vueActive === 'AFFICHER' ? 'bg-white text-primary' : 'bg-light text-dark border'">
+          {{ localisationsFilter.length }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="messageSucces" class="alert d-flex align-items-center shadow-sm border-0 mb-4" role="alert" style="background-color: #e6f7ed; color: #137333; border-left: 4px solid #137333 !important;">
+    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+    <div class="fw-medium">{{ messageSucces }}</div>
+  </div>
+
+  <div *ngIf="messageErreur" class="alert d-flex align-items-center shadow-sm border-0 mb-4" role="alert" style="background-color: #fce8e6; color: #c5221f; border-left: 4px solid #c5221f !important;">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+    <div class="fw-medium">{{ messageErreur }}</div>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="vueActive === 'AJOUTER'">
+    <div class="col-lg-8 col-xl-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold text-dark mb-4 pb-2 border-bottom">
+            {{ modeEdition ? 'Formulaire de modification' : 'Enregistrement d\'un nouvel emplacement' }}
+          </h2>
+          
           <form [formGroup]="locForm" (ngSubmit)="soumettreFormulaire()">
-            
-            <div class="mb-3">
-              <label class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" formControlName="nom" placeholder="Ex: Salle Serveur 1">
-              <div *ngIf="locForm.get('nom')?.invalid && locForm.get('nom')?.touched" class="text-danger small mt-1">
-                Le nom est obligatoire (max 100 char).
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-semibold text-secondary">Nom de l'emplacement *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-tags"></i></span>
+                  <input type="text" class="form-control border-start-0 ps-0" formControlName="nom" placeholder="Ex: Salle Serveur 1">
+                </div>
+                <div *ngIf="locForm.get('nom')?.invalid && locForm.get('nom')?.touched" class="text-danger small mt-1">
+                  Le nom est obligatoire (max 100 char).
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small fw-semibold text-secondary">Bâtiment</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-building"></i></span>
+                  <input type="text" class="form-control border-start-0 ps-0" formControlName="batiment" placeholder="Ex: Bâtiment A">
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-secondary">Étage</label>
+                <input type="text" class="form-control" formControlName="etage" placeholder="Ex: 2ème étage">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-secondary">Bureau</label>
+                <input type="text" class="form-control" formControlName="bureau" placeholder="Ex: Bureau 204">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small fw-semibold text-secondary">Armoire / Rack</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-layers"></i></span>
+                  <input type="text" class="form-control border-start-0 ps-0" formControlName="armoire" placeholder="Ex: Baie Info 42U">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small fw-semibold text-secondary">Description complémentaire</label>
+                <textarea class="form-control" formControlName="description" rows="3" placeholder="Précisions sur l'accès ou contenu..."></textarea>
+              </div>
+
+              <div class="col-12 pt-2">
+                <div class="form-check form-switch card p-3 border d-flex flex-row align-items-center justify-content-between bg-light">
+                  <div class="ms-2">
+                    <label class="form-check-label fw-semibold text-dark" for="activeSwitch">Localisation opérationnelle</label>
+                    <div class="small text-muted">Désactivez pour masquer cet emplacement lors des transferts.</div>
+                  </div>
+                  <input class="form-check-input fs-5 m-0 me-1" type="checkbox" formControlName="active" id="activeSwitch">
+                </div>
               </div>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label">Bâtiment</label>
-              <input type="text" class="form-control" formControlName="batiment">
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-6">
-                <label class="form-label">Étage</label>
-                <input type="text" class="form-control" formControlName="etage">
-              </div>
-              <div class="col-6">
-                <label class="form-label">Bureau</label>
-                <input type="text" class="form-control" formControlName="bureau">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Armoire / Rack</label>
-              <input type="text" class="form-control" formControlName="armoire">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" formControlName="description" rows="2"></textarea>
-            </div>
-
-            <div class="form-check form-switch mb-4">
-              <input class="form-check-input" type="checkbox" formControlName="active" id="activeSwitch">
-              <label class="form-check-label" for="activeSwitch">Localisation Active</label>
-            </div>
-
-            <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="locForm.invalid || chargement">
-                <i class="bi" [ngClass]="chargement ? 'bi-hourglass-split' : 'bi-save'"></i> 
-                {{ chargement ? 'En cours...' : (modeEdition ? 'Mettre à jour' : 'Enregistrer') }}
+            <div class="d-flex gap-2 pt-4 border-top mt-4">
+              <button type="submit" class="btn btn-primary px-4 fw-medium shadow-sm d-flex align-items-center gap-2" [disabled]="locForm.invalid || chargement">
+                <i class="bi" [ngClass]="chargement ? 'spinner-border spinner-border-sm' : 'bi-cloud-arrow-up-fill'"></i>
+                {{ chargement ? 'Envoi...' : (modeEdition ? 'Mettre à jour' : 'Valider l\'emplacement') }}
               </button>
               
-              <button *ngIf="modeEdition" type="button" class="btn btn-secondary" (click)="annulerEdition()">
-                <i class="bi bi-x-circle"></i> Annuler
+              <button type="button" class="btn btn-light border text-secondary fw-medium px-4" (click)="annulerEdition(); vueActive = 'AFFICHER'">
+                Annuler
               </button>
             </div>
           </form>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="col-lg-8">
-      <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0 align-middle">
-              <thead class="table-light text-primary">
-                <tr>
-                  <th>Nom</th>
-                  <th>Bâtiment / Étage</th>
-                  <th>Bureau / Armoire</th>
-                  <th>Statut</th>
-                  <th class="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngIf="localisations.length === 0">
-                  <td colspan="5" class="text-center py-4 text-muted">
-                    Aucune localisation trouvée.
-                  </td>
-                </tr>
-                <tr *ngFor="let loc of localisations">
-                  <td class="fw-bold">{{ loc.nom }}</td>
-                  <td>
-                    <span *ngIf="loc.batiment"><i class="bi bi-building"></i> {{ loc.batiment }}</span><br>
-                    <span *ngIf="loc.etage" class="small text-muted">Étage: {{ loc.etage }}</span>
-                  </td>
-                  <td>
-                    <span *ngIf="loc.bureau">Bur: {{ loc.bureau }}</span><br>
-                    <span *ngIf="loc.armoire" class="small text-muted">Arm: {{ loc.armoire }}</span>
-                  </td>
-                  <td>
-                    <span class="badge" [ngClass]="loc.active ? 'bg-success' : 'bg-danger'">
-                      {{ loc.active ? 'Actif' : 'Inactif' }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-2" (click)="editerLocalisation(loc)" title="Modifier">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="supprimerLocalisation(loc.id)" title="Supprimer">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+  <div class="card border-0 shadow-sm rounded-3" *ngIf="vueActive === 'AFFICHER'">
+    <div class="card-body p-4">
+      
+      <div class="row justify-content-between align-items-center mb-4 g-3" *ngIf="localisations.length > 0">
+        <div class="col-md-5 col-lg-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-filter-left fs-5"></i></span>
+            <input type="text" 
+                   class="form-control bg-light border-start-0 ps-0" 
+                   placeholder="Filtrer par nom, bâtiment, rack..." 
+                   [(ngModel)]="texteRechercheLocalisation"
+                   (input)="filtrerLocalisations()">
+            <button *ngIf="texteRechercheLocalisation" 
+                    class="btn btn-light border border-start-0 text-muted" 
+                    type="button" 
+                    (click)="texteRechercheLocalisation=''; filtrerLocalisations()">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
           </div>
         </div>
+        <div class="col-md-auto text-end">
+          <span class="text-muted small">
+            Affichage de <strong>{{ localisationsFilter.length }}</strong> sur {{ localisations.length }} localisations
+          </span>
+        </div>
       </div>
+
+      <div *ngIf="!chargement && localisations.length === 0" class="text-center py-5">
+        <div class="bg-light d-inline-flex p-3 rounded-circle text-muted mb-3">
+          <i class="bi bi-geo fs-2"></i>
+        </div>
+        <h4 class="h6 fw-bold text-dark">Aucune zone répertoriée</h4>
+        <p class="text-muted small mx-auto mb-3" style="max-width: 320px;">Votre inventaire n'est associé à aucune localisation physique.</p>
+        <button class="btn btn-primary btn-sm fw-medium" (click)="vueActive = 'AJOUTER'">
+          <i class="bi bi-plus"></i> Créer une zone
+        </button>
+      </div>
+
+      <div *ngIf="localisations.length > 0 && localisationsFilter.length === 0" class="text-center py-5 my-2">
+        <div class="text-warning mb-2"><i class="bi bi-search fs-3"></i></div>
+        <h5 class="h6 fw-bold text-dark">Aucun emplacement trouvé</h5>
+        <p class="text-muted small mb-0">Aucune zone ne correspond à la recherche "{{ texteRechercheLocalisation }}".</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="localisationsFilter.length > 0">
+        <table class="table align-middle border-0 table-hover mb-0">
+          <thead>
+            <tr class="text-uppercase text-secondary fs-7 bg-light">
+              <th class="border-0 px-3 py-3 rounded-start">Désignation Zone</th>
+              <th class="border-0 py-3">Bâtiment / Niveau</th>
+              <th class="border-0 py-3">Bureau / Racks</th>
+              <th class="border-0 py-3">Statut</th>
+              <th class="border-0 px-3 py-3 text-end rounded-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let loc of localisationsFilter" class="border-bottom">
+              <td class="px-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; min-width: 40px;">
+                    <i class="bi bi-geo-alt-fill"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark">{{ loc.nom }}</div>
+                    <small class="text-muted d-block text-truncate" style="max-width: 220px;" [title]="loc.description">
+                      {{ loc.description || 'Pas de description' }}
+                    </small>
+                  </div>
+                </div>
+              </td>
+              
+              <td class="py-3">
+                <div class="d-flex flex-column small">
+                  <span class="text-dark fw-medium" *ngIf="loc.batiment"><i class="bi bi-building text-muted me-1"></i> {{ loc.batiment }}</span>
+                  <span class="text-muted" *ngIf="loc.etage">Niveau: {{ loc.etage }}</span>
+                  <span class="text-muted small italic" *ngIf="!loc.batiment && !loc.etage">—</span>
+                </div>
+              </td>
+              
+              <td class="py-3">
+                <div class="d-flex flex-column small">
+                  <span class="text-dark fw-medium" *ngIf="loc.bureau">Bureau: {{ loc.bureau }}</span>
+                  <span class="text-muted" *ngIf="loc.armoire"><i class="bi bi-layers text-muted me-1"></i> {{ loc.armoire }}</span>
+                  <span class="text-muted small italic" *ngIf="!loc.bureau && !loc.armoire">—</span>
+                </div>
+              </td>
+
+              <td class="py-3">
+                <span class="badge rounded-pill px-2.5 py-1.5 fs-8" 
+                      [ngClass]="loc.active ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
+                  {{ loc.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              
+              <td class="px-3 py-3 text-end">
+                <div class="d-inline-flex gap-1">
+                  <button class="btn btn-sm btn-light border" (click)="editerLocalisation(loc); vueActive = 'AJOUTER'" title="Modifier">
+                    <i class="bi bi-pencil-square text-primary"></i>
+                  </button>
+                  <button class="btn btn-sm btn-light border" (click)="supprimerLocalisation(loc.id)" title="Supprimer">
+                    <i class="bi bi-trash3-fill text-danger"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>

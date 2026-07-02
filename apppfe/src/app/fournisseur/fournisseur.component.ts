@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FournisseurService } from '../services/fournisseur.service';
 import { Fournisseur } from '../Model/Entity';
 
 @Component({
   selector: 'app-fournisseur',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './fournisseur.component.html',
   styleUrl: './fournisseur.component.css'
 })
@@ -18,12 +18,16 @@ export class FournisseurComponent implements OnInit {
 
   // 📦 Variables d'état
   fournisseurs: Fournisseur[] = [];
+  fournisseursFilter: Fournisseur[] = []; // 👈 Parfaitement typé
   fournisseurForm!: FormGroup;
+  
+  vueActive: 'AJOUTER' | 'AFFICHER' = 'AFFICHER';
+  texteRechercheFournisseur: string = '';
   
   chargement = false;
   messageSucces = '';
   messageErreur = '';
-    // 📦 Nouvelles variables d'état pour la modification
+  
   modeEdition = false;
   fournisseurIdEnEdition: number | undefined;
 
@@ -32,8 +36,23 @@ export class FournisseurComponent implements OnInit {
     this.chargerFournisseurs();
   }
 
+  /**
+   * 🔍 Logique de filtrage instantané multi-critère
+   */
+  filtrerFournisseurs(): void {
+    if (!this.texteRechercheFournisseur || !this.texteRechercheFournisseur.trim()) {
+      this.fournisseursFilter = [...this.fournisseurs];
+      return;
+    }
 
-  // ... (Garde ngOnInit, initialiserFormulaire, chargerFournisseurs et supprimerFournisseur) ...
+    const motCle = this.texteRechercheFournisseur.toLowerCase().trim();
+
+    this.fournisseursFilter = this.fournisseurs.filter(f => 
+      (f.nom && f.nom.toLowerCase().includes(motCle)) ||
+      (f.contact && f.contact.toLowerCase().includes(motCle)) ||
+      (f.email && f.email.toLowerCase().includes(motCle))
+    );
+  }
 
   /**
    * ✏️ Déclenchée au clic sur "Modifier" dans le tableau
@@ -51,7 +70,6 @@ export class FournisseurComponent implements OnInit {
       adresse: fournisseur.adresse
     });
 
-    // Optionnel : remonter en haut de la page pour voir le formulaire
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -65,58 +83,63 @@ export class FournisseurComponent implements OnInit {
   }
 
   /**
-   * 💾 Gère à la fois la création et la modification (Remplace ajouterFournisseur)
+   * 💾 Gère à la fois la création (POST) et la modification (PUT)
    */
-soumettreFormulaire(): void {
-  if (this.fournisseurForm.invalid) {
-    this.fournisseurForm.markAllAsTouched();
-    return;
-  }
+  soumettreFormulaire(): void {
+    if (this.fournisseurForm.invalid) {
+      this.fournisseurForm.markAllAsTouched();
+      return;
+    }
 
-  this.chargement = true;
-  const fournisseurData: Fournisseur = this.fournisseurForm.value;
+    this.chargement = true;
+    const fournisseurData: Fournisseur = this.fournisseurForm.value;
 
-  // 👇 C'est ici que le choix se fait entre PUT (modification) et POST (création)
-  if (this.modeEdition && this.fournisseurIdEnEdition) {
-    
-    // 🔄 MODE ÉDITION : Appelle le service avec l'ID et fait un PUT
-    this.fournisseurService.updateFournisseur(this.fournisseurIdEnEdition, fournisseurData).subscribe({
-      next: (fournisseurMisAJour) => {
-        // Met à jour la liste localement
-        const index = this.fournisseurs.findIndex(f => f.id === this.fournisseurIdEnEdition);
-        if (index !== -1) {
-          this.fournisseurs[index] = fournisseurMisAJour;
+    if (this.modeEdition && this.fournisseurIdEnEdition) {
+      
+      // 🔄 MODE ÉDITION (PUT)
+      this.fournisseurService.updateFournisseur(this.fournisseurIdEnEdition, fournisseurData).subscribe({
+        next: (fournisseurMisAJour) => {
+          const index = this.fournisseurs.findIndex(f => f.id === this.fournisseurIdEnEdition);
+          if (index !== -1) {
+            this.fournisseurs[index] = fournisseurMisAJour;
+          }
+          this.messageSucces = '✅ Fournisseur modifié avec succès !';
+          this.annulerEdition();
+          this.filtrerFournisseurs();   // 👈 Met à jour le tableau instantanément
+          this.chargement = false;
+          this.vueActive = 'AFFICHER';  // 👈 Renvoie l'utilisateur vers la liste
+          this.effacerMessagesApresDelai();
+        },
+        error: (err) => {
+          console.error('❌ Erreur lors de la modification', err);
+          this.messageErreur = 'Erreur lors de la modification.';
+          this.chargement = false;
+          this.effacerMessagesApresDelai();
         }
-        this.messageSucces = '✅ Fournisseur modifié avec succès !';
-        this.annulerEdition();
-        this.chargement = false;
-      },
-      error: (err) => {
-        console.error('❌ Erreur lors de la modification', err);
-        this.messageErreur = 'Erreur lors de la modification.';
-        this.chargement = false;
-      }
-    });
+      });
 
-  } else {
-    
-    // ➕ MODE CRÉATION : Fait un POST (ton ancien code)
-    this.fournisseurService.createFournisseur(fournisseurData).subscribe({
-      next: (fournisseurCree) => {
-        this.fournisseurs.push(fournisseurCree);
-        this.messageSucces = '✅ Fournisseur ajouté avec succès !';
-        this.fournisseurForm.reset();
-        this.chargement = false;
-      },
-      error: (err) => {
-        console.error('❌ Erreur lors de la création', err);
-        this.messageErreur = 'Erreur lors de l\'ajout.';
-        this.chargement = false;
-      }
-    });
-
+    } else {
+      
+      // ➕ MODE CRÉATION (POST)
+      this.fournisseurService.createFournisseur(fournisseurData).subscribe({
+        next: (fournisseurCree) => {
+          this.fournisseurs.push(fournisseurCree);
+          this.messageSucces = '✅ Fournisseur ajouté avec succès !';
+          this.fournisseurForm.reset();
+          this.filtrerFournisseurs();   // 👈 Ajoute la nouvelle ligne au tableau
+          this.chargement = false;
+          this.vueActive = 'AFFICHER';  // 👈 Renvoie l'utilisateur vers la liste
+          this.effacerMessagesApresDelai();
+        },
+        error: (err) => {
+          console.error('❌ Erreur lors de la création', err);
+          this.messageErreur = 'Erreur lors de l\'ajout.';
+          this.chargement = false;
+          this.effacerMessagesApresDelai();
+        }
+      });
+    }
   }
-}
 
   /**
    * 🛠️ Initialise le formulaire d'ajout d'un fournisseur
@@ -139,6 +162,7 @@ soumettreFormulaire(): void {
     this.fournisseurService.getAllFournisseurs().subscribe({
       next: (data) => {
         this.fournisseurs = data;
+        this.fournisseursFilter = data; // 👈 Synchro indispensable pour le premier affichage
         this.chargement = false;
       },
       error: (err) => {
@@ -150,37 +174,7 @@ soumettreFormulaire(): void {
   }
 
   /**
-   * ➕ Ajoute un nouveau fournisseur
-   */
-  ajouterFournisseur(): void {
-    if (this.fournisseurForm.invalid) {
-      this.fournisseurForm.markAllAsTouched();
-      return;
-    }
-
-    this.chargement = true;
-    const nouveauFournisseur: Fournisseur = this.fournisseurForm.value;
-
-    // Assure-toi d'avoir une méthode createFournisseur() dans ton FournisseurService
-    this.fournisseurService.createFournisseur(nouveauFournisseur).subscribe({
-      next: (fournisseurCree) => {
-        this.fournisseurs.push(fournisseurCree); // Ajout direct à la liste affichée
-        this.messageSucces = '✅ Fournisseur ajouté avec succès !';
-        this.fournisseurForm.reset();
-        this.chargement = false;
-        this.effacerMessagesApresDelai();
-      },
-      error: (err) => {
-        console.error('❌ Erreur lors de la création', err);
-        this.messageErreur = 'Erreur lors de l\'ajout du fournisseur.';
-        this.chargement = false;
-        this.effacerMessagesApresDelai();
-      }
-    });
-  }
-
-  /**
-   * 🗑️ Supprime un fournisseur (Optionnel)
+   * 🗑️ Supprime un fournisseur
    */
   supprimerFournisseur(id: number | undefined): void {
     if (!id) return;
@@ -189,6 +183,7 @@ soumettreFormulaire(): void {
       this.fournisseurService.deleteFournisseur(id).subscribe({
         next: () => {
           this.fournisseurs = this.fournisseurs.filter(f => f.id !== id);
+          this.filtrerFournisseurs(); // 👈 Recalcule l'affichage après suppression
           this.messageSucces = '🗑️ Fournisseur supprimé.';
           this.effacerMessagesApresDelai();
         },

@@ -34,6 +34,12 @@ export class TicketService {
   /**
  * 📄 Exporter un ticket en PDF
  */
+
+getTicketsParNomGroupe(nomGroupe: string): Observable<any[]> {
+  console.log(`📊 Récupération des tickets pour le groupe : ${nomGroupe}`);
+  return this.http.get<any[]>(`${this.ticketUrl}/par-groupe/${nomGroupe}`);
+}
+  
 exportTicketPDF(idTicket: number): Observable<Blob> {
   return this.http.get(
     `${this.ticketUrl}/${idTicket}/export/pdf`,

@@ -129,6 +129,57 @@ fermerModal() {
       });
   }
 
+  imprimerQRCodeArticle(event: Event, article: any): void {
+  // Empêche le clic de déclencher la sélection de la ligne du tableau
+  event.stopPropagation();
+
+  // Ouverture d'une pop-up d'impression éphémère
+  const fenetreImpression = window.open('', '_blank', 'width=450,height=450');
+  
+  if (fenetreImpression) {
+    fenetreImpression.document.write(`
+      <html>
+        <head>
+          <title>Étiquette Article - ${article.codeBarres}</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              text-align: center; 
+              padding: 20px; 
+              margin: 0;
+            }
+            .ticket-box {
+              border: 2px dashed #333;
+              padding: 20px;
+              display: inline-block;
+              border-radius: 4px;
+              background-color: #fff;
+            }
+            .title { font-weight: bold; font-size: 14px; text-transform: uppercase; color: #111; margin-bottom: 2px; }
+            .reference { font-size: 11px; font-weight: 600; color: #666; margin-bottom: 12px; }
+            .designation { font-size: 12px; font-weight: bold; color: #000; margin-bottom: 15px; max-width: 220px; word-wrap: break-word; }
+            .code-text { font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 15px; margin-top: 8px; letter-spacing: 1px; }
+          </style>
+        </head>
+        <body>
+          <div class="ticket-box">
+            <div class="title">SAGEMCOM INVENTAIRE</div>
+            <div class="reference">REF: ${article.reference || 'N/A'}</div>
+            <div class="designation">${article.designation || 'N/A'}</div>
+            
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${article.codeBarres}" 
+                 alt="QR Code Article" 
+                 onload="window.print(); window.close();" />
+                 
+            <div class="code-text">${article.codeBarres}</div>
+          </div>
+        </body>
+      </html>
+    `);
+    fenetreImpression.document.close();
+  }
+}
+
   /**
    * 🔍 Rechercher articles
    */

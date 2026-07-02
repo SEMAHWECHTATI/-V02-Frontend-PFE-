@@ -154,9 +154,19 @@
             <strong>{{ article.reference || '-' }}</strong>
           </td>
           <td class="name-cell">{{ article.designation || '-' }}</td>
-          <td>
-            <span class="barcode">{{ article.codeBarres || '-' }}</span>
-          </td>
+         <td>
+  <div class="d-flex align-items-center justify-content-between gap-2" style="min-width: 140px;">
+    <span class="barcode fw-bold">{{ article.codeBarres || '-' }}</span>
+    
+    <button *ngIf="article.codeBarres"
+            type="button" 
+            class="btn btn-sm btn-link text-primary p-0 border-0" 
+            title="Imprimer l'étiquette QR Code"
+            (click)="imprimerQRCodeArticle($event, article)">
+      <i class="bi bi-qr-code-scan" style="font-size: 1.15rem;"></i>
+    </button>
+  </div>
+</td>
           <td><small>{{ article.typeArticle || '-' }}</small></td>
           <td class="text-center">
             <span [ngClass]="'qty-' + getStockStatus(article)">

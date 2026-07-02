@@ -1,0 +1,128 @@
+<div class="card">
+      <h4 style="margin: 0 0 10px; font-weight: 600; color: #111827;">Navigation des flux</h4>
+  <div class="actions" style="margin-bottom: 16px;">
+    <button type="button" class="btn" [style.background]="vueActuelle === 'reclamation' ? '#4b5563' : '#f3f4f6'" [style.color]="vueActuelle === 'reclamation' ? '#fff' : '#374151'" (click)="changerVue('reclamation')">
+      📋 Réclamation {{ result ? '(Aperçu)' : '(Saisie)' }}
+    </button>
+    <button type="button" class="btn" [style.background]="vueActuelle === 'demandeaction' ? '#2563eb' : '#f3f4f6'" [style.color]="vueActuelle === 'demandeaction' ? '#fff' : '#374151'" (click)="changerVue('demandeaction')">
+      🛠️ Demande Action
+    </button>
+    <button type="button" class="btn" [style.background]="vueActuelle === 'demandeachat' ? '#16a34a' : '#f3f4f6'" [style.color]="vueActuelle === 'demandeachat' ? '#fff' : '#374151'" (click)="changerVue('demandeachat')">
+      🛒 Demande Achat
+    </button>
+  </div>
+
+  <h2 class="title">Formulaire de Documentation Technique</h2>
+  <p class="subtitle">Suivi, diagnostic et traitement des anomalies équipements.</p>
+
+  <form *ngIf="vueActuelle === 'reclamation' && !result" [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+    
+    <div class="field">
+      <label for="equipement">Équipement concerné</label>
+      <input id="equipement" formControlName="equipement" placeholder="Ex: Machine d'assemblage" />
+    </div>
+
+    <div class="field">
+      <label for="referenceArticle">Référence de l'Article</label>
+      <input id="referenceArticle" formControlName="referenceArticle" placeholder="Ex: REF-9942" />
+    </div>
+
+    <div class="field">
+      <label for="numeroSerie">Numéro de Série (N° SN)</label>
+      <input id="numeroSerie" formControlName="numeroSerie" placeholder="Ex: SN-883921" />
+    </div>
+
+    <div class="field">
+      <label for="localisation">Localisation / Atelier</label>
+      <input id="localisation" formControlName="localisation" placeholder="Ex: Ligne Bloc A" />
+    </div>
+
+    <div class="field">
+      <label for="serviceDemandeur">Service Demandeur</label>
+      <input id="serviceDemandeur" formControlName="serviceDemandeur" placeholder="Ex: Maintenance" />
+    </div>
+
+    <div class="field">
+      <label for="criticite">Criticité</label>
+      <input id="criticite" formControlName="criticite" placeholder="Ex: HIGH, CRITIQUE" />
+    </div>
+
+    <div class="field">
+      <label for="declarant">Déclarant de la panne</label>
+      <input id="declarant" formControlName="declarant" placeholder="Ex: Mohamed Ali" />
+    </div>
+
+    <div class="field">
+      <label for="langueRapport">Langue du Rapport PDF</label>
+      <select id="langueRapport" formControlName="langueRapport">
+        <option value="Français">Français</option>
+        <option value="English">English</option>
+        <option value="العربية">العربية</option>
+      </select>
+    </div>
+
+    <div class="field full">
+      <label for="symptomes">Symptômes constatés</label>
+      <textarea id="symptomes" formControlName="symptomes" placeholder="Décrivez les pannes observées..."></textarea>
+    </div>
+
+    <div class="actions full">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+        {{ loading ? 'Génération du rapport...' : '🚀 Valider et Générer le Rapport' }}
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="vueActuelle === 'reclamation' && result" class="animated-fade-in">
+    
+    <div class="alert alert-success" style="margin-bottom: 20px;">
+      🎉 <strong>Rapport d'anomalie enregistré !</strong> Les données sont désormais verrouillées pour ce ticket.
+    </div>
+
+    <div class="result" style="border-style: solid; border-color: #e2e8f0; background: #f8fafc;">
+      <h3 style="margin-top: 0; color: #1e293b; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        Fiche Récapitulative : Ticket #{{ result.reclamationId }}
+      </h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <p><strong>Équipement :</strong> {{ form.value.equipement }}</p>
+        <p><strong>Référence :</strong> {{ form.value.referenceArticle }}</p>
+        <p><strong>N° Série :</strong> {{ form.value.numeroSerie }}</p>
+        <p><strong>Atelier :</strong> {{ form.value.localisation }}</p>
+        <p><strong>Criticité :</strong> <span style="color: #b91c1c; font-weight: bold;">{{ form.value.criticite }}</span></p>
+        <p><strong>Déclarant :</strong> {{ form.value.declarant }}</p>
+      </div>
+
+      <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+        <p><strong>Symptômes rédigés :</strong></p>
+        <p style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-style: italic;">
+          {{ form.value.symptomes }}
+        </p>
+      </div>
+
+      <div class="actions" style="margin-top: 16px;">
+        <button type="button" class="btn btn-secondary" (click)="downloadPdf()">
+          📥 Télécharger le PDF Officiel (Rapport #{{ result.rapportId }})
+        </button>
+        <button type="button" class="btn" style="background: #ef4444; color: #fff;" (click)="result = null">
+          ✏️ Corriger / Rééditer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert" style="background: #eff6ff; color: #1e40af; border-color: #bfdbfe; margin-top: 10px;">
+    Génération en cours du fichier sur le serveur...
+  </div>
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+  <hr style="margin: 24px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+
+
+  <div *ngIf="vueActuelle === 'demandeaction'" style="margin-top: 14px;">
+    <app-demande-action></app-demande-action>
+  </div>
+  <div *ngIf="vueActuelle === 'demandeachat'" style="margin-top: 14px;">
+    <app-demande-achat></app-demande-achat>
+  </div>
+</div>

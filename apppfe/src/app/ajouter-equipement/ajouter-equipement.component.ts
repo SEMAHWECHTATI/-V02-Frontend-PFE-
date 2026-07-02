@@ -39,7 +39,7 @@ export class AjouterEquipementComponent implements OnInit {
   messageAlerte: string = '';
   codeBarresGenere: string = '';
 
-articlesFiltres: any[] = []; // Liste temporaire affichée à l'écran
+articlesFiltres: Article[] = []; // Liste temporaire affichée à l'écran
 texteRechercheArticle: string = '';
 afficherSuggestions: boolean = false;
 

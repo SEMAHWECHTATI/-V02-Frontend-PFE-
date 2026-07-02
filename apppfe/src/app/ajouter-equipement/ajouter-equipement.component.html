@@ -78,6 +78,11 @@
           <span class="badge bg-dark me-2">{{ art.reference }}</span>
           <span class="fw-semibold">{{ art.designation }}</span>
         </div>
+       <div
+  class="badge me-2"
+  [ngClass]="art.quantiteEnStock > 1 ? 'bg-success' : 'bg-danger'">
+  QT: <span class="fw-semibold">{{ art.quantiteEnStock }}</span>
+</div>
         <small class="text-muted text-uppercase fs-7">{{ art.typeArticle }}</small>
       </button>
     </ul>

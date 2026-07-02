@@ -22,6 +22,133 @@
   box-sizing: border-box;
 }
 
+/* ==========================================================================
+   📦 STYLE DE LA CARTE PRINCIPALE (CONTAINER)
+   ========================================================================== */
+.card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* En-tête de la section */
+.text-primary {
+  color: #4f46e5 !important; /* Un bleu-violet moderne et professionnel */
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+/* ==========================================================================
+   📋 TABLEAU DES ACTIONS & DEMANDES
+   ========================================================================== */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.table {
+  margin-bottom: 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* En-tête du tableau */
+.table-light {
+  background-color: #f9fafb !important;
+}
+
+.table th {
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Lignes et cellules */
+.table td {
+  padding: 16px;
+  color: #1f2937;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+/* Effet au survol d'une ligne */
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+  cursor: default;
+}
+
+/* Textes secondaires (Justification / Description sous l'objet) */
+.text-muted.text-truncate {
+  color: #6b7280 !important;
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   🏷️ BADGES DE CRITICITÉ & STATUTS
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Compteur global d'actions en haut à droite */
+.bg-primary {
+  background-color: #e0e7ff !important;
+  color: #4f46e5 !important;
+}
+
+/* Badge Ticket Parent Reference (ex: SAG260629...) */
+.bg-secondary {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #e5e7eb;
+  font-family: 'Courier New', Courier, monospace; /* Style technique propre aux IDs/Refs */
+}
+
+/* Couleurs dynamiques selon la Criticité [ngClass] */
+.bg-danger {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.bg-warning {
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+}
+
+.bg-info {
+  background-color: #ecfeff !important;
+  color: #0891b2 !important;
+}
+
+/* ==========================================================================
+   📭 ALERTE SI AUCUNE ACTION DISPONIBLE (VIDE)
+   ========================================================================== */
+.alert-info {
+  background-color: #f0fdf4; /* Teinte verte claire ou bleue selon vos envies */
+  border: 1px dashed #bbf7d0;
+  color: #166534;
+  padding: 20px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
